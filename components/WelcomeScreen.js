@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 
 const WelcomeScreen = ({ navigation }) => {
   return (
@@ -11,6 +11,12 @@ const WelcomeScreen = ({ navigation }) => {
       <Text style={styles.text}>
         Find <Text style={styles.loveText}>Love</Text> Where it Matters Most!
       </Text>
+      <TouchableOpacity style={styles.button}>
+        <View style={styles.iconContainer}>
+          <Text style={styles.icon}>✉️</Text>
+        </View>
+        <Text style={styles.buttonText}>Login with Email</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -26,7 +32,7 @@ const styles = StyleSheet.create({
     width: 311, 
     height: 316,
     marginBottom: 20, 
-    marginTop: 108
+    marginTop: 108,
   },
   text: {
     fontSize: 28,
@@ -38,6 +44,34 @@ const styles = StyleSheet.create({
   },
   loveText: {
     color: '#DD88FC',
+  },
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#4B164C',
+    width: 295,
+    height: 56,
+    borderRadius: 32,
+    marginTop: 20,
+  },
+  iconContainer: {
+    backgroundColor: '#FFFFFF',
+    position:'absolute',
+    left:10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  icon: {
+    fontSize: 20,
+  },
+  buttonText: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    fontFamily: 'Inter-Bold',
   },
 });
 
