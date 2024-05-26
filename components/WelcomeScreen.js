@@ -1,15 +1,13 @@
-// WelcomeScreen.js
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 
 const WelcomeScreen = ({ navigation }) => {
   return (
-    <View style={styles.container}>
+    <View >
       <Image 
         source={require('../assets/Group.png')} 
         style={styles.image} 
       />
-      <Text style={styles.text}>Welcome Screen</Text>
     </View>
   );
 };
@@ -19,15 +17,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff', // Optional: to set a background color
+    backgroundColor: '#fff', 
   },
   image: {
-    width: 311, // Adjust the width of the image
-    height: 306, // Adjust the height of the image
-    marginBottom: 20, // Space between image and text
+    width: 311, 
+    height: 316,
+    marginBottom: 20, 
+    marginLeft:48,
+    marginTop:108
   },
   text: {
-    fontSize: 24, // Adjust the size of the text
+    fontSize: 24, 
   },
 });
 
