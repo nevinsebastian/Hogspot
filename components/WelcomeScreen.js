@@ -3,11 +3,14 @@ import { View, Text, Image, StyleSheet } from 'react-native';
 
 const WelcomeScreen = ({ navigation }) => {
   return (
-    <View >
+    <View style={styles.container}>
       <Image 
         source={require('../assets/Group.png')} 
         style={styles.image} 
       />
+      <Text style={styles.text}>
+        Find <Text style={styles.loveText}>Love</Text> Where it Matters Most!
+      </Text>
     </View>
   );
 };
@@ -17,17 +20,24 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff', 
+    backgroundColor: '#F5F5F5',
   },
   image: {
     width: 311, 
     height: 316,
     marginBottom: 20, 
-    marginLeft:48,
-    marginTop:108
+    marginTop: 108
   },
   text: {
-    fontSize: 24, 
+    fontSize: 28,
+    fontFamily: 'Inter-Bold',
+    color: '#22172A',
+    textAlign: 'center',
+    width: 279,
+    height: 72,
+  },
+  loveText: {
+    color: '#DD88FC',
   },
 });
 
