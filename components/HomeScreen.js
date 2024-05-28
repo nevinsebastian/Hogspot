@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   bellIcon: {
     width: 24,
     height: 24,
-    color: '#4B164C',
+    color: '#4B164C' ,
   },
 });
 
