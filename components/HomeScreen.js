@@ -29,7 +29,7 @@ const HomeScreen = () => {
         <View style={styles.innerRectangle}>
           <Image source={require('../assets/lulu.jpg')} style={styles.image} />
         </View>
-        <Text style={styles.locationText}>Lulu, Kochi</Text>
+        <Text style={styles.locationText}>Lulu, ochi</Text>
       </View>
 
       <View style={styles.newRectangle}>
