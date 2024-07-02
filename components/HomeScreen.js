@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
+import SwipeCards from 'react-native-swipe-cards';
+
 
 const bellSvg = `
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -68,7 +70,30 @@ const messagesSvg = `
 
 `;
 
+const data = [
+  { id: 1, name: 'Mishell Rose Mathew', location: 'Kochi', image: require('../assets/person.jpg') },
+  // Add more data objects if you have multiple cards
+];
+
+
+//const Card = ({ person }) => (
+//  <View style={styles.card}>
+//    <LinearGradient colors={['#4B164C', '#4B164C70']} style={styles.gradient}>
+//      <Image source={person.image} style={styles.cardImage} />
+//      <View style={styles.circle}>
+//        <Text style={styles.starEmoji}>⭐</Text>
+//      </View>
+//      <Text style={styles.personName}>{person.name}</Text>
+//      <Text style={styles.personLocation}>{person.location}</Text>
+//    </LinearGradient>
+//  </View>
+//);
+
+
 const HomeScreen = () => {
+
+  
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Hogspot</Text>
