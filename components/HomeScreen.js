@@ -35,11 +35,13 @@ const HomeScreen = () => {
       <View style={styles.newRectangle}>
         <Image source={require('../assets/profile.jpg')} style={styles.newImage} />
       </View>
+
+      <View style={styles.bottomShape}>
+        {/* Future swipable card content will be added here */}
+      </View>
     </View>
   );
 };
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -129,6 +131,24 @@ const styles = StyleSheet.create({
     width: 61.25,
     height: 58.63,
     borderRadius: 30,
+  },
+  bottomShape: {
+    position: 'absolute',
+    left: 8,
+    top: 213,
+    width: 360,
+    height: 459,
+    borderRadius: 24,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#999999',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
   },
 });
 
