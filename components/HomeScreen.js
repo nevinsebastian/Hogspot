@@ -96,7 +96,7 @@ const HomeScreen = () => {
           <View style={styles.circle}>
             <Text style={styles.starEmoji}>⭐</Text>
           </View>
-          <Text style={styles.personName}>Nevin</Text>
+          <Text style={styles.personName}>Mishell Rose Mathew</Text>
           <Text style={styles.personLocation}>Kochi</Text>
         </LinearGradient>
       </View>
@@ -257,7 +257,7 @@ fontSize: 24,
 },
 personName: {
 position: 'absolute',
-bottom: 90,
+bottom: 45,
 left: 24.79,
 width: 83.97,
 height: 26.75,
@@ -265,14 +265,15 @@ fontFamily: 'Inter-SemiBold',
 fontSize: 14,
 lineHeight: 19.6, // 140% of 14
 color: '#FFFFFF',
+borderColor:"#999999"
 },
 personLocation: {
 position: 'absolute',
-bottom: 60,
+bottom: 30,
 left: 24.79,
 width: 45.13,
 height: 22.29,
-fontFamily: 'Inter-SemiBold',
+fontFamily: 'Inter-Medium',
 fontSize: 14,
 lineHeight: 19.6, // 140% of 14
 color: '#FFFFFF',
@@ -280,7 +281,7 @@ color: '#FFFFFF',
 bottomNavbar: {
 position: 'absolute',
 left: 24,
-top: 712,
+top: 722,
 width: 327,
 height: 64,
 borderRadius: 40,
