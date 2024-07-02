@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { SvgXml } from 'react-native-svg';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const bellSvg = `
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -14,6 +15,36 @@ const bellSvg = `
 <rect width="24" height="24" fill="white"/>
 </clipPath>
 </defs>
+</svg>
+`;
+
+const homeSvg = `
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 3L3 12H7V21H10V14H14V21H17V12H21L12 3Z" stroke="#4B164C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;
+
+const discoverSvg = `
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M21 11H13V3H11V11H3V13H11V21H13V13H21V11Z" stroke="#4B164C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;
+
+const plusSvg = `
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 5V19M5 12H19" stroke="#4B164C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;
+
+const matchesSvg = `
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 21C12 21 4 14.1865 4 8.7C4 5.79863 6.2 3.6 9.1 3.6C10.6763 3.6 12 4.52344 12 5.95312C12 4.52344 13.3237 3.6 14.9 3.6C17.8 3.6 20 5.79863 20 8.7C20 14.1865 12 21 12 21Z" stroke="#4B164C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;
+
+const messagesSvg = `
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M21 6V14C21 15.1046 20.1046 16 19 16H7L3 20V6C3 4.89543 3.89543 4 5 4H19C20.1046 4 21 4.89543 21 6Z" stroke="#4B164C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 `;
 
@@ -37,7 +68,35 @@ const HomeScreen = () => {
       </View>
 
       <View style={styles.bottomShape}>
-        {/* Future swipable card content will be added here */}
+        <LinearGradient
+          colors={['#4B164C', '#4B164C70']}
+          style={styles.gradient}
+        >
+          <Image source={require('../assets/person.jpg')} style={styles.bottomImage} />
+          <View style={styles.circle}>
+            <Text style={styles.starEmoji}>⭐</Text>
+          </View>
+          <Text style={styles.personName}>Nevin</Text>
+          <Text style={styles.personLocation}>Kochi</Text>
+        </LinearGradient>
+      </View>
+
+      <View style={styles.bottomNavbar}>
+        <TouchableOpacity style={styles.navButton}>
+          <SvgXml xml={homeSvg} style={styles.navIcon} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navButton}>
+          <SvgXml xml={discoverSvg} style={styles.navIcon} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navButton}>
+          <SvgXml xml={plusSvg} style={styles.navIcon} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navButton}>
+          <SvgXml xml={matchesSvg} style={styles.navIcon} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navButton}>
+          <SvgXml xml={messagesSvg} style={styles.navIcon} />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -66,90 +125,163 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     backgroundColor: '#F5F5F5',
     justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
-    right: 16,
-    top: 52,
-  },
-  bellIcon: {
-    width: 24,
-    height: 24,
-    color: '#4B164C',
-  },
-  mainRectangle: {
-    position: 'absolute',
-    left: 7,
-    top: 112,
-    width: 268,
-    height: 64,
-    borderRadius: 40,
-    backgroundColor: '#FFDFDF',
-    borderColor: '#DDDFDF',
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-  },
-  innerRectangle: {
-    width: 57,
-    height: 50,
-    borderRadius: 32,
-    borderColor: '#71656F',
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  image: {
-    width: 50,
-    height: 50,
-    borderRadius: 32,
-  },
-  locationText: {
-    fontSize: 24,
-    fontFamily: 'Inter-Bold',
-    color: '#4B164C',
-    lineHeight: 31.2, // 130% of 24
-  },
-  newRectangle: {
-    position: 'absolute',
-    left: 290,
-    top: 108, // Adjusted to align better with the existing rectangle
-    width: 70,
-    height: 67,
-    borderRadius: 32,
-    borderColor: '#DD88CF',
-    borderWidth: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  newImage: {
-    width: 61.25,
-    height: 58.63,
-    borderRadius: 30,
-  },
-  bottomShape: {
-    position: 'absolute',
-    left: 8,
-    top: 213,
-    width: 360,
-    height: 459,
-    borderRadius: 24,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#999999',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
+    alignItems:'center',
+position: 'absolute',
+right: 16,
+top: 52,
+},
+bellIcon: {
+width: 24,
+height: 24,
+color: '#4B164C',
+},
+mainRectangle: {
+position: 'absolute',
+left: 7,
+top: 112,
+width: 268,
+height: 64,
+borderRadius: 40,
+backgroundColor: '#FFDFDF',
+borderColor: '#DDDFDF',
+borderWidth: 1,
+shadowColor: '#000',
+shadowOffset: { width: 0, height: 2 },
+shadowOpacity: 0.2,
+shadowRadius: 3,
+flexDirection: 'row',
+alignItems: 'center',
+paddingHorizontal: 8,
+},
+innerRectangle: {
+width: 57,
+height: 50,
+borderRadius: 32,
+borderColor: '#71656F',
+borderWidth: 1,
+justifyContent: 'center',
+alignItems: 'center',
+marginRight: 16,
+},
+image: {
+width: 50,
+height: 50,
+borderRadius: 32,
+},
+locationText: {
+fontSize: 24,
+fontFamily: 'Inter-Bold',
+color: '#4B164C',
+lineHeight: 31.2, // 130% of 24
+},
+newRectangle: {
+position: 'absolute',
+left: 290,
+top: 108, // Adjusted to align better with the existing rectangle
+width: 70,
+height: 67,
+borderRadius: 32,
+borderColor: '#DD88CF',
+borderWidth: 2,
+justifyContent: 'center',
+alignItems: 'center',
+},
+newImage: {
+width: 61.25,
+height: 58.63,
+borderRadius: 30,
+},
+bottomShape: {
+position: 'absolute',
+left: 8,
+top: 213,
+width: 360,
+height: 459,
+borderRadius: 24,
+backgroundColor: '#FFFFFF',
+borderWidth: 1,
+borderColor: '#999999',
+shadowColor: '#000',
+shadowOffset: { width: 0, height: 2 },
+shadowOpacity: 0.2,
+shadowRadius: 3,
+overflow: 'hidden',
+},
+gradient: {
+flex: 1,
+justifyContent: 'flex-start',
+alignItems: 'center',
+borderRadius: 24,
+},
+bottomImage: {
+width: 361.05,
+height: 566.06,
+resizeMode: 'cover',
+position: 'absolute',
+top: 0,
+left: 0,
+},
+circle: {
+position: 'absolute',
+top: 20,
+left: 20,
+width: 41.98,
+height: 42.82,
+borderRadius: 32,
+backgroundColor: 'rgba(255, 255, 255, 0.2)',
+justifyContent: 'center',
+alignItems: 'center',
+},
+starEmoji: {
+fontSize: 24,
+},
+personName: {
+position: 'absolute',
+bottom: 90,
+left: 24.79,
+width: 83.97,
+height: 26.75,
+fontFamily: 'Inter-SemiBold',
+fontSize: 14,
+lineHeight: 19.6, // 140% of 14
+color: '#FFFFFF',
+},
+personLocation: {
+position: 'absolute',
+bottom: 60,
+left: 24.79,
+width: 45.13,
+height: 22.29,
+fontFamily: 'Inter-SemiBold',
+fontSize: 14,
+lineHeight: 19.6, // 140% of 14
+color: '#FFFFFF',
+},
+bottomNavbar: {
+position: 'absolute',
+left: 24,
+top: 712,
+width: 327,
+height: 64,
+borderRadius: 40,
+backgroundColor: '#FFFFFF',
+shadowColor: '#752277',
+shadowOffset: { width: 0, height: 8 },
+shadowOpacity: 0.15,
+shadowRadius: 40,
+flexDirection: 'row',
+justifyContent: 'space-around',
+alignItems: 'center',
+},
+navButton: {
+justifyContent: 'center',
+alignItems: 'center',
+},
+navIcon: {
+width: 24,
+height: 24,
+color: '#4B164C',
+},
 });
 
 export default HomeScreen;
