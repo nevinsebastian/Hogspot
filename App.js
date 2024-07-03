@@ -2,11 +2,12 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import WelcomeScreen from './components/WelcomeScreen';
 import HomeScreen from './components/HomeScreen';
+import Discover from './components/Discover';
 
 const App = () => {
   return (
     <View style={styles.container}>
-      <HomeScreen/>
+      <Discover/>
     </View>
   );
 };
