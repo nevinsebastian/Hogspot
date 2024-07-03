@@ -94,6 +94,13 @@ const Discover = () => {
           <View key={hogspot.id} style={styles.hogspotItem}>
             <ImageBackground source={hogspot.image} style={styles.hogspotImage}>
               <View style={styles.gradientOverlay} />
+              <View style={styles.hotspotTag}>
+                <Text style={styles.hotspotText}>Hot️‍️‍🔥</Text>
+              </View>
+              <View style={styles.distanceTag}>
+                <Text style={styles.distanceText}>16 km away</Text>
+              </View>
+              <Text style={styles.hogspotTitle}>Lulu, Kochi</Text>
             </ImageBackground>
           </View>
         ))}
@@ -105,7 +112,7 @@ const Discover = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding:16,
+    padding: 16,
     backgroundColor: '#F5F5F5',
   },
   header: {
@@ -181,6 +188,49 @@ const styles = StyleSheet.create({
   gradientOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(75, 22, 76, 0.6)',
+  },
+  hotspotTag: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: '#4B164C',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  hotspotText: {
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 11,
+    color: '#DD88CF',
+    lineHeight: 14,
+  },
+  distanceTag: {
+    position: 'absolute',
+    bottom: 26,
+    left: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 32,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  distanceText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 11,
+    color: '#FFFFFF',
+    lineHeight: 14,
+  },
+  hogspotTitle: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 10,
+    color: '#FFFFFF',
+    lineHeight: 14,
+    position: 'absolute',
+    bottom: 8,
+    left: 23,
   },
 });
 
