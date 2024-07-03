@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ImageBackground } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
 const locationSvg = `
@@ -39,7 +39,6 @@ const searchIconSvg = `
 <circle cx="23.7664" cy="23.7666" r="8.98856" stroke="#4B164C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M30.0181 30.4851L33.5421 34" stroke="#4B164C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
-
 `;
 
 const filterIconSvg = `
@@ -59,8 +58,17 @@ const filterIconSvg = `
 </clipPath>
 </defs>
 </svg>
-
 `;
+
+const hogspots = [
+  { id: 1, image: require('../assets/lulu.jpg') },
+  { id: 2, image: require('../assets/lulu.jpg') },
+  { id: 3, image: require('../assets/lulu.jpg') },
+  { id: 4, image: require('../assets/lulu.jpg') },
+  { id: 5, image: require('../assets/lulu.jpg') },
+  { id: 6, image: require('../assets/lulu.jpg') },
+  // Add more hogspots as needed
+];
 
 const Discover = () => {
   return (
@@ -81,6 +89,15 @@ const Discover = () => {
         <Text style={styles.hogspotText}>Hogspot </Text>
         <Text style={styles.nearYouText}>near you</Text>
       </Text>
+      <ScrollView horizontal style={styles.hogspotScroll}>
+        {hogspots.map(hogspot => (
+          <View key={hogspot.id} style={styles.hogspotItem}>
+            <ImageBackground source={hogspot.image} style={styles.hogspotImage}>
+              <View style={styles.gradientOverlay} />
+            </ImageBackground>
+          </View>
+        ))}
+      </ScrollView>
     </View>
   );
 };
@@ -88,24 +105,24 @@ const Discover = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding:16,
     backgroundColor: '#F5F5F5',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 45,
+    marginTop: 55,
   },
   locationIcon: {
     width: 6,
     height: 10.8,
-    marginRight: 10,
+    marginRight: 2,
   },
   locationText: {
     fontSize: 12,
     fontFamily: 'Inter-Medium',
     color: '#22172A',
-    marginRight: 20,
+    marginRight: 10,
   },
   otherIcon: {
     width: 12,
@@ -115,7 +132,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 22,
+    marginTop: 12,
   },
   mainText: {
     fontSize: 24,
@@ -138,13 +155,32 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: 'Inter-SemiBold',
     lineHeight: 16.25,
-    marginTop: 3,
+    marginTop: -10,
   },
   hogspotText: {
     color: '#DD88CF',
   },
   nearYouText: {
     color: '#626262',
+  },
+  hogspotScroll: {
+    marginTop: 36,
+  },
+  hogspotItem: {
+    width: 105,
+    height: 160,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginRight: 12,
+  },
+  hogspotImage: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'flex-end',
+  },
+  gradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(75, 22, 76, 0.6)',
   },
 });
 
