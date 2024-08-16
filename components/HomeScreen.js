@@ -71,7 +71,7 @@ const messagesSvg = `
 `;
 
 const data = [
-  { id: 1, name: 'Mishell Rose Mathew', location: 'Kochi', image: require('../assets/person.jpg') },
+  { id: 1, name: 'Mishell Rose', location: 'Kochi', image: require('../assets/person.jpg') },
   // Add more data objects if you have multiple cards
 ];
 
