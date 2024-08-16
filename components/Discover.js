@@ -89,7 +89,7 @@ const Discover = () => {
         <Text style={styles.hogspotText}>Hogspot </Text>
         <Text style={styles.nearYouText}>near you</Text>
       </Text>
-      <ScrollView horizontal style={styles.hogspotScroll}>
+      <ScrollView horizontal style={styles.hogspotScroll} contentContainerStyle={styles.hogspotScrollContent}>
         {hogspots.map(hogspot => (
           <View key={hogspot.id} style={styles.hogspotItem}>
             <ImageBackground source={hogspot.image} style={styles.hogspotImage}>
@@ -105,6 +105,10 @@ const Discover = () => {
           </View>
         ))}
       </ScrollView>
+      <Text style={styles.aroundMeText}>Around me</Text>
+      <Text style={styles.nearbySparksText}>
+        <Text style={styles.hogspotSparksText}>Hogspot</Text> Sparks Await Nearby
+      </Text>
     </View>
   );
 };
@@ -172,6 +176,10 @@ const styles = StyleSheet.create({
   },
   hogspotScroll: {
     marginTop: 36,
+    maxHeight:180
+  },
+  hogspotScrollContent: {
+    paddingHorizontal: 16,
   },
   hogspotItem: {
     width: 105,
@@ -231,6 +239,24 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 8,
     left: 23,
+  },
+  aroundMeText: {
+    fontSize: 20,
+    fontFamily: 'Inter-Bold',
+    lineHeight: 24,
+    color: '#22172A',
+    marginTop: 16,
+  },
+  nearbySparksText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    lineHeight: 21,
+    color: '#6C727F',
+    marginTop: 8,
+  },
+  hogspotSparksText: {
+    fontFamily: 'Inter-Medium',
+    color: '#DD88CF',
   },
 });
 
