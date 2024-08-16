@@ -22,7 +22,7 @@ const WelcomeScreen = ({ navigation }) => {
       <Text style={styles.text}>
         Find <Text style={styles.loveText}>Love</Text> Where it Matters Most!
       </Text>
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Register')}>
         <View style={styles.iconContainer}>
           <Text style={styles.icon}>✉️</Text>
         </View>
