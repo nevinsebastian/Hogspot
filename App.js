@@ -6,6 +6,7 @@ import RegisterScreen from './components/RegisterScreen';
 import VerifyEmailScreen from './components/VerifyEmailScreen';
 import VerifyOTPScreen from './components/VerifyOTPScreen';
 import HomeScreen from './components/HomeScreen';
+import LoginScreen from './components/LoginScreen';
 
 const Stack = createStackNavigator();
 
@@ -18,6 +19,7 @@ const App = () => {
       >
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
         <Stack.Screen name="VerifyOTP" component={VerifyOTPScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
