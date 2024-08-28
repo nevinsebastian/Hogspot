@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 
 const VerifyEmailScreen = ({ navigation, route }) => {
@@ -8,8 +8,8 @@ const VerifyEmailScreen = ({ navigation, route }) => {
   const handleVerifyEmail = async () => {
     try {
       const encodedEmail = encodeURIComponent(email);
-      console.log(`Sending verification request to: http://3.86.38.127:8000/verify/verify-email?email=${encodedEmail}`);
-      const response = await axios.post(`http://3.86.38.127:8000/verify/verify-email?email=${encodedEmail}`);
+      console.log(`Sending verification request to: http://13.232.70.195/verify/verify-email?email=${encodedEmail}`);
+      const response = await axios.post(`http://13.232.70.195/verify/verify-email?email=${encodedEmail}`);
       console.log('Verification response:', response.data);
 
       if (response.status === 200) {

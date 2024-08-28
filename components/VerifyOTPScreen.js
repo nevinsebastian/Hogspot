@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 
 const VerifyOTPScreen = ({ navigation, route }) => {
@@ -8,7 +8,7 @@ const VerifyOTPScreen = ({ navigation, route }) => {
 
   const handleVerifyOTP = async () => {
     try {
-      const response = await axios.post(`http://3.86.38.127:8000/verify/verify-otp?email=${encodeURIComponent(email)}&otp_code=${otp}`);
+      const response = await axios.post(`http://13.232.70.195/verify/verify-otp?email=${encodeURIComponent(email)}&otp_code=${otp}`);
       console.log('OTP Verification response:', response.data);
 
       if (response.status === 200) {
@@ -29,12 +29,14 @@ const VerifyOTPScreen = ({ navigation, route }) => {
         placeholder="Email" 
         value={email} 
         onChangeText={setEmail} 
+        editable={false}  // Makes the email input read-only
       />
       <TextInput 
         style={styles.input} 
         placeholder="OTP" 
         value={otp} 
         onChangeText={setOtp} 
+        keyboardType="numeric"
       />
       <Button title="Verify OTP" onPress={handleVerifyOTP} />
     </View>
