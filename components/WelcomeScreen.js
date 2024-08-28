@@ -22,7 +22,7 @@ const WelcomeScreen = ({ navigation }) => {
       <Text style={styles.text}>
         Find <Text style={styles.loveText}>Love</Text> Where it Matters Most!
       </Text>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Register')}>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
         <View style={styles.iconContainer}>
           <Text style={styles.icon}>✉️</Text>
         </View>
@@ -35,7 +35,13 @@ const WelcomeScreen = ({ navigation }) => {
         <Text style={styles.buttonTextgoogle}>Login with Google</Text>
       </TouchableOpacity>
       <Text style={styles.signUpText}>
-        Don’t have an account? <Text style={styles.signUpLink}>Sign Up</Text>
+        Don’t have an account?{' '}
+        <Text 
+          style={styles.signUpLink} 
+          onPress={() => navigation.navigate('Register')}
+        >
+          Sign Up
+        </Text>
       </Text>
     </View>
   );
@@ -53,7 +59,7 @@ const styles = StyleSheet.create({
     height: 316,
     marginBottom: 20, 
     marginTop: 108,
-    marginLeft:10
+    marginLeft: 10,
   },
   text: {
     fontSize: 28,
