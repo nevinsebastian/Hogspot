@@ -1,60 +1,39 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import axios from 'axios';
+import { View, StyleSheet } from 'react-native';
+import { TextInput, Button, Text } from 'react-native-paper'; // Using React Native Paper as an alternative
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async () => {
-    try {
-      const response = await axios.post('http://13.232.70.195/login', new URLSearchParams({
-        grant_type: '',
-        username: username,
-        password: password,
-        scope: '',
-        client_id: '',
-        client_secret: ''
-      }).toString(), {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      });
-
-      console.log('Login response:', response.data);
-
-      if (response.status === 200) {
-        console.log('Login successful:', response.data);
-        Alert.alert('Success', 'Login successful.');
-
-        // Navigate to Home and reset navigation stack
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Home' }],
-        });
-      }
-    } catch (error) {
-      console.error('Login error:', error.response ? error.response.data : error.message);
-      Alert.alert('Login Error', 'Failed to log in. Please check your credentials and try again.');
+  const handleLogin = () => {
+    if (username === 'test' && password === 'test') {
+      alert('Login Successful!');
+      navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+    } else {
+      alert('Invalid credentials.');
     }
   };
 
   return (
     <View style={styles.container}>
+      <Text variant="headlineMedium" style={styles.title}>Login</Text>
       <TextInput 
-        style={styles.input} 
-        placeholder="Username" 
+        label="Username" 
         value={username} 
         onChangeText={setUsername} 
+        style={styles.input} 
       />
       <TextInput 
-        style={styles.input} 
-        placeholder="Password" 
+        label="Password" 
         value={password} 
         onChangeText={setPassword} 
         secureTextEntry 
+        style={styles.input} 
       />
-      <Button title="Login" onPress={handleLogin} />
+      <Button mode="contained" onPress={handleLogin} style={styles.button}>
+        Login
+      </Button>
     </View>
   );
 };
@@ -62,15 +41,18 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     justifyContent: 'center',
+    padding: 16,
+  },
+  title: {
+    textAlign: 'center',
+    marginBottom: 16,
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
     marginBottom: 12,
-    padding: 10,
+  },
+  button: {
+    marginTop: 8,
   },
 });
 
