@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { StyleSheet, Alert, KeyboardAvoidingView, ScrollView, Platform, View } from 'react-native';
 import { TextInput, Button, Text, HelperText } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates'; // Calendar picker for Date of Birth
 
@@ -38,77 +38,82 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text variant="headlineMedium" style={styles.title}>
-        Register
-      </Text>
-      <TextInput
-        label="Name"
-        value={name}
-        onChangeText={setName}
-        style={styles.input}
-        mode="outlined"
-      />
-      <TextInput
-        label="Email"
-        value={email}
-        onChangeText={(text) => {
-          setEmail(text);
-          setEmailError(!validateEmail(text)); // Update email error dynamically
-        }}
-        style={styles.input}
-        mode="outlined"
-        keyboardType="email-address"
-        error={emailError}
-      />
-      {emailError && (
-        <HelperText type="error" visible={emailError}>
-          Enter a valid email address (e.g., user@example.com)
-        </HelperText>
-      )}
-      <TextInput
-        label="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        style={styles.input}
-        mode="outlined"
-      />
-      <TextInput
-        label="Confirm Password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-        style={styles.input}
-        mode="outlined"
-      />
-      <TextInput
-        label="Date of Birth"
-        value={dateOfBirth || ''}
-        onFocus={() => setDatePickerVisible(true)}
-        style={styles.input}
-        mode="outlined"
-        editable={false}
-        right={<TextInput.Icon icon="calendar" onPress={() => setDatePickerVisible(true)} />}
-      />
-      <Button mode="contained" onPress={handleRegister} style={styles.button}>
-        Register
-      </Button>
-      <DatePickerModal
-        locale="en"
-        mode="single"
-        visible={datePickerVisible}
-        onDismiss={() => setDatePickerVisible(false)}
-        date={new Date()}
-        onConfirm={onDateConfirm}
-      />
-    </View>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <Text variant="headlineMedium" style={styles.title}>
+          Register
+        </Text>
+        <TextInput
+          label="Name"
+          value={name}
+          onChangeText={setName}
+          style={styles.input}
+          mode="outlined"
+        />
+        <TextInput
+          label="Email"
+          value={email}
+          onChangeText={(text) => {
+            setEmail(text);
+            setEmailError(!validateEmail(text)); // Update email error dynamically
+          }}
+          style={styles.input}
+          mode="outlined"
+          keyboardType="email-address"
+          error={emailError}
+        />
+        {emailError && (
+          <HelperText type="error" visible={emailError}>
+            Enter a valid email address (e.g., user@example.com)
+          </HelperText>
+        )}
+        <TextInput
+          label="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          style={styles.input}
+          mode="outlined"
+        />
+        <TextInput
+          label="Confirm Password"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+          style={styles.input}
+          mode="outlined"
+        />
+        <TextInput
+          label="Date of Birth"
+          value={dateOfBirth || ''}
+          onFocus={() => setDatePickerVisible(true)}
+          style={styles.input}
+          mode="outlined"
+          editable={false}
+          right={<TextInput.Icon icon="calendar" onPress={() => setDatePickerVisible(true)} />}
+        />
+        <Button mode="contained" onPress={handleRegister} style={styles.button}>
+          Register
+        </Button>
+        <DatePickerModal
+          locale="en"
+          mode="single"
+          visible={datePickerVisible}
+          onDismiss={() => setDatePickerVisible(false)}
+          date={new Date()}
+          onConfirm={onDateConfirm}
+        />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     padding: 16,
     justifyContent: 'center',
   },
