@@ -72,22 +72,9 @@ const messagesSvg = `
 
 const data = [
   { id: 1, name: 'Mishell Rose', location: 'Kochi', image: require('../assets/person.jpg') },
-  // Add more data objects if you have multiple cards
 ];
 
 
-//const Card = ({ person }) => (
-//  <View style={styles.card}>
-//    <LinearGradient colors={['#4B164C', '#4B164C70']} style={styles.gradient}>
-//      <Image source={person.image} style={styles.cardImage} />
-//      <View style={styles.circle}>
-//        <Text style={styles.starEmoji}>⭐</Text>
-//      </View>
-//      <Text style={styles.personName}>{person.name}</Text>
-//      <Text style={styles.personLocation}>{person.location}</Text>
-//    </LinearGradient>
-//  </View>
-//);
 
 
 const HomeScreen = () => {
