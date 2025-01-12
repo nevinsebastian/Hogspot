@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper'; // Using React Native Paper as an alternative
 
 const LoginScreen = ({ navigation }) => {
@@ -8,7 +8,6 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = () => {
     if (username === 'test' && password === 'test') {
-      alert('Login Successful!');
       navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
     } else {
       alert('Invalid credentials.');
@@ -16,31 +15,47 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text variant="headlineMedium" style={styles.title}>Login</Text>
-      <TextInput 
-        label="Username" 
-        value={username} 
-        onChangeText={setUsername} 
-        style={styles.input} 
-      />
-      <TextInput 
-        label="Password" 
-        value={password} 
-        onChangeText={setPassword} 
-        secureTextEntry 
-        style={styles.input} 
-      />
-      <Button mode="contained" onPress={handleLogin} style={styles.button}>
-        Login
-      </Button>
-    </View>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        <Text variant="headlineMedium" style={styles.title}>Login</Text>
+        <TextInput 
+          label="Username" 
+          value={username} 
+          onChangeText={setUsername} 
+          style={styles.input} 
+          mode="outlined" 
+        />
+        <TextInput 
+          label="Password" 
+          value={password} 
+          onChangeText={setPassword} 
+          secureTextEntry 
+          style={styles.input} 
+          mode="outlined" 
+        />
+        <Button 
+          mode="contained" 
+          onPress={handleLogin} 
+          buttonColor="#4B164C" 
+          style={styles.button}
+          labelStyle={{ color: '#fff' }}
+        >
+          Login
+        </Button>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
     justifyContent: 'center',
     padding: 16,
   },
