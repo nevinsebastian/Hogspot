@@ -17,8 +17,7 @@ const SwipingCardScreen = () => {
 
   const handleNope = (card) => {
     console.log(`Nope for ${card.text}`);
-  };
-
+  };    
   const renderCard = (card) => (
     <View style={styles.card}>
       <Text style={styles.cardText}>{card.text}</Text>
