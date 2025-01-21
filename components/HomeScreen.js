@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import SwipeCards from 'react-native-swipe-cards';
+import { useNavigation } from '@react-navigation/native';
 
 
 const bellSvg = `
@@ -120,9 +121,9 @@ const HomeScreen = () => {
         <TouchableOpacity style={styles.navButton}>
           <SvgXml xml={discoverSvg} style={styles.navIcon} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <SvgXml xml={plusSvg} style={styles.navIcon} />
-        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('SwipingCards')}>
+        <SvgXml xml={plusSvg} width={50} height={50} />
+      </TouchableOpacity>
         <TouchableOpacity style={styles.navButton}>
           <SvgXml xml={matchesSvg} style={styles.navIcon} />
         </TouchableOpacity>
