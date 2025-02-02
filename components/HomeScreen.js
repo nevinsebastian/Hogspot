@@ -129,8 +129,10 @@ const HomeScreen = () => {
     <View style={styles.container}>
       <Text style={styles.heading}>Hogspot</Text>
       <TouchableOpacity style={styles.notificationButton}>
-        <SvgXml xml={bellSvg} style={styles.bellIcon} />
-      </TouchableOpacity>
+  <View style={styles.bellContainer}>
+    <SvgXml xml={bellSvg} width={24} height={24} />
+  </View>
+</TouchableOpacity>
 
       <View style={styles.mainRectangle}>
         <View style={styles.innerRectangle}>
@@ -213,10 +215,20 @@ const styles = StyleSheet.create({
     right: 16,
     top: 72,
   },
+  bellContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24, // Makes it a circle
+    borderWidth: 1.5, // Adjust stroke width
+    borderColor: '#d1c9c9', // Border color
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   bellIcon: {
     width: 24,
     height: 24,
     color: '#4B164C',
+    
   },
   mainRectangle: {
     position: 'absolute',
@@ -321,7 +333,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 30,
     left: 24.79,
-    width: 45.13,
+    width: 100.13,
     height: 22.29,
     fontFamily: 'Inter-Medium',
     fontSize: 14,
