@@ -102,7 +102,8 @@ const HomeScreen = () => {
       <View style={styles.card}>
         <Image source={card.image} style={styles.cardImage} />
         <LinearGradient
-          colors={['#4B164C', '#4B164C70']}
+          colors={['transparent', 'rgba(75, 22, 76, 0.8)', '#4B164C']}
+          locations={[0, 0.5, 1]} // Adjust gradient stops
           style={styles.gradient}
         >
           <View style={styles.circle}>
@@ -183,7 +184,7 @@ const styles = StyleSheet.create({
     color: '#4B164C',
     position: 'absolute',
     left: 16,
-    top: 58,
+    top: 74,
   },
   notificationButton: {
     width: 48,
@@ -194,7 +195,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'absolute',
     right: 16,
-    top: 52,
+    top: 72,
   },
   bellIcon: {
     width: 24,
@@ -204,7 +205,7 @@ const styles = StyleSheet.create({
   mainRectangle: {
     position: 'absolute',
     left: 7,
-    top: 112,
+    top: 137,
     width: 268,
     height: 64,
     borderRadius: 40,
@@ -242,8 +243,8 @@ const styles = StyleSheet.create({
   },
   swiperContainer: {
     position: 'absolute',
-    left: 8,
-    top: 180,
+    left: 14,
+    top: 170,
     width: 5,
     height: 459,
   },
