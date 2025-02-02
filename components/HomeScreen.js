@@ -2,8 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
-import SwipeCards from 'react-native-swipe-cards';
 import { useNavigation } from '@react-navigation/native';
+import Swiper from 'react-native-deck-swiper';
 
 
 
@@ -73,16 +73,51 @@ const messagesSvg = `
 
 `;
 
-const data = [
-  { id: 1, name: 'Mishell Rose', location: 'Kochi', image: require('../assets/person.jpg') },
+const cardData = [
+  {
+    id: 1,
+    name: 'Mishell Rose Mathew',
+    location: 'Kochi',
+    image: require('../assets/person.jpg'),
+  },
+  {
+    id: 2,
+    name: 'John Doe',
+    location: 'New York',
+    image: require('../assets/profile.jpg'),
+  },
+  {
+    id: 3,
+    name: 'Jane Smith',
+    location: 'London',
+    image: require('../assets/lulu.jpg'),
+  },
 ];
 
-
-
-
 const HomeScreen = () => {
+  const navigation = useNavigation();
 
-  
+  const renderCard = (card) => {
+    return (
+      <View style={styles.card}>
+        <Image source={card.image} style={styles.cardImage} />
+        <LinearGradient
+          colors={['#4B164C', '#4B164C70']}
+          style={styles.gradient}
+        >
+          <View style={styles.circle}>
+            <Text style={styles.starEmoji}>⭐</Text>
+          </View>
+          <Text style={styles.personName}>{card.name}</Text>
+          <Text style={styles.personLocation}>{card.location}</Text>
+        </LinearGradient>
+      </View>
+    );
+  };
+
+  const onSwiped = (index) => {
+    console.log(`Card ${index} swiped`);
+  };
 
   return (
     <View style={styles.container}>
@@ -98,22 +133,21 @@ const HomeScreen = () => {
         <Text style={styles.locationText}>Lulu, Kochi</Text>
       </View>
 
-      <View style={styles.newRectangle}>
-        <Image source={require('../assets/profile.jpg')} style={styles.newImage} />
-      </View>
-
-      <View style={styles.bottomShape}>
-        <LinearGradient
-          colors={['#4B164C', '#4B164C70']}
-          style={styles.gradient}
-        >
-          <Image source={require('../assets/person.jpg')} style={styles.bottomImage} />
-          <View style={styles.circle}>
-            <Text style={styles.starEmoji}>⭐</Text>
-          </View>
-          <Text style={styles.personName}>Mishell Rose Mathew</Text>
-          <Text style={styles.personLocation}>Kochi</Text>
-        </LinearGradient>
+      {/* Swipeable Cards */}
+      <View style={styles.swiperContainer}>
+        <Swiper
+          cards={cardData}
+          renderCard={renderCard}
+          onSwiped={onSwiped}
+          infinite // Enable infinite swiping
+          backgroundColor="transparent"
+          cardHorizontalMargin={0}
+          stackSize={3} // Number of cards in the stack
+          stackSeparation={15} // Space between stacked cards
+          animateCardOpacity // Fade out cards when swiped
+          disableTopSwipe // Disable swiping up
+          disableBottomSwipe // Disable swiping down
+        />
       </View>
 
       <View style={styles.bottomNavbar}>
@@ -124,8 +158,8 @@ const HomeScreen = () => {
           <SvgXml xml={discoverSvg} style={styles.navIcon} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('SwipingCards')}>
-        <SvgXml xml={plusSvg} width={50} height={50} />
-      </TouchableOpacity>
+          <SvgXml xml={plusSvg} width={50} height={50} />
+        </TouchableOpacity>
         <TouchableOpacity style={styles.navButton}>
           <SvgXml xml={matchesSvg} style={styles.navIcon} />
         </TouchableOpacity>
@@ -142,9 +176,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: '#F5F5F5',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
   },
   heading: {
     fontSize: 28,
@@ -160,164 +191,150 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     backgroundColor: '#F5F5F5',
     justifyContent: 'center',
-    alignItems:'center',
-position: 'absolute',
-right: 16,
-top: 52,
-},
-bellIcon: {
-width: 24,
-height: 24,
-color: '#4B164C',
-},
-mainRectangle: {
-position: 'absolute',
-left: 7,
-top: 112,
-width: 268,
-height: 64,
-borderRadius: 40,
-backgroundColor: '#FFDFDF',
-borderColor: '#DDDFDF',
-borderWidth: 1,
-shadowColor: '#000',
-shadowOffset: { width: 0, height: 2 },
-shadowOpacity: 0.2,
-shadowRadius: 3,
-flexDirection: 'row',
-alignItems: 'center',
-paddingHorizontal: 8,
-},
-innerRectangle: {
-width: 57,
-height: 50,
-borderRadius: 32,
-borderColor: '#71656F',
-borderWidth: 1,
-justifyContent: 'center',
-alignItems: 'center',
-marginRight: 16,
-},
-image: {
-width: 50,
-height: 50,
-borderRadius: 32,
-},
-locationText: {
-fontSize: 24,
-fontFamily: 'Inter-Bold',
-color: '#4B164C',
-lineHeight: 31.2, // 130% of 24
-},
-newRectangle: {
-position: 'absolute',
-left: 290,
-top: 108, // Adjusted to align better with the existing rectangle
-width: 70,
-height: 67,
-borderRadius: 32,
-borderColor: '#DD88CF',
-borderWidth: 2,
-justifyContent: 'center',
-alignItems: 'center',
-},
-newImage: {
-width: 61.25,
-height: 58.63,
-borderRadius: 30,
-},
-bottomShape: {
-position: 'absolute',
-left: 8,
-top: 213,
-width: 360,
-height: 459,
-borderRadius: 24,
-backgroundColor: '#FFFFFF',
-borderWidth: 1,
-borderColor: '#999999',
-shadowColor: '#000',
-shadowOffset: { width: 0, height: 2 },
-shadowOpacity: 0.2,
-shadowRadius: 3,
-overflow: 'hidden',
-},
-gradient: {
-flex: 1,
-justifyContent: 'flex-start',
-alignItems: 'center',
-borderRadius: 24,
-},
-bottomImage: {
-width: 361.05,
-height: 566.06,
-resizeMode: 'cover',
-position: 'absolute',
-top: 0,
-left: 0,
-},
-circle: {
-position: 'absolute',
-top: 20,
-left: 20,
-width: 41.98,
-height: 42.82,
-borderRadius: 32,
-backgroundColor: 'rgba(255, 255, 255, 0.2)',
-justifyContent: 'center',
-alignItems: 'center',
-},
-starEmoji: {
-fontSize: 24,
-},
-personName: {
-position: 'absolute',
-bottom: 45,
-left: 24.79,
-width: 83.97,
-height: 26.75,
-fontFamily: 'Inter-SemiBold',
-fontSize: 14,
-lineHeight: 19.6, // 140% of 14
-color: '#FFFFFF',
-borderColor:"#999999"
-},
-personLocation: {
-position: 'absolute',
-bottom: 30,
-left: 24.79,
-width: 45.13,
-height: 22.29,
-fontFamily: 'Inter-Medium',
-fontSize: 14,
-lineHeight: 19.6, // 140% of 14
-color: '#FFFFFF',
-},
-bottomNavbar: {
-position: 'absolute',
-left: 24,
-top: 722,
-width: 327,
-height: 64,
-borderRadius: 40,
-backgroundColor: '#FFFFFF',
-shadowColor: '#752277',
-shadowOffset: { width: 0, height: 8 },
-shadowOpacity: 0.15,
-shadowRadius: 40,
-flexDirection: 'row',
-justifyContent: 'space-around',
-alignItems: 'center',
-},
-navButton: {
-justifyContent: 'center',
-alignItems: 'center',
-},
-navIcon: {
-width: 24,
-height: 24,
-color: '#4B164C',
-},
+    alignItems: 'center',
+    position: 'absolute',
+    right: 16,
+    top: 52,
+  },
+  bellIcon: {
+    width: 24,
+    height: 24,
+    color: '#4B164C',
+  },
+  mainRectangle: {
+    position: 'absolute',
+    left: 7,
+    top: 112,
+    width: 268,
+    height: 64,
+    borderRadius: 40,
+    backgroundColor: '#FFDFDF',
+    borderColor: '#DDDFDF',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
+  innerRectangle: {
+    width: 57,
+    height: 50,
+    borderRadius: 32,
+    borderColor: '#71656F',
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  image: {
+    width: 50,
+    height: 50,
+    borderRadius: 32,
+  },
+  locationText: {
+    fontSize: 24,
+    fontFamily: 'Inter-Bold',
+    color: '#4B164C',
+    lineHeight: 31.2,
+  },
+  swiperContainer: {
+    position: 'absolute',
+    left: 8,
+    top: 180,
+    width: 5,
+    height: 459,
+  },
+  card: {
+    borderRadius: 24,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#999999',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    overflow: 'hidden',
+    width: 360, // Fixed width to match Figma
+    height: 459, // Matches Figma
+  },  
+  cardImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  gradient: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 150,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  circle: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    width: 41.98,
+    height: 42.82,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  starEmoji: {
+    fontSize: 24,
+  },
+  personName: {
+    position: 'absolute',
+    bottom: 45,
+    left: 24.79,
+    width: 83.97,
+    height: 26.75,
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 14,
+    lineHeight: 19.6,
+    color: '#FFFFFF',
+  },
+  personLocation: {
+    position: 'absolute',
+    bottom: 30,
+    left: 24.79,
+    width: 45.13,
+    height: 22.29,
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    lineHeight: 19.6,
+    color: '#FFFFFF',
+  },
+  bottomNavbar: {
+    position: 'absolute',
+    left: 24,
+    top: 722,
+    width: 327,
+    height: 64,
+    borderRadius: 40,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#752277',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 40,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  navButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  navIcon: {
+    width: 24,
+    height: 24,
+    color: '#4B164C',
+  },
 });
 
 export default HomeScreen;
