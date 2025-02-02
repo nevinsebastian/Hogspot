@@ -133,7 +133,9 @@ const HomeScreen = () => {
         </View>
         <Text style={styles.locationText}>Lulu, Kochi</Text>
       </View>
-
+      <View style={styles.newRectangle}>
+        <Image source={require('../assets/profile.jpg')} style={styles.newImage} />
+      </View>
       {/* Swipeable Cards */}
       <View style={styles.swiperContainer}>
         <Swiper
@@ -185,7 +187,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 16,
     top: 74,
-  },
+  }, 
+   newImage: {
+    width: 61.25,
+    height: 58.63,
+    borderRadius: 30,
+    left:300,
+    top:125,
+    borderWidth: 2, // Add a stroke
+    borderColor: '#DD88CF', // Black color for the stroke
+    },
   notificationButton: {
     width: 48,
     height: 48,
@@ -231,10 +242,11 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   image: {
-    width: 50,
-    height: 50,
+    width: 54,
+    height: 49,
     borderRadius: 32,
   },
+
   locationText: {
     fontSize: 24,
     fontFamily: 'Inter-Bold',
