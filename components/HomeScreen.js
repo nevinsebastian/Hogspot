@@ -113,8 +113,8 @@ const HomeScreen = () => {
         />
       </View>
 
-      <BottomNavbar/>
-    </View>
+      <BottomNavbar currentScreen="home" />
+      </View>
   );
 };
 

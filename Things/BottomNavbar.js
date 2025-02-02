@@ -48,21 +48,30 @@ const messagesSvg = `
 </svg>
 `;
 
-const BottomNavbar = () => {
+const BottomNavbar = ({ currentScreen }) => {
   return (
     <View style={styles.bottomNavbar}>
+      {/* Home Button with Circle Highlight */}
       <TouchableOpacity style={styles.navButton}>
-        <SvgXml xml={homeSvg} style={styles.navIcon} />
+        <View style={[styles.iconContainer, currentScreen === 'home' && styles.activeIconContainer]}>
+          <SvgXml xml={homeSvg} style={[styles.navIcon, currentScreen === 'home' && styles.activeNavIcon]} />
+        </View>
       </TouchableOpacity>
+
+      {/* Other Navigation Buttons */}
       <TouchableOpacity style={styles.navButton}>
         <SvgXml xml={discoverSvg} style={styles.navIcon} />
       </TouchableOpacity>
+
+      {/* Center Plus Button (unchanged) */}
       <TouchableOpacity>
         <SvgXml xml={plusSvg} width={50} height={50} />
       </TouchableOpacity>
+
       <TouchableOpacity style={styles.navButton}>
         <SvgXml xml={matchesSvg} style={styles.navIcon} />
       </TouchableOpacity>
+
       <TouchableOpacity style={styles.navButton}>
         <SvgXml xml={messagesSvg} style={styles.navIcon} />
       </TouchableOpacity>
@@ -91,11 +100,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  activeIconContainer: {
+    backgroundColor: '#DD88CF', // Circle background only for active icon
+  },
   navIcon: {
     width: 24,
     height: 24,
-    color: '#4B164C',
+    color: '#4B164C', // Default color
+  },
+  activeNavIcon: {
+    color: '#FFFFFF', // White icon inside when active
   },
 });
-
 export default BottomNavbar;
