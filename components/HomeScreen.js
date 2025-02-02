@@ -78,19 +78,24 @@ const cardData = [
     id: 1,
     name: 'Mishell Rose Mathew',
     location: 'Kochi',
-    image: require('../assets/person.jpg'),
+    image: require('../assets/mish.jpg'),
   },
   {
     id: 2,
-    name: 'John Doe',
-    location: 'New York',
-    image: require('../assets/profile.jpg'),
+    name: 'Nevin',
+    location: 'Alappuzha',
+    image: require('../assets/nevin.jpg'),
   },
   {
     id: 3,
-    name: 'Jane Smith',
-    location: 'London',
-    image: require('../assets/lulu.jpg'),
+    name: 'Bin',
+    location: 'Trivandrum',
+    image: require('../assets/bin.jpg'),
+  }, {
+    id: 4,
+    name: 'Sreejith',
+    location: 'Trivandrum',
+    image: require('../assets/sree.jpeg'),
   },
 ];
 
