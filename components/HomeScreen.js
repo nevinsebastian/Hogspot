@@ -98,19 +98,25 @@ const HomeScreen = () => {
       </View>
       {/* Swipeable Cards */}
       <View style={styles.swiperContainer}>
-        <Swiper
-          cards={cardData}
-          renderCard={renderCard}
-          onSwiped={onSwiped}
-          infinite // Enable infinite swiping
-          backgroundColor="transparent"
-          cardHorizontalMargin={0}
-          stackSize={3} // Number of cards in the stack
-          stackSeparation={15} // Space between stacked cards
-          animateCardOpacity // Fade out cards when swiped
-          disableTopSwipe // Disable swiping up
-          disableBottomSwipe // Disable swiping down
-        />
+      <Swiper
+  cards={cardData}
+  renderCard={renderCard}
+  onSwiped={onSwiped}
+  infinite
+  backgroundColor="transparent"
+  cardHorizontalMargin={0}
+  stackSize={3} // Keep 3 cards visible at a time
+  stackSeparation={-30} // Makes the next card more visible
+  animateCardOpacity
+  disableTopSwipe
+  disableBottomSwipe
+  stackAnimationFriction={10} // Reduces delay by making animation snappier
+  stackAnimationTension={60} // Makes stacking more responsive
+  containerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+  cardStyle={{ position: 'absolute' }} // Ensures correct stacking
+/>
+
+
       </View>
 
       <BottomNavbar currentScreen="home" />
