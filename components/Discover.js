@@ -110,7 +110,7 @@ const Discover = () => {
         <Text style={styles.hogspotSparksText}>Hogspot</Text> Sparks Await Nearby
       </Text>
       <View style={styles.bottomNavbarContainer}>
-        <BottomNavbar currentScreen="Discover" />
+        <BottomNavbar currentScreen="discover" />
       </View>
     </View>
   );
