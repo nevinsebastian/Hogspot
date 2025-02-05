@@ -9,7 +9,8 @@ import VerifyEmailScreen from './components/VerifyEmailScreen';
 import VerifyOTPScreen from './components/VerifyOTPScreen';
 import HomeScreen from './components/HomeScreen';
 import LoginScreen from './components/LoginScreen';
-import SwipingCardScreen from './Things/SwipingCardScreen';
+import Discover from './components/Discover';
+
 
 const Stack = createStackNavigator();
 
@@ -21,13 +22,12 @@ const App = () => {
           initialRouteName="Welcome"
           screenOptions={{ headerShown: false }} // This removes the header for all screens
         >
-          <Stack.Screen name="Welcome" component={WelcomeScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
-          <Stack.Screen name="VerifyOTP" component={VerifyOTPScreen} />
+          {/* <Stack.Screen name="Welcome" component={WelcomeScreen} /> */}
+          {/* <Stack.Screen name="Register" component={RegisterScreen} /> */}
+          {/* <Stack.Screen name="Login" component={LoginScreen} /> */}
           <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="SwipingCard" component={SwipingCardScreen} />
+          <Stack.Screen name="Discover" component={Discover} />
+
         </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>

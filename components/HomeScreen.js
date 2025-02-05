@@ -119,12 +119,19 @@ const HomeScreen = () => {
 
       </View>
 
-      <BottomNavbar currentScreen="home" />
+      <View style={styles.bottomNavbarContainer}>
+        <BottomNavbar currentScreen="home" />
+      </View>
       </View>
   );
 };
 
 const styles = StyleSheet.create({
+  bottomNavbarContainer: {
+position: 'absolute',
+    zIndex: 10, // Ensure BottomNavbar is above Swiper
+  },
+
   container: {
     flex: 1,
     padding: 16,
@@ -139,8 +146,8 @@ const styles = StyleSheet.create({
     top: 74,
   }, 
    newImage: {
-    width: 61.25,
-    height: 58.63,
+    width: 64.25,
+    height: 64.63,
     borderRadius: 30,
     left:300,
     top:125,
@@ -177,7 +184,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 7,
     top: 137,
-    width: 268,
+    width: 288,
     height: 64,
     borderRadius: 40,
     backgroundColor: '#FFDFDF',
@@ -217,8 +224,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 14,
     top: 170,
-    width: 5,
-    height: 459,
+    width: '100%',
+    height: '0%', // Adjust height to avoid overlapping with BottomNavbar
   },
   card: {
     borderRadius: 24,
