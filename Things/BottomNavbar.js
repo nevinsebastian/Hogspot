@@ -55,7 +55,7 @@ const BottomNavbar = ({ currentScreen }) => {
 
   return (
     <View style={styles.bottomNavbar}>
-      {/* Home Button with Circle Highlight */}
+      {/* Home Button */}
       <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Home')}>
         <View style={[styles.iconContainer, currentScreen === 'home' && styles.activeIconContainer]}>
           <SvgXml xml={homeSvg} style={[styles.navIcon, currentScreen === 'home' && styles.activeNavIcon]} />
@@ -64,22 +64,28 @@ const BottomNavbar = ({ currentScreen }) => {
 
       {/* Discover Button */}
       <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Discover')}>
-        <SvgXml xml={discoverSvg} style={styles.navIcon} />
+        <View style={[styles.iconContainer, currentScreen === 'discover' && styles.activeIconContainer]}>
+          <SvgXml xml={discoverSvg} style={[styles.navIcon, currentScreen === 'discover' && styles.activeNavIcon]} />
+        </View>
       </TouchableOpacity>
 
-      {/* Center Plus Button (unchanged) */}
+      {/* Center Plus Button */}
       <TouchableOpacity>
         <SvgXml xml={plusSvg} width={50} height={50} />
       </TouchableOpacity>
 
       {/* Matches Button */}
       <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Matches')}>
-        <SvgXml xml={matchesSvg} style={styles.navIcon} />
+        <View style={[styles.iconContainer, currentScreen === 'matches' && styles.activeIconContainer]}>
+          <SvgXml xml={matchesSvg} style={[styles.navIcon, currentScreen === 'matches' && styles.activeNavIcon]} />
+        </View>
       </TouchableOpacity>
 
       {/* Messages Button */}
       <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Messages')}>
-        <SvgXml xml={messagesSvg} style={styles.navIcon} />
+        <View style={[styles.iconContainer, currentScreen === 'messages' && styles.activeIconContainer]}>
+          <SvgXml xml={messagesSvg} style={[styles.navIcon, currentScreen === 'messages' && styles.activeNavIcon]} />
+        </View>
       </TouchableOpacity>
     </View>
   );
