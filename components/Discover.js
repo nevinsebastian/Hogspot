@@ -89,7 +89,13 @@ const Discover = () => {
         <Text style={styles.hogspotText}>Hogspot </Text>
         <Text style={styles.nearYouText}>near you</Text>
       </Text>
-      <ScrollView horizontal style={styles.hogspotScroll} contentContainerStyle={styles.hogspotScrollContent}>
+      {/* ScrollView with scrollbar hidden */}
+      <ScrollView
+        horizontal
+        style={styles.hogspotScroll}
+        contentContainerStyle={styles.hogspotScrollContent}
+        showsHorizontalScrollIndicator={false} // Hide the scrollbar
+      >
         {hogspots.map(hogspot => (
           <View key={hogspot.id} style={styles.hogspotItem}>
             <ImageBackground source={hogspot.image} style={styles.hogspotImage}>
@@ -117,10 +123,6 @@ const Discover = () => {
 };
 
 const styles = StyleSheet.create({
-  bottomNavbarContainer: {
-    position: 'absolute',
-        zIndex: 10, // Ensure BottomNavbar is above Swiper
-      },
   container: {
     flex: 1,
     padding: 16,
@@ -183,7 +185,7 @@ const styles = StyleSheet.create({
   },
   hogspotScroll: {
     marginTop: 36,
-    maxHeight:180
+    maxHeight: 180,
   },
   hogspotScrollContent: {
     paddingHorizontal: 16,
@@ -265,6 +267,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
     color: '#DD88CF',
   },
+  bottomNavbarContainer: {
+    position: 'absolute',
+        zIndex: 10, // Ensure BottomNavbar is above Swiper
+      },
 });
 
 export default Discover;
