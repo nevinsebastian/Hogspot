@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { SvgXml } from 'react-native-svg';
+import { useNavigation } from '@react-navigation/native';
+
 
 const homeSvg = `
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -49,17 +51,19 @@ const messagesSvg = `
 `;
 
 const BottomNavbar = ({ currentScreen }) => {
+  const navigation = useNavigation(); // Initialize navigation
+
   return (
     <View style={styles.bottomNavbar}>
       {/* Home Button with Circle Highlight */}
-      <TouchableOpacity style={styles.navButton}>
+      <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Home')}>
         <View style={[styles.iconContainer, currentScreen === 'home' && styles.activeIconContainer]}>
           <SvgXml xml={homeSvg} style={[styles.navIcon, currentScreen === 'home' && styles.activeNavIcon]} />
         </View>
       </TouchableOpacity>
 
-      {/* Other Navigation Buttons */}
-      <TouchableOpacity style={styles.navButton}>
+      {/* Discover Button */}
+      <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Discover')}>
         <SvgXml xml={discoverSvg} style={styles.navIcon} />
       </TouchableOpacity>
 
@@ -68,11 +72,13 @@ const BottomNavbar = ({ currentScreen }) => {
         <SvgXml xml={plusSvg} width={50} height={50} />
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.navButton}>
+      {/* Matches Button */}
+      <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Matches')}>
         <SvgXml xml={matchesSvg} style={styles.navIcon} />
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.navButton}>
+      {/* Messages Button */}
+      <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Messages')}>
         <SvgXml xml={messagesSvg} style={styles.navIcon} />
       </TouchableOpacity>
     </View>
@@ -119,4 +125,5 @@ const styles = StyleSheet.create({
     color: '#FFFFFF', // White icon inside when active
   },
 });
+
 export default BottomNavbar;
