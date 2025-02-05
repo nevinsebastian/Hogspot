@@ -288,7 +288,7 @@ position: 'absolute',
     fontFamily: 'Inter-Medium',
     fontSize: 14,
     lineHeight: 19.6,
-    color: '#FFFFFF',
+    color: '#6C727F',
   },
  
 });

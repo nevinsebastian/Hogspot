@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, ImageBackground } from 'react-native';
 import { SvgXml } from 'react-native-svg';
-
+import BottomNavbar from '../Things/BottomNavbar';
 const locationSvg = `
 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_1354_463)">
@@ -109,11 +109,18 @@ const Discover = () => {
       <Text style={styles.nearbySparksText}>
         <Text style={styles.hogspotSparksText}>Hogspot</Text> Sparks Await Nearby
       </Text>
+      <View style={styles.bottomNavbarContainer}>
+        <BottomNavbar currentScreen="Discover" />
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  bottomNavbarContainer: {
+    position: 'absolute',
+        zIndex: 10, // Ensure BottomNavbar is above Swiper
+      },
   container: {
     flex: 1,
     padding: 16,
