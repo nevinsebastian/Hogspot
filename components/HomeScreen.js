@@ -272,12 +272,13 @@ position: 'absolute',
     position: 'absolute',
     bottom: 45,
     left: 24.79,
-    width: 83.97,
+    width: 103.97,
     height: 26.75,
     fontFamily: 'Inter-SemiBold',
     fontSize: 14,
     lineHeight: 19.6,
     color: '#FFFFFF',
+    textTransform: 'uppercase', 
   },
   personLocation: {
     position: 'absolute',
@@ -289,6 +290,8 @@ position: 'absolute',
     fontSize: 14,
     lineHeight: 19.6,
     color: '#6C727F',
+    textTransform: 'uppercase', 
+
   },
  
 });
