@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, ImageBackground } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import BottomNavbar from '../Things/BottomNavbar';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker , Polygon} from 'react-native-maps';
 
 
 const locationSvg = `
@@ -62,6 +62,221 @@ const filterIconSvg = `
 </defs>
 </svg>
 `;
+const customMapStyle = [
+  {
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#ebe3cd"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#523735"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#f5f1e6"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#c9b2a6"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#dcd2be"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#ae9e90"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.natural",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#dfd2ae"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#dfd2ae"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#93817c"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "geometry.fill",
+    "stylers": [
+      {
+        "color": "#a5b076"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#447530"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#f5f1e6"
+      }
+    ]
+  },
+  {
+    "featureType": "road.arterial",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#fdfcf8"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#f8c967"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#e9bc62"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway.controlled_access",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#e98d58"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway.controlled_access",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#db8555"
+      }
+    ]
+  },
+  {
+    "featureType": "road.local",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#806b63"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.line",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#dfd2ae"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.line",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#8f7d77"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.line",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#ebe3cd"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.station",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#dfd2ae"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "geometry.fill",
+    "stylers": [
+      {
+        "color": "#b9d3c2"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#92998d"
+      }
+    ]
+  }
+];
 
 const hogspots = [
   { id: 1, image: require('../assets/lulu.jpg') },
@@ -119,22 +334,38 @@ const Discover = () => {
       <Text style={styles.nearbySparksText}>
         <Text style={styles.hogspotSparksText}>Hogspot</Text> Sparks Await Nearby
       </Text>
-        <MapView
-          style={styles.map}
-          initialRegion={{
-            latitude: 9.9312, // Latitude of Kochi
-            longitude: 76.2673, // Longitude of Kochi
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-          }}
-        >
-          {/* Example marker */}
-          <Marker
-            coordinate={{ latitude: 9.9312, longitude: 76.2673 }}
-            title="Kochi"
-            description="Hogspot near you"
-          />
-        </MapView>
+      <MapView
+        style={styles.map}
+        customMapStyle={customMapStyle}
+        initialRegion={{
+          latitude: 10.0258, // Lulu Mall Kochi
+          longitude: 76.3083,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        }}
+      >
+        {/* Marker for Lulu Mall */}
+        <Marker
+          coordinate={{ latitude: 10.0258, longitude: 76.3083 }}
+          title="Lulu Mall, Kochi"
+          description="Geo-fenced Hogspot location"
+        />
+
+        {/* Polygon representing geofence */}
+        <Polygon
+          coordinates={[
+            { latitude: 10.026511, longitude: 76.308768 },
+            { latitude: 10.025846, longitude: 76.308317 },
+            { latitude: 10.026611265359561, longitude: 76.307586290024 },
+            { latitude: 10.028249, longitude: 76.307200 },
+            { latitude: 10.028534092768108, longitude: 76.30835879496146 },
+            { latitude: 10.027266289119712, longitude: 76.30840169468514 }
+          ]}
+          strokeColor="rgba(255, 0, 0, 0.8)"
+          fillColor="rgba(255, 0, 0, 0.2)"
+          strokeWidth={2}
+        />
+      </MapView>
      
       <View style={styles.bottomNavbarContainer}>
         <BottomNavbar currentScreen="discover" />
