@@ -135,7 +135,7 @@ position: 'absolute',
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#fdf7fd',
   },
   heading: {
     fontSize: 28,

@@ -90,27 +90,28 @@ const Discover = () => {
         <Text style={styles.nearYouText}>near you</Text>
       </Text>
       {/* ScrollView with scrollbar hidden */}
-      <ScrollView
-        horizontal
-        style={styles.hogspotScroll}
-        contentContainerStyle={styles.hogspotScrollContent}
-        showsHorizontalScrollIndicator={false} // Hide the scrollbar
-      >
-        {hogspots.map(hogspot => (
-          <View key={hogspot.id} style={styles.hogspotItem}>
-            <ImageBackground source={hogspot.image} style={styles.hogspotImage}>
-              <View style={styles.gradientOverlay} />
-              <View style={styles.hotspotTag}>
-                <Text style={styles.hotspotText}>Hot️‍️‍🔥</Text>
-              </View>
-              <View style={styles.distanceTag}>
-                <Text style={styles.distanceText}>16 km away</Text>
-              </View>
-              <Text style={styles.hogspotTitle}>Lulu, Kochi</Text>
-            </ImageBackground>
-          </View>
-        ))}
-      </ScrollView>
+    
+<ScrollView
+  horizontal
+  style={styles.hogspotScroll}
+  contentContainerStyle={styles.hogspotScrollContent}
+  showsHorizontalScrollIndicator={false} // Hide the scrollbar
+>
+{hogspots.map(hogspot => (
+    <View key={hogspot.id} style={styles.hogspotItem}>
+      <ImageBackground source={hogspot.image} style={styles.hogspotImage}>
+        <View style={styles.gradientOverlay} />
+        <View style={styles.hotspotTag}>
+          <Text style={styles.hotspotText}>Hot️‍️‍🔥</Text>
+        </View>
+        <View style={styles.distanceTag}>
+          <Text style={styles.distanceText}>16 km away</Text>
+        </View>
+        <Text style={styles.hogspotTitle}>Lulu, Kochi</Text>
+      </ImageBackground>
+    </View>
+  ))}
+</ScrollView>
       <Text style={styles.aroundMeText}>Around me</Text>
       <Text style={styles.nearbySparksText}>
         <Text style={styles.hogspotSparksText}>Hogspot</Text> Sparks Await Nearby
@@ -127,6 +128,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: '#F5F5F5',
+    width: '100%',
   },
   header: {
     flexDirection: 'row',
@@ -186,9 +188,10 @@ const styles = StyleSheet.create({
   hogspotScroll: {
     marginTop: 36,
     maxHeight: 180,
+    width:'100%'
   },
   hogspotScrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 0,
   },
   hogspotItem: {
     width: 105,
