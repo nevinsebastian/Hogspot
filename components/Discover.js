@@ -2,6 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, ImageBackground } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import BottomNavbar from '../Things/BottomNavbar';
+import MapView, { Marker } from 'react-native-maps';
+
+
 const locationSvg = `
 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_1354_463)">
@@ -116,6 +119,23 @@ const Discover = () => {
       <Text style={styles.nearbySparksText}>
         <Text style={styles.hogspotSparksText}>Hogspot</Text> Sparks Await Nearby
       </Text>
+        <MapView
+          style={styles.map}
+          initialRegion={{
+            latitude: 9.9312, // Latitude of Kochi
+            longitude: 76.2673, // Longitude of Kochi
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          }}
+        >
+          {/* Example marker */}
+          <Marker
+            coordinate={{ latitude: 9.9312, longitude: 76.2673 }}
+            title="Kochi"
+            description="Hogspot near you"
+          />
+        </MapView>
+     
       <View style={styles.bottomNavbarContainer}>
         <BottomNavbar currentScreen="discover" />
       </View>
@@ -124,11 +144,20 @@ const Discover = () => {
 };
 
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
     padding: 16,
     backgroundColor: '#F5F5F5',
     width: '100%',
+  },  
+  map: {
+    position: 'absolute',
+    top: 454, // Position it at Y: 394
+    left: 18, // Position it at X: 16
+    width: 353, // Set the width
+    height: 354, // Set the height
+    borderRadius: 24, // Corner radius
   },
   header: {
     flexDirection: 'row',
@@ -270,9 +299,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
     color: '#DD88CF',
   },
+  
   bottomNavbarContainer: {
     position: 'absolute',
-        zIndex: 10, // Ensure BottomNavbar is above Swiper
+        zIndex: 10, 
+      
+          left:8, // Set left position to 0
+
       },
 });
 
