@@ -130,6 +130,8 @@ const styles = StyleSheet.create({
   bottomNavbarContainer: {
 position: 'absolute',
     zIndex: 10, // Ensure BottomNavbar is above Swiper
+    left:8, // Set left position to 0
+
   },
 
   container: {
