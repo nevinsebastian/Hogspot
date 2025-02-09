@@ -26,7 +26,7 @@ const App = () => {
           {/* <Stack.Screen name="Register" component={RegisterScreen} /> */}
           {/* <Stack.Screen name="Login" component={LoginScreen} /> */}
           <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Discover" component={Discover} />
+          <Stack.Screen name="Discover" component={Discover}  options={{animationEnabled: false }}/>
 
         </Stack.Navigator>
       </NavigationContainer>
