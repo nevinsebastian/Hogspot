@@ -332,7 +332,7 @@ const Discover = () => {
 </ScrollView>
       <Text style={styles.aroundMeText}>Around me</Text>
       <Text style={styles.nearbySparksText}>
-        <Text style={styles.hogspotSparksText}>Hogspot</Text> Sparks Await Nearby
+        <Text style={styles.hogspotSparksText}>"Hogspot"</Text> Sparks Await Nearby
       </Text>
       <MapView
         style={styles.map}
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
   },  
   map: {
     position: 'absolute',
-    top: 454, // Position it at Y: 394
+    top: 407, // Position it at Y: 394
     left: 18, // Position it at X: 16
     width: 353, // Set the width
     height: 354, // Set the height
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 2,
+    marginTop: 5,
   },
   mainText: {
     fontSize: 24,
@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
     color: '#626262',
   },
   hogspotScroll: {
-    marginTop: 36,
+    marginTop: 32,
     maxHeight: 180,
     width:'100%'
   },
@@ -462,6 +462,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     marginRight: 12,
+    borderWidth: 1, // Add border width
+    borderColor: '#DD88CF', // Set border color
   },
   hogspotImage: {
     width: '100%',
@@ -482,6 +484,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth:1,
+    borderColor:'#DD88CF'
   },
   hotspotText: {
     fontFamily: 'Inter-SemiBold',
@@ -520,14 +524,14 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
     lineHeight: 24,
     color: '#22172A',
-    marginTop: 16,
+    marginTop: 0,
   },
   nearbySparksText: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     lineHeight: 21,
     color: '#6C727F',
-    marginTop: 8,
+    marginTop: 6,
   },
   hogspotSparksText: {
     fontFamily: 'Inter-Medium',
