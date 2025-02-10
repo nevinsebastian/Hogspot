@@ -1,6 +1,18 @@
-import { View, Text ,TouchableOpacity ,StyleSheet} from 'react-native'
+import { View, Text ,TouchableOpacity ,StyleSheet, ImageBackground , FlatList} from 'react-native'
 import BottomNavbar from '../Things/BottomNavbar'
 import { SvgXml } from 'react-native-svg';
+
+
+const users = [
+  { id: '1', name: 'Alice', image: require('../assets/lulu.jpg') },
+  { id: '2', name: 'Bob', image: require('../assets/lulu.jpg') },
+  { id: '3', name: 'Charlie', image: require('../assets/lulu.jpg') },
+  { id: '4', name: 'David', image: require('../assets/lulu.jpg')}, { id: '1', name: 'Alice', image: require('../assets/lulu.jpg') },
+  { id: '2', name: 'Bob', image: require('../assets/lulu.jpg') },
+  { id: '3', name: 'Charlie', image: require('../assets/lulu.jpg') },
+  { id: '4', name: 'David', image: require('../assets/lulu.jpg')},
+];
+
 
 
 const backIcon = `<svg width="48" height="48" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -34,18 +46,43 @@ const filterIconSvg = `
 </defs>
 </svg>
 `
-
 const Match = () => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backIconContainer}>
-        <SvgXml xml={backIcon} style={styles.backIcon} />
-      </TouchableOpacity>
-      <Text style={styles.heading}>Matches</Text>
-      <TouchableOpacity style={styles.filterIconContainer}>
-      <SvgXml xml={filterIconSvg} style={styles.filterIconSvg} />
+      {/* Header */}
+      <View style={styles.header}>
+        {/* Back Icon */}
+        <TouchableOpacity style={[styles.iconContainer, styles.backIconPosition]}>
+          <SvgXml xml={backIcon} style={styles.icon} />
+        </TouchableOpacity>
 
-      </TouchableOpacity>
+        {/* Heading */}
+        <Text style={styles.heading}>Matches</Text>
+
+        {/* Filter Icon */}
+        <TouchableOpacity style={[styles.iconContainer, styles.filterIconPosition]}>
+          <SvgXml xml={filterIconSvg} style={styles.icon} />
+        </TouchableOpacity>
+      </View>
+      <FlatList
+        data={users}
+        horizontal
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.storySection}
+        showsHorizontalScrollIndicator={false}
+        renderItem={({ item }) => (
+          <View style={styles.storyItem}>
+            <View style={styles.storyRing}>
+              {/* Use ImageBackground to blend image and color */}
+              <ImageBackground source={item.image} style={styles.storyImage} imageStyle={{ borderRadius: 28 }}>
+                <View style={styles.imageOverlay} />
+              </ImageBackground>
+            </View>
+            <Text style={styles.userName}>{item.name}</Text>
+          </View>
+        )}
+      />
+      {/* Bottom Navbar */}
       <View style={styles.bottomNavbarContainer}>
         <BottomNavbar currentScreen="match" />
       </View>
@@ -56,46 +93,90 @@ const Match = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: '#fdf7fd',
     width: '100%',
   },
 
-  backIconContainer: {
+  // Header Wrapper
+  header: {
+    position: 'relative', // Allows absolute positioning inside
+    height: 80, // Enough space for icons and title
+    justifyContent: 'center',
+  },
+
+  // Back & Filter Icon Container
+  iconContainer: {
     position: 'absolute',
-    left: 24,  
-    top: 58,   
+    top: 58, // Matches Figma's Y = 58
     width: 40,
-    height: 40, 
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
   },
 
-  backIcon: {
-    width: 24, 
+  // Specific Positioning
+  backIconPosition: {
+    left: 24, // X = 24
+  },
+  filterIconPosition: {
+    left: 319, // X = 319
+  },
+
+  // Back & Filter Icon (Same size)
+  icon: {
+    width: 24,
     height: 24,
   },
+
+  // Heading
   heading: {
     fontSize: 24,
     fontFamily: 'Inter-Bold',
     color: '#22172A',
     position: 'absolute',
-    left: 136,
-    top:66,
-  }, 
-  filterIconContainer: {
-    position: 'absolute',
-    left: 319,  
-    top: 58,   
-    width: 40,
-    height: 40, 
-    justifyContent: 'center',
-    alignItems: 'center',
+    left: 136, // Adjusted for center alignment
+    top: 63, // Matches Figma's Y = 66
   },
-  filterIconSvg:{
-    width: 24, 
-    height: 24,
-  },
+
+    // Story Section
+    storySection: {
+      marginTop: 45,
+      paddingHorizontal: 5,
+    },
+    storyItem: {
+      alignItems: 'center',
+      marginRight: 16,
+    },
+    storyRing: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      borderWidth: 2,
+      borderColor: '#DD88CF',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    storyImage: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      overflow: 'hidden',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    imageOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: '#DD88CF',
+      opacity: 0.2, // This will blend with the image
+      borderRadius: 28,
+    },
+    userName: {
+      marginTop: 4,
+      fontSize: 13,
+      color: '#22172A',
+      fontFamily: 'Inter-Regular',
+    },
+  // Bottom Navbar
   bottomNavbarContainer: {
     position: 'absolute',
     zIndex: 10,
