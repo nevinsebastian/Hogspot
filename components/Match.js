@@ -1,4 +1,4 @@
-import { View, Text ,TouchableOpacity ,StyleSheet, ImageBackground , FlatList} from 'react-native'
+import { View, Text ,TouchableOpacity ,StyleSheet, ImageBackground , FlatList, ScrollView} from 'react-native'
 import BottomNavbar from '../Things/BottomNavbar'
 import { SvgXml } from 'react-native-svg';
 
@@ -46,6 +46,8 @@ const filterIconSvg = `
 </defs>
 </svg>
 `
+
+
 const Match = () => {
   return (
     <View style={styles.container}>
@@ -64,24 +66,36 @@ const Match = () => {
           <SvgXml xml={filterIconSvg} style={styles.icon} />
         </TouchableOpacity>
       </View>
-      <FlatList
-        data={users}
-        horizontal
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.storySection}
-        showsHorizontalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <View style={styles.storyItem}>
-            <View style={styles.storyRing}>
-              {/* Use ImageBackground to blend image and color */}
-              <ImageBackground source={item.image} style={styles.storyImage} imageStyle={{ borderRadius: 28 }}>
-                <View style={styles.imageOverlay} />
-              </ImageBackground>
+
+      {/* Scrollable Content */}
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        {/* Story Section */}
+        <FlatList
+          data={users}
+          horizontal
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.storySection}
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <View style={styles.storyItem}>
+              <View style={styles.storyRing}>
+                <ImageBackground source={item.image} style={styles.storyImage} imageStyle={{ borderRadius: 28 }}>
+                  <View style={styles.imageOverlay} />
+                </ImageBackground>
+              </View>
+              <Text style={styles.userName}>{item.name}</Text>
             </View>
-            <Text style={styles.userName}>{item.name}</Text>
-          </View>
-        )}
-      />
+          )}
+        />
+
+        {/* "Your Matches" Text */}
+        <Text style={styles.subHeading}>
+          <Text style={styles.youMatchText}>Your Matches</Text> 47
+        </Text>
+
+        {/* Other Content Can Be Added Here */}
+      </ScrollView>
+
       {/* Bottom Navbar */}
       <View style={styles.bottomNavbarContainer}>
         <BottomNavbar currentScreen="match" />
@@ -97,91 +111,105 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
+  scrollViewContent: {
+    paddingBottom: 80, // Ensure spacing before bottom navbar
+  },
+
   // Header Wrapper
   header: {
-    position: 'relative', // Allows absolute positioning inside
-    height: 80, // Enough space for icons and title
+    height: 80,
     justifyContent: 'center',
   },
 
-  // Back & Filter Icon Container
   iconContainer: {
     position: 'absolute',
-    top: 58, // Matches Figma's Y = 58
+    top: 58,
     width: 40,
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
   },
 
-  // Specific Positioning
   backIconPosition: {
-    left: 24, // X = 24
+    left: 24,
   },
   filterIconPosition: {
-    left: 319, // X = 319
+    left: 319,
   },
 
-  // Back & Filter Icon (Same size)
   icon: {
     width: 24,
     height: 24,
   },
 
-  // Heading
   heading: {
     fontSize: 24,
     fontFamily: 'Inter-Bold',
     color: '#22172A',
     position: 'absolute',
-    left: 136, // Adjusted for center alignment
-    top: 63, // Matches Figma's Y = 66
+    left: 136,
+    top: 63,
   },
 
-    // Story Section
-    storySection: {
-      marginTop: 45,
-      paddingHorizontal: 5,
-    },
-    storyItem: {
-      alignItems: 'center',
-      marginRight: 16,
-    },
-    storyRing: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      borderWidth: 2,
-      borderColor: '#DD88CF',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    storyImage: {
-      width: 56,
-      height: 56,
-      borderRadius: 28,
-      overflow: 'hidden',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    imageOverlay: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: '#DD88CF',
-      opacity: 0.2, // This will blend with the image
-      borderRadius: 28,
-    },
-    userName: {
-      marginTop: 4,
-      fontSize: 13,
-      color: '#22172A',
-      fontFamily: 'Inter-Regular',
-    },
+  // Story Section
+  storySection: {
+    marginTop: 45,
+    paddingHorizontal: 5,
+  },
+  storyItem: {
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  storyRing: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 2,
+    borderColor: '#DD88CF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  storyImage: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+  },
+  imageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#DD88CF',
+    opacity: 0.2,
+    borderRadius: 28,
+  },
+  userName: {
+    marginTop: 4,
+    fontSize: 13,
+    color: '#22172A',
+    fontFamily: 'Inter-Regular',
+  },
+
+  // "Your Matches" Text
+  subHeading: {
+    fontSize: 20,
+    fontFamily: 'Inter-Bold',
+    color: '#DD88CF',
+    marginTop: 40,
+    marginLeft:16
+  },
+  youMatchText: {
+    fontSize: 20,
+    fontFamily: 'Inter-Bold',
+    lineHeight: 24,
+    color: '#4B164C',
+  },
+
   // Bottom Navbar
   bottomNavbarContainer: {
     position: 'absolute',
-    zIndex: 10,
-    left: 8,
-  },
+        zIndex: 10, 
+      
+          left:8, // Set left position to 0
+
+      },
 });
 
 export default Match;
