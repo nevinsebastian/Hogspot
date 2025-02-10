@@ -75,9 +75,9 @@ const BottomNavbar = ({ currentScreen }) => {
       </TouchableOpacity>
 
       {/* Matches Button */}
-      <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Matches')}>
-        <View style={[styles.iconContainer, currentScreen === 'matches' && styles.activeIconContainer]}>
-          <SvgXml xml={matchesSvg} style={[styles.navIcon, currentScreen === 'matches' && styles.activeNavIcon]} />
+      <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Match')}>
+        <View style={[styles.iconContainer, currentScreen === 'match' && styles.activeIconContainer]}>
+          <SvgXml xml={matchesSvg} style={[styles.navIcon, currentScreen === 'match' && styles.activeNavIcon]} />
         </View>
       </TouchableOpacity>
 

@@ -10,7 +10,7 @@ import VerifyOTPScreen from './components/VerifyOTPScreen';
 import HomeScreen from './components/HomeScreen';
 import LoginScreen from './components/LoginScreen';
 import Discover from './components/Discover';
-
+import Match from './components/Match';
 
 const Stack = createStackNavigator();
 
@@ -27,6 +27,7 @@ const App = () => {
           {/* <Stack.Screen name="Login" component={LoginScreen} /> */}
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Discover" component={Discover}  options={{animationEnabled: false }}/>
+          <Stack.Screen name="Match" component={Match} options={{animationEnabled: false }} />
 
         </Stack.Navigator>
       </NavigationContainer>
