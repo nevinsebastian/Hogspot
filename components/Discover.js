@@ -3,6 +3,28 @@ import { View, Text, StyleSheet, ScrollView, ImageBackground } from 'react-nativ
 import { SvgXml } from 'react-native-svg';
 import BottomNavbar from '../Things/BottomNavbar';
 import MapView, { Marker , Polygon} from 'react-native-maps';
+import * as Location from 'expo-location';
+import * as Linking from 'react-native';
+
+
+const openMaps = async () => {
+  let { status } = await Location.requestForegroundPermissionsAsync();
+  if (status !== 'granted') {
+    alert('Permission to access location was denied');
+    return;
+  }
+
+  let location = await Location.getCurrentPositionAsync({});
+  const { latitude, longitude } = location.coords;
+
+  const destinationLatitude = 10.027319117310457;
+  const destinationLongitude = 76.30801545317772;
+
+  const url = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${destinationLatitude},${destinationLongitude}&travelmode=driving`;
+
+  Linking.openURL(url);
+};
+
 
 
 const locationSvg = `
@@ -289,6 +311,10 @@ const hogspots = [
 ];
 
 const Discover = () => {
+
+  
+
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -346,9 +372,10 @@ const Discover = () => {
       >
         {/* Marker for Lulu Mall */}
         <Marker
-          coordinate={{ latitude: 10.0258, longitude: 76.3083 }}
-          title="Lulu Mall, Kochi"
-          description="Geo-fenced Hogspot location"
+          coordinate={{ latitude: 10.027319117310457, longitude: 76.30801545317772}}
+          title="Lulu Mall, Hogspot"
+          description="Find your Spot"
+          onPress={openMaps}
         />
 
         {/* Polygon representing geofence */}
@@ -379,15 +406,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#fdf7fd',
     width: '100%',
   },  
   map: {
     position: 'absolute',
     top: 407, // Position it at Y: 394
-    left: 18, // Position it at X: 16
-    width: 353, // Set the width
-    height: 354, // Set the height
+    left: 15, // Position it at X: 16
+    width: 359, // Set the width
+    height: 364, // Set the height
     borderRadius: 24, // Corner radius
   },
   header: {
