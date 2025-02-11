@@ -1,17 +1,28 @@
 import { View, Text ,TouchableOpacity ,StyleSheet, ImageBackground , FlatList, ScrollView} from 'react-native'
 import BottomNavbar from '../Things/BottomNavbar'
 import { SvgXml } from 'react-native-svg';
+import { LinearGradient } from 'expo-linear-gradient';
+import { faker } from '@faker-js/faker';
 
 
-const users = [
-  { id: '1', name: 'Alice', image: require('../assets/lulu.jpg') },
-  { id: '2', name: 'Bob', image: require('../assets/lulu.jpg') },
-  { id: '3', name: 'Charlie', image: require('../assets/lulu.jpg') },
-  { id: '4', name: 'David', image: require('../assets/lulu.jpg')}, { id: '1', name: 'Alice', image: require('../assets/lulu.jpg') },
-  { id: '2', name: 'Bob', image: require('../assets/lulu.jpg') },
-  { id: '3', name: 'Charlie', image: require('../assets/lulu.jpg') },
-  { id: '4', name: 'David', image: require('../assets/lulu.jpg')},
-];
+// const users = [
+//   { id: '1', name: 'Alice', image: require('../assets/lulu.jpg') },
+//   { id: '2', name: 'Bob', image: require('../assets/lulu.jpg') },
+//   { id: '3', name: 'Charlie', image: require('../assets/lulu.jpg') },
+//   { id: '4', name: 'David', image: require('../assets/lulu.jpg')}, { id: '1', name: 'Alice', image: require('../assets/lulu.jpg') },
+//   { id: '2', name: 'Bob', image: require('../assets/lulu.jpg') },
+//   { id: '3', name: 'Charlie', image: require('../assets/lulu.jpg') },
+//   { id: '4', name: 'David', image: require('../assets/lulu.jpg')},
+// ];
+const generateUsers = (count) => {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i.toString(),
+    name: faker.person.firstName(),
+    image: { uri: faker.image.avatar() }, // Generates a random avatar
+  }));
+};
+
+const users = generateUsers(10); // Change the number to get more users
 
 
 
@@ -93,7 +104,23 @@ const Match = () => {
           <Text style={styles.youMatchText}>Your Matches</Text> 47
         </Text>
 
-        {/* Other Content Can Be Added Here */}
+           {/* Boxes Section */}
+        <View style={styles.boxesContainer}>
+          {users.slice(0, 4).map((user, index) => (
+            <View key={user.id} style={styles.box}>
+              <LinearGradient
+                colors={['#4B164C', '#4B164C']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={styles.gradient}
+              >
+                <ImageBackground source={user.image} style={styles.boxImage} imageStyle={{ borderRadius: 22 }}>
+                  <View style={styles.boxOverlay} />
+                </ImageBackground>
+              </LinearGradient>
+            </View>
+          ))}
+        </View>
       </ScrollView>
 
       {/* Bottom Navbar */}
@@ -193,7 +220,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
     color: '#DD88CF',
     marginTop: 40,
-    marginLeft:16
+    marginLeft: 16,
   },
   youMatchText: {
     fontSize: 20,
@@ -202,14 +229,42 @@ const styles = StyleSheet.create({
     color: '#4B164C',
   },
 
+  // Boxes Section
+  boxesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between', // Ensures two boxes per row
+    marginTop: 20,
+    marginHorizontal: 16,
+  },
+  box: {
+    width: '48%', // Two boxes per row with 4% spacing
+    height: 224,
+    borderRadius: 22,
+    borderWidth: 2,
+    borderColor: '#DD88CF',
+    overflow: 'hidden',
+    marginBottom: 16, // Space between rows
+  },
+  gradient: {
+    flex: 1,
+  },
+  boxImage: {
+    width: '100%',
+    height: '100%',
+  },
+  boxOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#4B164C',
+    opacity: 0.5,
+  },
+
   // Bottom Navbar
   bottomNavbarContainer: {
     position: 'absolute',
-        zIndex: 10, 
-      
-          left:8, // Set left position to 0
-
-      },
+    zIndex: 10,
+    left: 8,
+  },
 });
 
 export default Match;
