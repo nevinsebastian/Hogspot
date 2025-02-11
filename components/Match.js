@@ -96,23 +96,26 @@ const Match = () => {
           <Text style={styles.youMatchText}>Your Matches</Text> 47
         </Text>
 
-           {/* Boxes Section */}
-        <View style={styles.boxesContainer}>
-          {users.slice(0, 66).map((user, index) => (
-            <View key={user.id} style={styles.box}>
-              <LinearGradient
-                colors={['#4B164C', '#4B164C']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 0, y: 1 }}
-                style={styles.gradient}
-              >
-                <ImageBackground source={user.image} style={styles.boxImage} imageStyle={{ borderRadius: 22 }}>
-                  <View style={styles.boxOverlay} />
-                </ImageBackground>
-              </LinearGradient>
-            </View>
-          ))}
-        </View>
+        {/* Boxes Section */}
+<View style={styles.boxesContainer}>
+  {users.slice(0, 66).map((user, index) => (
+    <View key={user.id} style={styles.box}>
+      <LinearGradient
+        colors={['#4B164C', '#4B164C']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={styles.gradient}
+      >
+        <ImageBackground source={user.image} style={styles.boxImage} imageStyle={{ borderRadius: 22 }}>
+          <View style={styles.boxOverlay} />
+        </ImageBackground>
+      </LinearGradient>
+      {/* User's Name */}
+      <Text style={styles.boxUserName}>{user.name}</Text>
+    </View>
+  ))}
+</View>
+
       </ScrollView>
 
       {/* Bottom Navbar */}
@@ -129,7 +132,32 @@ const styles = StyleSheet.create({
     backgroundColor: '#fdf7fd',
     width: '100%',
   },
-
+  spotedPlace: {
+    position: 'absolute',
+    bottom: 56,
+    left: 45,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 32,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  spotedPlaceText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 11,
+    color: '#FFFFFF',
+    lineHeight: 14,
+  },
+  boxUserName: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 10,
+    color: '#FFFFFF',
+    lineHeight: 14,
+    position: 'absolute',
+    bottom: 8,
+    left: 23,
+  },
   scrollViewContent: {
     paddingBottom: 80, // Ensure spacing before bottom navbar
   },
