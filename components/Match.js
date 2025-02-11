@@ -5,15 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { faker } from '@faker-js/faker';
 
 
-// const users = [
-//   { id: '1', name: 'Alice', image: require('../assets/lulu.jpg') },
-//   { id: '2', name: 'Bob', image: require('../assets/lulu.jpg') },
-//   { id: '3', name: 'Charlie', image: require('../assets/lulu.jpg') },
-//   { id: '4', name: 'David', image: require('../assets/lulu.jpg')}, { id: '1', name: 'Alice', image: require('../assets/lulu.jpg') },
-//   { id: '2', name: 'Bob', image: require('../assets/lulu.jpg') },
-//   { id: '3', name: 'Charlie', image: require('../assets/lulu.jpg') },
-//   { id: '4', name: 'David', image: require('../assets/lulu.jpg')},
-// ];
+
 const generateUsers = (count) => {
   return Array.from({ length: count }, (_, i) => ({
     id: i.toString(),
@@ -106,7 +98,7 @@ const Match = () => {
 
            {/* Boxes Section */}
         <View style={styles.boxesContainer}>
-          {users.slice(0, 4).map((user, index) => (
+          {users.slice(0, 66).map((user, index) => (
             <View key={user.id} style={styles.box}>
               <LinearGradient
                 colors={['#4B164C', '#4B164C']}
@@ -144,7 +136,7 @@ const styles = StyleSheet.create({
 
   // Header Wrapper
   header: {
-    height: 80,
+    height: 110,
     justifyContent: 'center',
   },
 
