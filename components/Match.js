@@ -110,6 +110,10 @@ const Match = () => {
           <View style={styles.boxOverlay} />
         </ImageBackground>
       </LinearGradient>
+      <View style={styles.locationTag}>
+                <Text style={styles.locationText}>Lulu , Kochi</Text>
+              </View>
+
       {/* User's Name */}
       <Text style={styles.boxUserName}>{user.name}</Text>
     </View>
@@ -131,6 +135,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fdf7fd',
     width: '100%',
+  },locationTag: {
+    position: 'absolute',
+    bottom: 46,
+    left: 47,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 32,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  locationText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 11,
+    color: '#FFFFFF',
+    lineHeight: 14,
+
   },
   spotedPlace: {
     position: 'absolute',
@@ -149,7 +170,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     lineHeight: 14,
   },
-  boxUserName: {
+   boxUserName: {
     fontFamily: 'Inter-Bold',
     fontSize: 10,
     color: '#FFFFFF',
