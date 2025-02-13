@@ -11,6 +11,7 @@ import HomeScreen from './components/HomeScreen';
 import LoginScreen from './components/LoginScreen';
 import Discover from './components/Discover';
 import Match from './components/Match';
+import Chat from './components/Chat';
 
 const Stack = createStackNavigator();
 
@@ -28,7 +29,7 @@ const App = () => {
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Discover" component={Discover}  options={{animationEnabled: false }}/>
           <Stack.Screen name="Match" component={Match} options={{animationEnabled: false }} />
-
+          <Stack.Screen name="Chat" component={Chat} options={{animationEnabled: false}}/>
         </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>
