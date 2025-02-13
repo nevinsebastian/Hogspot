@@ -82,9 +82,9 @@ const BottomNavbar = ({ currentScreen }) => {
       </TouchableOpacity>
 
       {/* Messages Button */}
-      <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Messages')}>
-        <View style={[styles.iconContainer, currentScreen === 'messages' && styles.activeIconContainer]}>
-          <SvgXml xml={messagesSvg} style={[styles.navIcon, currentScreen === 'messages' && styles.activeNavIcon]} />
+      <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Chat')}>
+        <View style={[styles.iconContainer, currentScreen === 'chat' && styles.activeIconContainer]}>
+          <SvgXml xml={messagesSvg} style={[styles.navIcon, currentScreen === 'chat' && styles.activeNavIcon]} />
         </View>
       </TouchableOpacity>
     </View>
