@@ -135,7 +135,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fdf7fd',
     width: '100%',
-  },locationTag: {
+  },
+  locationTag: {
     position: 'absolute',
     bottom: 46,
     left: 47,
@@ -145,6 +146,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 0.2,
+    borderColor: '#FFFFFF',
   },
   locationText: {
     fontFamily: 'Inter-Medium',
@@ -153,17 +156,7 @@ const styles = StyleSheet.create({
     lineHeight: 14,
 
   },
-  spotedPlace: {
-    position: 'absolute',
-    bottom: 56,
-    left: 45,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 32,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+ 
   spotedPlaceText: {
     fontFamily: 'Inter-Medium',
     fontSize: 11,
@@ -172,12 +165,13 @@ const styles = StyleSheet.create({
   },
    boxUserName: {
     fontFamily: 'Inter-Bold',
-    fontSize: 10,
+    fontSize: 18,
     color: '#FFFFFF',
     lineHeight: 14,
     position: 'absolute',
-    bottom: 8,
-    left: 23,
+    lineHeight: 22,
+    bottom: 17,
+    left: 58,
   },
   scrollViewContent: {
     paddingBottom: 80, // Ensure spacing before bottom navbar
