@@ -71,7 +71,7 @@ const Match = () => {
       </View>
 
       {/* Scrollable Content */}
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}showsVerticalScrollIndicator={false}>
         {/* Story Section */}
         <FlatList
           data={users}

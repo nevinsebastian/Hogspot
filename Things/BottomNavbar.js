@@ -104,6 +104,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,
     shadowRadius: 40,
+    elevation: 10, // Added for Android
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',

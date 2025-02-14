@@ -1,13 +1,16 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 import BottomNavbar from '../Things/BottomNavbar';
 import { SvgXml } from 'react-native-svg';
+import { faker } from '@faker-js/faker';
 
-const users = [
-  { id: 1, name: 'John Doe', lastMessage: 'Hey, how are you?', time: '10:30 AM', unread: true, profileImage: 'https://via.placeholder.com/56' },
-  { id: 2, name: 'Jane Smith', lastMessage: 'See you soon!', time: '9:15 AM', unread: false, profileImage: 'https://via.placeholder.com/56' },
-  { id: 3, name: 'Alice Johnson', lastMessage: 'Let’s catch up later.', time: '8:45 AM', unread: true, profileImage: 'https://via.placeholder.com/56' },
-];
-
+const users = Array.from({ length: 10 }, (_, id) => ({
+  id,
+  name: faker.person.fullName(),
+  lastMessage: faker.lorem.sentence(),
+  time: faker.date.recent().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  unread: faker.datatype.boolean(),
+  profileImage: faker.image.avatar(),
+}));
 
 
 const backIcon = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -24,8 +27,6 @@ const backIcon = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xm
 
 `
 
-
-
 const Chat = () => {
   return (
     <View style={styles.container}>
@@ -41,8 +42,8 @@ const Chat = () => {
 
       {/* Scrollable Chat List */}
       <View style={styles.chatListContainer}>
-        <ScrollView contentContainerStyle={styles.chatList}>
-          {users.map(user => (
+        <ScrollView contentContainerStyle={styles.chatList} showsVerticalScrollIndicator={false}>
+          {users.slice(0, users.length - 3).map(user => (
             <View key={user.id} style={styles.chatItem}>
               <Image source={{ uri: user.profileImage }} style={styles.profileImage} />
               <View style={styles.chatInfo}>
@@ -98,8 +99,8 @@ const styles = StyleSheet.create({
   },
   chatListContainer: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    borderTopLeftRadius: 36,
+    borderTopRightRadius: 36,
     flex: 1,
     marginTop: 16,
   },
@@ -150,3 +151,5 @@ const styles = StyleSheet.create({
 });
 
 export default Chat;
+
+
