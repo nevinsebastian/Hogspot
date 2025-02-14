@@ -131,7 +131,11 @@ const styles = StyleSheet.create({
 position: 'absolute',
     zIndex: 10, // Ensure BottomNavbar is above Swiper
     left:8, // Set left position to 0
-
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4, // For Android shadow effect
   },
 
   container: {
