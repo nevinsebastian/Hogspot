@@ -3,17 +3,18 @@ import BottomNavbar from '../Things/BottomNavbar'
 import { SvgXml } from 'react-native-svg';
 
 
-const backIcon = `<svg width="38" height="48" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect opacity="0.08" x="0.5" y="0.5" width="39" height="39" rx="19.5" stroke="#22172A"/>
-<g clip-path="url(#clip0_1473_352)">
-<path d="M23 14L17 20L23 26" stroke="#22172A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+const backIcon = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect opacity="0.08" x="0.5" y="0.5" width="39" height="39" rx="19.5" stroke="white"/>
+<g clip-path="url(#clip0_1494_140)">
+<path d="M23 14L17 20L23 26" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </g>
 <defs>
-<clipPath id="clip0_1473_352">
+<clipPath id="clip0_1494_140">
 <rect width="24" height="24" fill="white" transform="translate(8 8)"/>
 </clipPath>
 </defs>
 </svg>
+
 `
 
 
@@ -41,7 +42,7 @@ const Chat = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fdf7fd',
+    backgroundColor: '#4B164C',
     width: '100%',
   },
   header: {
