@@ -1,6 +1,13 @@
-import { View,Text, StyleSheet,TouchableOpacity } from 'react-native'
-import BottomNavbar from '../Things/BottomNavbar'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import BottomNavbar from '../Things/BottomNavbar';
 import { SvgXml } from 'react-native-svg';
+
+const users = [
+  { id: 1, name: 'John Doe', lastMessage: 'Hey, how are you?', time: '10:30 AM', unread: true, profileImage: 'https://via.placeholder.com/56' },
+  { id: 2, name: 'Jane Smith', lastMessage: 'See you soon!', time: '9:15 AM', unread: false, profileImage: 'https://via.placeholder.com/56' },
+  { id: 3, name: 'Alice Johnson', lastMessage: 'Let’s catch up later.', time: '8:45 AM', unread: true, profileImage: 'https://via.placeholder.com/56' },
+];
+
 
 
 const backIcon = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -22,21 +29,38 @@ const backIcon = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xm
 const Chat = () => {
   return (
     <View style={styles.container}>
-       <View style={styles.header}>
-              {/* Back Icon */}
-              <TouchableOpacity style={[styles.iconContainer, styles.backIconPosition]}>
-                <SvgXml xml={backIcon} style={styles.icon} />
-              </TouchableOpacity>
-      
-              {/* Heading */}
-              <Text style={styles.heading}>Messages</Text>
-      
-              {/* Filter Icon */}
-             
+      <View style={styles.header}>
+        {/* Back Icon */}
+        <TouchableOpacity style={[styles.iconContainer, styles.backIconPosition]}>
+          <SvgXml xml={backIcon} style={styles.icon} />
+        </TouchableOpacity>
+
+        {/* Heading */}
+        <Text style={styles.heading}>Messages</Text>
+      </View>
+
+      {/* Scrollable Chat List */}
+      <View style={styles.chatListContainer}>
+        <ScrollView contentContainerStyle={styles.chatList}>
+          {users.map(user => (
+            <View key={user.id} style={styles.chatItem}>
+              <Image source={{ uri: user.profileImage }} style={styles.profileImage} />
+              <View style={styles.chatInfo}>
+                <Text style={styles.name}>{user.name}</Text>
+                <Text style={styles.lastMessage}>{user.lastMessage}</Text>
+              </View>
+              <View style={styles.chatMeta}>
+                <Text style={styles.time}>{user.time}</Text>
+                {user.unread && <View style={styles.unreadDot} />}
+              </View>
             </View>
-        <BottomNavbar currentScreen="chat" />
-        </View>
-  )
+          ))}
+        </ScrollView>
+      </View>
+
+      <BottomNavbar currentScreen="chat" />
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -49,7 +73,6 @@ const styles = StyleSheet.create({
     height: 110,
     justifyContent: 'center',
   },
-
   iconContainer: {
     position: 'absolute',
     top: 58,
@@ -64,20 +87,66 @@ const styles = StyleSheet.create({
   },
   backIconPosition: {
     left: 24,
-  }, heading: {
+  },
+  heading: {
     fontSize: 24,
     fontFamily: 'Inter-Bold',
-    color: '#22172A',
+    color: '#ffffff',
     position: 'absolute',
     left: 136,
-    top:63,},
-  
-  bottomNavbarContainer: {
-    position: 'absolute',
-    zIndex: 10,
-    left: 8,
+    top: 63,
+  },
+  chatListContainer: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    flex: 1,
+    marginTop: 16,
+  },
+  chatList: {
+    paddingVertical: 16,
+  },
+  chatItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  profileImage: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    marginRight: 12,
+  },
+  chatInfo: {
+    flex: 1,
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  lastMessage: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+  },
+  chatMeta: {
+    alignItems: 'flex-end',
+  },
+  time: {
+    fontSize: 12,
+    color: '#999',
+  },
+  unreadDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#DD88CF',
+    marginTop: 4,
   },
 });
 
-
-export default Chat
+export default Chat;
