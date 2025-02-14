@@ -59,8 +59,8 @@ const Chat = () => {
         </ScrollView>
       </View>
 
-      <BottomNavbar currentScreen="chat" />
-    </View>
+      <BottomNavbar style={styles.bottomNavbar} currentScreen="chat" />
+      </View>
   );
 };
 
@@ -69,7 +69,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#4B164C',
     width: '100%',
-  },
+  }, bottomNavbar: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    backgroundColor: '#ffffff',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4, // For Android shadow effect
+    },
   header: {
     height: 110,
     justifyContent: 'center',

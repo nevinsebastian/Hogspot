@@ -566,6 +566,11 @@ const styles = StyleSheet.create({
   },
   
   bottomNavbarContainer: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4, // For Android shadow effect
     position: 'absolute',
         zIndex: 10, 
       
