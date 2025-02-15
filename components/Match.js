@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
 
 
 
-    
+
 
 
     color: '#FFFFFF',
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     left: 58,
   },
   scrollViewContent: {
-    paddingBottom: 80, // Ensure spacing before bottom navbar
+    paddingBottom: 80, // Ensure spacing before bottom 
   },
 
   // Header Wrapper
