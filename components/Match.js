@@ -161,13 +161,15 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
     fontSize: 11,
 
-    
+
     color: '#FFFFFF',
     lineHeight: 14,
   },
    boxUserName: {
     fontFamily: 'Inter-Bold',
     fontSize: 18,
+
+    
     color: '#FFFFFF',
     lineHeight: 14,
     position: 'absolute',
