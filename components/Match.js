@@ -160,6 +160,8 @@ const styles = StyleSheet.create({
   spotedPlaceText: {
     fontFamily: 'Inter-Medium',
     fontSize: 11,
+
+    
     color: '#FFFFFF',
     lineHeight: 14,
   },
