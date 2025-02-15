@@ -169,7 +169,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
     fontSize: 18,
 
+
     
+
     color: '#FFFFFF',
     lineHeight: 14,
     position: 'absolute',
