@@ -170,7 +170,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
 
 
+
     
+
 
     color: '#FFFFFF',
     lineHeight: 14,
