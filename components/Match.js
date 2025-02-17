@@ -180,6 +180,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     bottom: 17,
     left: 58,
+    
   },
   scrollViewContent: {
     paddingBottom: 80, // Ensure spacing before bottom 
