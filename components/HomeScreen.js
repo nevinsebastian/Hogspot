@@ -7,6 +7,9 @@ import Swiper from 'react-native-deck-swiper';
 import BottomNavbar from '../Things/BottomNavbar';
 import { Platform } from 'react-native';
 
+const isInHotspot = false; // Change this to `true` or `false` to test both scenarios
+
+
 
 const element = { width: 100 }; // Ensure width is defined here
 console.log(element.width); // Should work fine
@@ -54,11 +57,9 @@ const cardData = [
     image: require('../assets/sree.jpeg'),
   },
 ];
-
 const HomeScreen = () => {
   const navigation = useNavigation();
   const { width, height } = Dimensions.get('window');
-
 
   const renderCard = (card) => {
     return (
@@ -66,7 +67,7 @@ const HomeScreen = () => {
         <Image source={card.image} style={styles.cardImage} />
         <LinearGradient
           colors={['transparent', 'rgba(75, 22, 76, 0.8)', '#4B164C']}
-          locations={[0, 0.5, 1]} // Adjust gradient stops
+          locations={[0, 0.5, 1]}
           style={styles.gradient}
         >
           <View style={styles.circle}>
@@ -87,10 +88,10 @@ const HomeScreen = () => {
     <View style={styles.container}>
       <Text style={styles.heading}>Hogspot</Text>
       <TouchableOpacity style={styles.notificationButton}>
-  <View style={styles.bellContainer}>
-    <SvgXml xml={bellSvg} width={24} height={24} />
-  </View>
-</TouchableOpacity>
+        <View style={styles.bellContainer}>
+          <SvgXml xml={bellSvg} width={24} height={24} />
+        </View>
+      </TouchableOpacity>
 
       <View style={styles.mainRectangle}>
         <View style={styles.innerRectangle}>
@@ -101,48 +102,42 @@ const HomeScreen = () => {
       <View style={styles.newRectangle}>
         <Image source={require('../assets/profile.jpg')} style={styles.newImage} />
       </View>
-      {/* Swipeable Cards */}
-      <View style={styles.swiperContainer}>
-      <Swiper
-  cards={cardData}
-  renderCard={renderCard}
-  onSwiped={onSwiped}
-  infinite
-  backgroundColor="transparent"
-  cardHorizontalMargin={0}
-  stackSize={3} // Keep 3 cards visible at a time
-  stackSeparation={-30} // Makes the next card more visible
-  animateCardOpacity
-  disableTopSwipe
-  disableBottomSwipe
-  stackAnimationFriction={10} // Reduces delay by making animation snappier
-  stackAnimationTension={60} // Makes stacking more responsive
-  containerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-  cardStyle={{ position: 'absolute' }} // Ensures correct stacking
-/>
 
-
-      </View>
+      {/* Conditional Rendering */}
+      {isInHotspot ? (
+        <View style={styles.swiperContainer}>
+          <Swiper
+            cards={cardData}
+            renderCard={renderCard}
+            onSwiped={onSwiped}
+            infinite
+            backgroundColor="transparent"
+            cardHorizontalMargin={0}
+            stackSize={3}
+            stackSeparation={-30}
+            animateCardOpacity
+            disableTopSwipe
+            disableBottomSwipe
+            stackAnimationFriction={10}
+            stackAnimationTension={60}
+            containerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+            cardStyle={{ position: 'absolute' }}
+          />
+        </View>
+      ) : (
+        <View style={styles.notInHotspotContainer}>
+          <Text style={styles.notInHotspotText}>You are not in a Hogspot</Text>
+        </View>
+      )}
 
       <View style={styles.bottomNavbarContainer}>
         <BottomNavbar currentScreen="home" />
       </View>
-      </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  bottomNavbarContainer: {
-position: 'absolute',
-    zIndex: 10, // Ensure BottomNavbar is above Swiper
-    left:8, // Set left position to 0
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4, // For Android shadow effect
-  },
-
   container: {
     flex: 1,
     padding: 16,
@@ -154,20 +149,19 @@ position: 'absolute',
     color: '#4B164C',
     position: 'absolute',
     left: 16,
-    top: Platform.OS === 'ios' ? 74 : 50, // Adjust for Android
-    zIndex: 10, // Ensure it's above other elements
-    backgroundColor: 'transparent', // Ensure no overlapping background issue
+    top: Platform.OS === 'ios' ? 74 : 50,
+    zIndex: 10,
+    backgroundColor: 'transparent',
   },
-  
-   newImage: {
+  newImage: {
     width: 64.25,
     height: 64.63,
     borderRadius: 30,
-    left:300,
-    top:125,
-    borderWidth: 2, // Add a stroke
-    borderColor: '#DD88CF', // Black color for the stroke
-    },
+    left: 300,
+    top: 125,
+    borderWidth: 2,
+    borderColor: '#DD88CF',
+  },
   notificationButton: {
     width: 48,
     height: 48,
@@ -182,17 +176,11 @@ position: 'absolute',
   bellContainer: {
     width: 48,
     height: 48,
-    borderRadius: 24, // Makes it a circle
-    borderWidth: 1.5, // Adjust stroke width
-    borderColor: '#d1c9c9', // Border color
+    borderRadius: 24,
+    borderWidth: 1.5,
+    borderColor: '#d1c9c9',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  bellIcon: {
-    width: 24,
-    height: 24,
-    color: '#4B164C',
-    
   },
   mainRectangle: {
     position: 'absolute',
@@ -227,7 +215,6 @@ position: 'absolute',
     height: 49,
     borderRadius: 32,
   },
-
   locationText: {
     fontSize: 24,
     fontFamily: 'Inter-Bold',
@@ -239,7 +226,29 @@ position: 'absolute',
     left: 14,
     top: 170,
     width: '100%',
-    height: '0%', // Adjust height to avoid overlapping with BottomNavbar
+    height: '0%',
+  },
+  notInHotspotContainer: {
+    position: 'absolute',
+    left: 14,
+    top: 240,
+    width: 360, // Same as swiperContainer
+    height: 459, // Same as swiperContainer
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#999999',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  notInHotspotText: {
+    fontSize: 18,
+    fontFamily: 'Inter-SemiBold',
+    color: '#4B164C',
   },
   card: {
     borderRadius: 24,
@@ -251,9 +260,9 @@ position: 'absolute',
     shadowOpacity: 0.2,
     shadowRadius: 3,
     overflow: 'hidden',
-    width: 360, // Fixed width to match Figma
-    height: 459, // Matches Figma
-  },  
+    width: 360,
+    height: 459,
+  },
   cardImage: {
     width: '100%',
     height: '100%',
@@ -292,7 +301,7 @@ position: 'absolute',
     fontSize: 14,
     lineHeight: 19.6,
     color: '#FFFFFF',
-    textTransform: 'uppercase', 
+    textTransform: 'uppercase',
   },
   personLocation: {
     position: 'absolute',
@@ -304,10 +313,18 @@ position: 'absolute',
     fontSize: 14,
     lineHeight: 19.6,
     color: '#6C727F',
-    textTransform: 'uppercase', 
-
+    textTransform: 'uppercase',
   },
- 
+  bottomNavbarContainer: {
+    position: 'absolute',
+    zIndex: 10,
+    left: 8,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
+  },
 });
 
 export default HomeScreen;
