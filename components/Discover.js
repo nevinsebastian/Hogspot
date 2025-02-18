@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ImageBackground, Dimensions, Platform } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import BottomNavbar from '../Things/BottomNavbar';
-import MapView, { Marker , Polygon} from 'react-native-maps';
+import MapView, { Marker, Polygon } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as Linking from 'react-native';
 
+const { width, height } = Dimensions.get('window');
 
 const openMaps = async () => {
   let { status } = await Location.requestForegroundPermissionsAsync();
@@ -24,7 +25,6 @@ const openMaps = async () => {
 
   Linking.openURL(url);
 };
-
 
 
 const locationSvg = `
@@ -311,10 +311,6 @@ const hogspots = [
 ];
 
 const Discover = () => {
-
-  
-
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -333,33 +329,33 @@ const Discover = () => {
         <Text style={styles.hogspotText}>Hogspot </Text>
         <Text style={styles.nearYouText}>near you</Text>
       </Text>
-      {/* ScrollView with scrollbar hidden */}
-    
-<ScrollView
-  horizontal
-  style={styles.hogspotScroll}
-  contentContainerStyle={styles.hogspotScrollContent}
-  showsHorizontalScrollIndicator={false} // Hide the scrollbar
->
-{hogspots.map(hogspot => (
-    <View key={hogspot.id} style={styles.hogspotItem}>
-      <ImageBackground source={hogspot.image} style={styles.hogspotImage}>
-        <View style={styles.gradientOverlay} />
-        <View style={styles.hotspotTag}>
-          <Text style={styles.hotspotText}>Hot️‍️‍🔥</Text>
-        </View>
-        <View style={styles.distanceTag}>
-          <Text style={styles.distanceText}>16 km away</Text>
-        </View>
-        <Text style={styles.hogspotTitle}>Lulu, Kochi</Text>
-      </ImageBackground>
-    </View>
-  ))}
-</ScrollView>
+      <ScrollView
+        horizontal
+        style={styles.hogspotScroll}
+        contentContainerStyle={styles.hogspotScrollContent}
+        showsHorizontalScrollIndicator={false}
+      >
+        {hogspots.map(hogspot => (
+          <View key={hogspot.id} style={styles.hogspotItem}>
+            <ImageBackground source={hogspot.image} style={styles.hogspotImage}>
+              <View style={styles.gradientOverlay} />
+              <View style={styles.hotspotTag}>
+                <Text style={styles.hotspotText}>Hot️‍️‍🔥</Text>
+              </View>
+              <View style={styles.distanceTag}>
+                <Text style={styles.distanceText}>16 km away</Text>
+              </View>
+              <Text style={styles.hogspotTitle}>Lulu, Kochi</Text>
+            </ImageBackground>
+          </View>
+        ))}
+      </ScrollView>
       <Text style={styles.aroundMeText}>Around me</Text>
       <Text style={styles.nearbySparksText}>
         <Text style={styles.hogspotSparksText}>"Hogspot"</Text> Sparks Await Nearby
       </Text>
+      <View style={styles.mapContainer}>
+
       <MapView
         style={styles.map}
         customMapStyle={customMapStyle}
@@ -370,15 +366,12 @@ const Discover = () => {
           longitudeDelta: 0.01,
         }}
       >
-        {/* Marker for Lulu Mall */}
         <Marker
-          coordinate={{ latitude: 10.027319117310457, longitude: 76.30801545317772}}
+          coordinate={{ latitude: 10.027319117310457, longitude: 76.30801545317772 }}
           title="Lulu Mall, Hogspot"
           description="Find your Spot"
           onPress={openMaps}
         />
-
-        {/* Polygon representing geofence */}
         <Polygon
           coordinates={[
             { latitude: 10.026511, longitude: 76.308768 },
@@ -393,7 +386,8 @@ const Discover = () => {
           strokeWidth={2}
         />
       </MapView>
-     
+      </View>
+
       <View style={styles.bottomNavbarContainer}>
         <BottomNavbar currentScreen="discover" />
       </View>
@@ -402,20 +396,33 @@ const Discover = () => {
 };
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
     padding: 16,
     backgroundColor: '#fdf7fd',
     width: '100%',
-  },  
+  },
+  mapContainer: {
+    width: width - 32, // Adjust width based on screen width
+    height: height * 0.45, // Adjust height based on screen height
+    borderRadius: 24, // Rounded corners
+    overflow: 'hidden', // Clip content to rounded corners
+    marginTop:15,
+    ...Platform.select({
+      android: {
+        elevation: 4, // Add shadow for Android
+      },
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+      },
+    }),
+  },
   map: {
-    position: 'absolute',
-    top: 407, // Position it at Y: 394
-    left: 15, // Position it at X: 16
-    width: 359, // Set the width
-    height: 364, // Set the height
-    borderRadius: 24, // Corner radius
+    width: '100%',
+    height: '100%',
   },
   header: {
     flexDirection: 'row',
@@ -447,7 +454,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: 'Inter-Bold',
     color: '#22172A',
-    
   },
   iconContainer: {
     flexDirection: 'row',
@@ -455,13 +461,12 @@ const styles = StyleSheet.create({
   searchIcon: {
     width: 24,
     marginRight: 16,
-    marginTop:-13
+    marginTop: -13
   },
   filterIcon: {
     width: 24,
     height: 24,
-    marginTop:-13
-
+    marginTop: -13
   },
   subText: {
     fontSize: 13,
@@ -478,7 +483,7 @@ const styles = StyleSheet.create({
   hogspotScroll: {
     marginTop: 32,
     maxHeight: 180,
-    width:'100%'
+    width: '100%'
   },
   hogspotScrollContent: {
     paddingHorizontal: 0,
@@ -489,8 +494,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     marginRight: 12,
-    borderWidth: 1, // Add border width
-    borderColor: '#DD88CF', // Set border color
+    borderWidth: 1,
+    borderColor: '#DD88CF',
   },
   hogspotImage: {
     width: '100%',
@@ -511,8 +516,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth:1,
-    borderColor:'#DD88CF'
+    borderWidth: 1,
+    borderColor: '#DD88CF'
   },
   hotspotText: {
     fontFamily: 'Inter-SemiBold',
@@ -564,19 +569,16 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
     color: '#DD88CF',
   },
-  
   bottomNavbarContainer: {
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 4, // For Android shadow effect
+    elevation: 4,
     position: 'absolute',
-        zIndex: 10, 
-      
-          left:8, // Set left position to 0
-
-      },
+    zIndex: 10,
+    left: 8,
+  },
 });
 
 export default Discover;

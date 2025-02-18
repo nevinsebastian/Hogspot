@@ -8,6 +8,8 @@ import BottomNavbar from '../Things/BottomNavbar';
 import { Platform } from 'react-native';
 
 
+const element = { width: 100 }; // Ensure width is defined here
+console.log(element.width); // Should work fine
 
 
 const bellSvg = `
