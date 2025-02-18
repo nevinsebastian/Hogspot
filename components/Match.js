@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
 
   },
   scrollViewContent: {
-    paddingBottom: 80, // Ensure spacing before bottom 
+    paddingBottom: 80, //  spacing before bottom 
   },
 
   // Header 
