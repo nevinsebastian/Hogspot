@@ -86,18 +86,18 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Hogspot</Text>
-      <TouchableOpacity style={styles.notificationButton}>
-        <View style={styles.bellContainer}>
-          <SvgXml xml={bellSvg} width={24} height={24} />
-        </View>
-      </TouchableOpacity>
+   
 
             {/* Conditional Rendering for mainRectangle */}
 
      
         {isInHotspot ? (
-          <>
+          <>   <Text style={styles.heading}>Hogspot</Text>
+           <TouchableOpacity style={styles.notificationButton}>
+        <View style={styles.bellContainer}>
+          <SvgXml xml={bellSvg} width={24} height={24} />
+        </View>
+      </TouchableOpacity>
                 <View style={styles.mainRectangle}>
 
             <View style={styles.innerRectangle}>
@@ -106,17 +106,28 @@ const HomeScreen = () => {
             <Text style={styles.locationText}>Lulu, Kochi</Text>
             </View>
 
-          </>
-        ) : (
-        <View style={styles.notInnerContainer}>
-          <Text style={styles.locationText}> Near you</Text>
-          </View>
-        )}
-
-
       <View style={styles.newRectangle}>
         <Image source={require('../assets/profile.jpg')} style={styles.newImage} />
       </View>
+
+          </>
+        ) : (<>
+        <View style={styles.notMainReactangle}>
+           <View style={styles.innerRectangle}>
+           <Image source={require('../assets/profile.jpg')} style={styles.image} />
+            </View>
+          <Text style={styles.notLocationText}> Hogspot Near You</Text>
+          </View>
+          <TouchableOpacity style={styles.notNotificationButton}>
+        <View style={styles.bellContainer}>
+          <SvgXml xml={bellSvg} width={24} height={24} />
+        </View>
+      </TouchableOpacity>
+          </>
+        )}
+
+
+    
 
       {/* Conditional Rendering */}
       {isInHotspot ? (
@@ -188,6 +199,17 @@ const styles = StyleSheet.create({
     right: 16,
     top: 72,
   },
+  notNotificationButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F5F5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    right: 16,
+    top: 79,
+  },
   bellContainer: {
     width: 48,
     height: 48,
@@ -215,20 +237,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 8,
   },
-  notInnerContainer:{
-    position: 'absolute',
-    left: 7,
-    top: 137,
-    width: 288,
-    height: 64,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-  },
+
+notMainReactangle: {
+  position: 'absolute',
+  left: 7,
+  top: 72,
+  width: 288,
+  height: 64,
+  borderRadius: 40,
+  backgroundColor: '#FFDFDF',
+  borderColor: '#DDDFDF',
+  borderWidth: 1,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.2,
+  shadowRadius: 3,
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingHorizontal: 8,
+},
   innerRectangle: {
     width: 57,
     height: 50,
@@ -246,6 +273,12 @@ const styles = StyleSheet.create({
   },
   locationText: {
     fontSize: 28,
+    fontFamily: 'Inter-Bold',
+    color: '#4B164C',
+    lineHeight: 31.2,
+  },
+  notLocationText: {
+    fontSize: 20,
     fontFamily: 'Inter-Bold',
     color: '#4B164C',
     lineHeight: 31.2,
