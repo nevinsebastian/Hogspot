@@ -337,7 +337,7 @@ const Discover = () => {
       >
         {hogspots.map(hogspot => (
           <View key={hogspot.id} style={styles.hogspotItem}>
-            <ImageBackground source={hogspot.image} style={styles.hogspotImage}>
+            <ImageBackground source={hogspot.image} style={styles.hogspotImage} >
               <View style={styles.gradientOverlay} />
               <View style={styles.hotspotTag}>
                 <Text style={styles.hotspotText}>Hot️‍️‍🔥</Text>
@@ -392,6 +392,7 @@ const Discover = () => {
         <BottomNavbar currentScreen="discover" />
       </View>
     </View>
+    
   );
 };
 
