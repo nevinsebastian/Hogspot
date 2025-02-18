@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image ,Dimensions} from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import Swiper from 'react-native-deck-swiper';
 import BottomNavbar from '../Things/BottomNavbar';
+import { Platform } from 'react-native';
 
 
 
@@ -54,6 +55,8 @@ const cardData = [
 
 const HomeScreen = () => {
   const navigation = useNavigation();
+  const { width, height } = Dimensions.get('window');
+
 
   const renderCard = (card) => {
     return (
@@ -145,12 +148,15 @@ position: 'absolute',
   },
   heading: {
     fontSize: 28,
-    fontFamily: 'Inter-Bold',
+    fontFamily: 'inter-bold',
     color: '#4B164C',
     position: 'absolute',
     left: 16,
-    top: 74,
-  }, 
+    top: Platform.OS === 'ios' ? 74 : 50, // Adjust for Android
+    zIndex: 10, // Ensure it's above other elements
+    backgroundColor: 'transparent', // Ensure no overlapping background issue
+  },
+  
    newImage: {
     width: 64.25,
     height: 64.63,
