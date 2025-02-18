@@ -93,12 +93,27 @@ const HomeScreen = () => {
         </View>
       </TouchableOpacity>
 
-      <View style={styles.mainRectangle}>
-        <View style={styles.innerRectangle}>
-          <Image source={require('../assets/lulu.jpg')} style={styles.image} />
-        </View>
-        <Text style={styles.locationText}>Lulu, Kochi</Text>
-      </View>
+            {/* Conditional Rendering for mainRectangle */}
+
+     
+        {isInHotspot ? (
+          <>
+                <View style={styles.mainRectangle}>
+
+            <View style={styles.innerRectangle}>
+              <Image source={require('../assets/lulu.jpg')} style={styles.image} />
+            </View>
+            <Text style={styles.locationText}>Lulu, Kochi</Text>
+            </View>
+
+          </>
+        ) : (
+        <View style={styles.notInnerContainer}>
+          <Text style={styles.locationText}> Near you</Text>
+          </View>
+        )}
+
+
       <View style={styles.newRectangle}>
         <Image source={require('../assets/profile.jpg')} style={styles.newImage} />
       </View>
@@ -200,6 +215,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 8,
   },
+  notInnerContainer:{
+    position: 'absolute',
+    left: 7,
+    top: 137,
+    width: 288,
+    height: 64,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
   innerRectangle: {
     width: 57,
     height: 50,
@@ -216,7 +245,7 @@ const styles = StyleSheet.create({
     borderRadius: 32,
   },
   locationText: {
-    fontSize: 24,
+    fontSize: 28,
     fontFamily: 'Inter-Bold',
     color: '#4B164C',
     lineHeight: 31.2,
