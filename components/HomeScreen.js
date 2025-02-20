@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image ,Dimensions} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image ,Dimensions , FlatList} from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -7,12 +7,20 @@ import Swiper from 'react-native-deck-swiper';
 import BottomNavbar from '../Things/BottomNavbar';
 import { Platform } from 'react-native';
 
+
 const isInHotspot = false; // Change this to `true` or `false` to test both scenarios
 
 
 
 const element = { width: 100 }; // Ensure width is defined here
 console.log(element.width); // Should work fine
+
+const notInHotspotData = [
+  { id: '1', text: 'You are not in a Hogspot' },
+  { id: '2', text: 'You are not in a Hogspot' },
+  { id: '3', text: 'You are not in a Hogspot' },
+  // Add more cards as needed
+];
 
 
 const bellSvg = `
@@ -29,7 +37,13 @@ const bellSvg = `
 </defs>
 </svg>
 `;
-
+const carouselData = [
+  { id: '1', text: 'You are not in a Hogspot' },
+  { id: '2', text: 'Another message' },
+  { id: '3', text: 'Yet another message' },
+  // Add more items as needed
+ ];
+ 
 
 
 const cardData = [
@@ -293,7 +307,7 @@ notMainReactangle: {
   notInHotspotContainer: {
     position: 'absolute',
     left: 14,
-    top: 240,
+    top: 200,
     width: 360, // Same as swiperContainer
     height: 459, // Same as swiperContainer
     justifyContent: 'center',
