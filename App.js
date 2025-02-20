@@ -59,7 +59,7 @@ const App = () => {
         <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="login" component={LoginScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Home" component={HomeScreen} options={{ animationEnabled: false }} />
           <Stack.Screen name="Discover" component={Discover} options={{ animationEnabled: false }} />
           <Stack.Screen name="Match" component={Match} options={{ animationEnabled: false }} />

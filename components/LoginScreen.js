@@ -1,16 +1,49 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { TextInput, Button, Text } from 'react-native-paper'; // Using React Native Paper as an alternative
+import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
+import { TextInput, Button, Text } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    if (username === 'test' && password === 'test') {
-      navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
-    } else {
-      alert('Invalid credentials.');
+  const handleLogin = async () => {
+    if (!username || !password) {
+      Alert.alert('Error', 'Please enter both username and password.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('http://15.206.127.132:8000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Accept: 'application/json',
+        },
+        body: new URLSearchParams({
+          username,
+          password,
+          grant_type: '',
+          scope: '',
+          client_id: '',
+          client_secret: '',
+        }).toString(),
+      });
+
+      const data = await response.json();
+      setLoading(false);
+
+      if (response.ok) {
+        await AsyncStorage.setItem('auth_token', data.access_token);
+        navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+      } else {
+        Alert.alert('Login Failed', data.detail || 'Invalid credentials');
+      }
+    } catch (error) {
+      setLoading(false);
+      Alert.alert('Error', 'Something went wrong. Please try again later.');
     }
   };
 
@@ -21,29 +54,31 @@ const LoginScreen = ({ navigation }) => {
     >
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
         <Text variant="headlineMedium" style={styles.title}>Login</Text>
-        <TextInput 
-          label="Username" 
-          value={username} 
-          onChangeText={setUsername} 
-          style={styles.input} 
-          mode="outlined" 
+        <TextInput
+          label="Username"
+          value={username}
+          onChangeText={setUsername}
+          style={styles.input}
+          mode="outlined"
         />
-        <TextInput 
-          label="Password" 
-          value={password} 
-          onChangeText={setPassword} 
-          secureTextEntry 
-          style={styles.input} 
-          mode="outlined" 
+        <TextInput
+          label="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          style={styles.input}
+          mode="outlined"
         />
-        <Button 
-          mode="contained" 
-          onPress={handleLogin} 
-          buttonColor="#4B164C" 
+        <Button
+          mode="contained"
+          onPress={handleLogin}
+          buttonColor="#4B164C"
           style={styles.button}
           labelStyle={{ color: '#fff' }}
+          loading={loading}
+          disabled={loading}
         >
-          Login
+          {loading ? 'Logging in...' : 'Login'}
         </Button>
       </ScrollView>
     </KeyboardAvoidingView>
