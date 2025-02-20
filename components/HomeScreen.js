@@ -6,9 +6,10 @@ import { useNavigation } from '@react-navigation/native';
 import Swiper from 'react-native-deck-swiper';
 import BottomNavbar from '../Things/BottomNavbar';
 import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
-const isInHotspot = false; // Change this to `true` or `false` to test both scenarios
+const isInHotspot = true; // Change this to `true` or `false` to test both scenarios
 
 
 
@@ -21,6 +22,9 @@ const notInHotspotData = [
   { id: '3', text: 'You are not in a Hogspot' },
   // Add more cards as needed
 ];
+
+
+
 
 
 const bellSvg = `
@@ -74,7 +78,14 @@ const cardData = [
 const HomeScreen = () => {
   const navigation = useNavigation();
   const { width, height } = Dimensions.get('window');
-
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('auth_token');
+      navigation.reset({ index: 0, routes: [{ name: 'Welcome' }] });
+    } catch (error) {
+      console.error('Logout Error:', error);
+    }
+  };
   const renderCard = (card) => {
     return (
       <View style={styles.card}>
@@ -121,15 +132,20 @@ const HomeScreen = () => {
             </View>
 
       <View style={styles.newRectangle}>
+        <TouchableOpacity onPress={handleLogout}>
         <Image source={require('../assets/profile.jpg')} style={styles.newImage} />
+        </TouchableOpacity>
       </View>
 
           </>
         ) : (<>
         <View style={styles.notMainReactangle}>
-           <View style={styles.innerRectangle}>
-           <Image source={require('../assets/profile.jpg')} style={styles.image} />
-            </View>
+          
+      <View style={styles.newRectangle}>
+        <TouchableOpacity onPress={handleLogout}>
+        <Image source={require('../assets/profile.jpg')} style={styles.newImage} />
+        </TouchableOpacity>
+      </View>
           <Text style={styles.notLocationText}> Hogspot Near You</Text>
           </View>
           <TouchableOpacity style={styles.notNotificationButton}>
