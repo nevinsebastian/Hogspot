@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image ,Dimensions , FlatList} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image ,Dimensions , ActivityIndicator} from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -7,7 +7,7 @@ import Swiper from 'react-native-deck-swiper';
 import BottomNavbar from '../Things/BottomNavbar';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import axios from 'axios';
 
 const isInHotspot = true; // Change this to `true` or `false` to test both scenarios
 
@@ -78,6 +78,42 @@ const cardData = [
 const HomeScreen = () => {
   const navigation = useNavigation();
   const { width, height } = Dimensions.get('window');
+  const [hotspotData, setHotspotData] = useState(null);
+  const [otherUsers, setOtherUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchHotspotData();
+  }, []);
+
+  const fetchHotspotData = async () => {
+    try {
+      const token = await AsyncStorage.getItem('auth_token');
+      const response = await fetch('http://15.206.127.132:8000/hotspot/start_swiping', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          latitude: 9.477034,
+          longitude: 76.335839,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.status === 'success') {
+        setHotspotData(data.hotspots[0]);
+        setOtherUsers(data.other_users || []); // Ensure other_users is an array
+      }
+    } catch (error) {
+      console.error('Error fetching hotspot data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem('auth_token');
@@ -86,10 +122,18 @@ const HomeScreen = () => {
       console.error('Logout Error:', error);
     }
   };
+
   const renderCard = (card) => {
+    if (!card) {
+      return null; // Skip rendering if card is undefined
+    }
+
     return (
       <View style={styles.card}>
-        <Image source={card.image} style={styles.cardImage} />
+        <Image
+          source={card.images && card.images.length > 0 ? { uri: card.images[0] } : require('../assets/mish.jpg')}
+          style={styles.cardImage}
+        />
         <LinearGradient
           colors={['transparent', 'rgba(75, 22, 76, 0.8)', '#4B164C']}
           locations={[0, 0.5, 1]}
@@ -99,7 +143,7 @@ const HomeScreen = () => {
             <Text style={styles.starEmoji}>⭐</Text>
           </View>
           <Text style={styles.personName}>{card.name}</Text>
-          <Text style={styles.personLocation}>{card.location}</Text>
+          <Text style={styles.personLocation}>{card.age}</Text>
         </LinearGradient>
       </View>
     );
@@ -109,76 +153,77 @@ const HomeScreen = () => {
     console.log(`Card ${index} swiped`);
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#4B164C" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-   
-
-            {/* Conditional Rendering for mainRectangle */}
-
-     
-        {isInHotspot ? (
-          <>   <Text style={styles.heading}>Hogspot</Text>
-           <TouchableOpacity style={styles.notificationButton}>
-        <View style={styles.bellContainer}>
-          <SvgXml xml={bellSvg} width={24} height={24} />
-        </View>
-      </TouchableOpacity>
-                <View style={styles.mainRectangle}>
-
+      {isInHotspot ? (
+        <>
+          <Text style={styles.heading}>Hogspot</Text>
+          <TouchableOpacity style={styles.notificationButton}>
+            <View style={styles.bellContainer}>
+              <SvgXml xml={bellSvg} width={24} height={24} />
+            </View>
+          </TouchableOpacity>
+          <View style={styles.mainRectangle}>
             <View style={styles.innerRectangle}>
               <Image source={require('../assets/lulu.jpg')} style={styles.image} />
             </View>
-            <Text style={styles.locationText}>Lulu, Kochi</Text>
+            <Text style={styles.locationText}>{hotspotData ? hotspotData.name : 'Loading...'}</Text>
+          </View>
+          <View style={styles.newRectangle}>
+            <TouchableOpacity onPress={handleLogout}>
+              <Image source={require('../assets/profile.jpg')} style={styles.newImage} />
+            </TouchableOpacity>
+          </View>
+        </>
+      ) : (
+        <>
+          <View style={styles.notMainReactangle}>
+            <View style={styles.newRectangle}>
+              <TouchableOpacity onPress={handleLogout}>
+                <Image source={require('../assets/profile.jpg')} style={styles.newImage} />
+              </TouchableOpacity>
             </View>
-
-      <View style={styles.newRectangle}>
-        <TouchableOpacity onPress={handleLogout}>
-        <Image source={require('../assets/profile.jpg')} style={styles.newImage} />
-        </TouchableOpacity>
-      </View>
-
-          </>
-        ) : (<>
-        <View style={styles.notMainReactangle}>
-          
-      <View style={styles.newRectangle}>
-        <TouchableOpacity onPress={handleLogout}>
-        <Image source={require('../assets/profile.jpg')} style={styles.newImage} />
-        </TouchableOpacity>
-      </View>
-          <Text style={styles.notLocationText}> Hogspot Near You</Text>
+            <Text style={styles.notLocationText}>Hogspot Near You</Text>
           </View>
           <TouchableOpacity style={styles.notNotificationButton}>
-        <View style={styles.bellContainer}>
-          <SvgXml xml={bellSvg} width={24} height={24} />
-        </View>
-      </TouchableOpacity>
-          </>
-        )}
+            <View style={styles.bellContainer}>
+              <SvgXml xml={bellSvg} width={24} height={24} />
+            </View>
+          </TouchableOpacity>
+        </>
+      )}
 
-
-    
-
-      {/* Conditional Rendering */}
       {isInHotspot ? (
         <View style={styles.swiperContainer}>
-          <Swiper
-            cards={cardData}
-            renderCard={renderCard}
-            onSwiped={onSwiped}
-            infinite
-            backgroundColor="transparent"
-            cardHorizontalMargin={0}
-            stackSize={3}
-            stackSeparation={-30}
-            animateCardOpacity
-            disableTopSwipe
-            disableBottomSwipe
-            stackAnimationFriction={10}
-            stackAnimationTension={60}
-            containerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-            cardStyle={{ position: 'absolute' }}
-          />
+          {otherUsers.length > 0 ? (
+            <Swiper
+              cards={otherUsers}
+              renderCard={renderCard}
+              onSwiped={onSwiped}
+              infinite
+              backgroundColor="transparent"
+              cardHorizontalMargin={0}
+              stackSize={3}
+              stackSeparation={-30}
+              animateCardOpacity
+              disableTopSwipe
+              disableBottomSwipe
+              stackAnimationFriction={10}
+              stackAnimationTension={60}
+              containerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+              cardStyle={{ position: 'absolute' }}
+            />
+          ) : (
+            <Text style={styles.noUsersText}>No users found in this hotspot.</Text>
+          )}
         </View>
       ) : (
         <View style={styles.notInHotspotContainer}>
@@ -192,6 +237,7 @@ const HomeScreen = () => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
