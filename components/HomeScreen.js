@@ -81,6 +81,7 @@ const HomeScreen = () => {
   const [hotspotData, setHotspotData] = useState(null);
   const [otherUsers, setOtherUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isInHotspot, setIsInHotspot] = useState(false); // State to manage hotspot status
 
   useEffect(() => {
     fetchHotspotData();
@@ -106,6 +107,9 @@ const HomeScreen = () => {
       if (data.status === 'success') {
         setHotspotData(data.hotspots[0]);
         setOtherUsers(data.other_users || []); // Ensure other_users is an array
+        setIsInHotspot(true); // User is in a hotspot
+      } else if (data.status === 'failure') {
+        setIsInHotspot(false); // User is not in a hotspot
       }
     } catch (error) {
       console.error('Error fetching hotspot data:', error);
@@ -238,7 +242,6 @@ const HomeScreen = () => {
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -352,6 +355,7 @@ notMainReactangle: {
     fontFamily: 'Inter-Bold',
     color: '#4B164C',
     lineHeight: 31.2,
+    marginTop:14
   },
   notLocationText: {
     fontSize: 20,
