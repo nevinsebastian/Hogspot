@@ -9,20 +9,11 @@ import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
-const isInHotspot = true; // Change this to `true` or `false` to test both scenarios
 
 
 
 const element = { width: 100 }; // Ensure width is defined here
 console.log(element.width); // Should work fine
-
-const notInHotspotData = [
-  { id: '1', text: 'You are not in a Hogspot' },
-  { id: '2', text: 'You are not in a Hogspot' },
-  { id: '3', text: 'You are not in a Hogspot' },
-  // Add more cards as needed
-];
-
 
 
 
@@ -41,40 +32,10 @@ const bellSvg = `
 </defs>
 </svg>
 `;
-const carouselData = [
-  { id: '1', text: 'You are not in a Hogspot' },
-  { id: '2', text: 'Another message' },
-  { id: '3', text: 'Yet another message' },
-  // Add more items as needed
- ];
- 
 
 
-const cardData = [
-  {
-    id: 1,
-    name: 'Mishell Rose Mathew',
-    location: 'Kochi',
-    image: require('../assets/mish.jpg'),
-  },
-  {
-    id: 2,
-    name: 'Nevin',
-    location: 'Alappuzha',
-    image: require('../assets/nevin.jpg'),
-  },
-  {
-    id: 3,
-    name: 'Bin',
-    location: 'Trivandrum',
-    image: require('../assets/bin.jpg'),
-  }, {
-    id: 4,
-    name: 'Sreejith',
-    location: 'Trivandrum',
-    image: require('../assets/sree.jpeg'),
-  },
-];
+
+
 const HomeScreen = () => {
   const navigation = useNavigation();
   const { width, height } = Dimensions.get('window');
