@@ -126,10 +126,6 @@ const HomeScreen = () => {
       return null;
     }
 
-    // Log the card data for debugging
-    console.log('Card Data:', card);
-
-    // Extract the first image URL from the images array
     const imageUrl = card.images && card.images.length > 0 ? card.images[0].image_url : null;
 
     return (
@@ -154,8 +150,52 @@ const HomeScreen = () => {
     );
   };
 
-  const onSwiped = (index) => {
-    console.log(`Card ${index} swiped`);
+  const onSwiped = async (index, swipeDirection) => {
+    const swipedUser = otherUsers[index];
+    if (!swipedUser) return;
+  
+    const swipeType = swipeDirection === 'right' ? 'right' : 'left';
+  
+    try {
+      const token = await AsyncStorage.getItem('auth_token');
+      const response = await fetch('http://15.206.127.132:8000/swipe/', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          swiped_user_id: swipedUser.id,
+          swipe_type: swipeType,
+        }),
+      });
+  
+      // Log the raw response for debugging
+      const rawResponse = await response.text();
+      console.log('Raw API Response:', rawResponse);
+  
+      // Try to parse the response as JSON
+      let data;
+      try {
+        data = JSON.parse(rawResponse);
+      } catch (jsonError) {
+        console.error('Failed to parse JSON:', jsonError);
+        Alert.alert('Error', 'We ran into an issue. Please try again.');
+        return;
+      }
+  
+      // Check if the response status is 201 (success)
+      if (response.status === 201) {
+        console.log('Swipe recorded successfully:', data.detail);
+      } else {
+        console.error('API Error:', data);
+        Alert.alert('Error', 'We ran into an issue. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error recording swipe:', error);
+      Alert.alert('Error', 'We ran into an issue. Please try again.');
+    }
   };
 
   if (loading) {
@@ -197,7 +237,7 @@ const HomeScreen = () => {
             <View style={styles.newRectangle}>
               <TouchableOpacity onPress={handleLogout}>
                 <Image
-                  source={userInfo?.image_url ? { uri: userInfo.image_url } : require('../assets/profile.jpg')}
+                  source={userInfo?.image_url ? { uri: userInfo.image_url } : require('../assets/profileava.jpg')}
                   style={styles.newImage}
                 />
               </TouchableOpacity>
@@ -218,7 +258,8 @@ const HomeScreen = () => {
             <Swiper
               cards={otherUsers}
               renderCard={renderCard}
-              onSwiped={onSwiped}
+              onSwiped={(index) => onSwiped(index, 'left')} // Swipe left
+              onSwipedRight={(index) => onSwiped(index, 'right')} // Swipe right
               infinite
               backgroundColor="transparent"
               cardHorizontalMargin={0}
@@ -248,6 +289,9 @@ const HomeScreen = () => {
     </View>
   );
 };
+
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
