@@ -44,7 +44,7 @@ const HomeScreen = () => {
   const [isInHotspot, setIsInHotspot] = useState(false);
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
-  const [userInfo, setUserInfo] = useState(null); // State to store user info
+  const [userInfo, setUserInfo] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -57,11 +57,10 @@ const HomeScreen = () => {
       let location = await Location.getCurrentPositionAsync({});
       setLocation(location);
       fetchHotspotData(location.coords.latitude, location.coords.longitude);
-      fetchUserInfo(); // Fetch user info when the component mounts
+      fetchUserInfo();
     })();
   }, []);
 
-  // Fetch user info from the API
   const fetchUserInfo = async () => {
     try {
       const token = await AsyncStorage.getItem('auth_token');
@@ -75,7 +74,7 @@ const HomeScreen = () => {
 
       const data = await response.json();
       if (data) {
-        setUserInfo(data); // Set user info in state
+        setUserInfo(data);
       }
     } catch (error) {
       console.error('Error fetching user info:', error);
@@ -127,10 +126,16 @@ const HomeScreen = () => {
       return null;
     }
 
+    // Log the card data for debugging
+    console.log('Card Data:', card);
+
+    // Extract the first image URL from the images array
+    const imageUrl = card.images && card.images.length > 0 ? card.images[0].image_url : null;
+
     return (
       <View style={styles.card}>
         <Image
-          source={card.images && card.images.length > 0 ? { uri: card.images[0] } : require('../assets/mish.jpg')}
+          source={imageUrl ? { uri: imageUrl } : require('../assets/mish.jpg')}
           style={styles.cardImage}
           onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
         />
@@ -179,7 +184,6 @@ const HomeScreen = () => {
           </View>
           <View style={styles.newRectangle}>
             <TouchableOpacity onPress={handleLogout}>
-              {/* Use the image_url from userInfo if available */}
               <Image
                 source={userInfo?.image_url ? { uri: userInfo.image_url } : require('../assets/profile.jpg')}
                 style={styles.newImage}
@@ -192,7 +196,6 @@ const HomeScreen = () => {
           <View style={styles.notMainReactangle}>
             <View style={styles.newRectangle}>
               <TouchableOpacity onPress={handleLogout}>
-                {/* Use the image_url from userInfo if available */}
                 <Image
                   source={userInfo?.image_url ? { uri: userInfo.image_url } : require('../assets/profile.jpg')}
                   style={styles.newImage}
