@@ -1,7 +1,9 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity,ActivityIndicator } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import BottomNavbar from '../Things/BottomNavbar';
 
 
 const backIcon = `<svg width="48" height="48" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -19,20 +21,55 @@ const backIcon = `<svg width="48" height="48" viewBox="0 0 40 40" fill="none" xm
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
+  const [userInfo, setUserInfo] = useState(null);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const token = await AsyncStorage.getItem('auth_token');
+        const response = await fetch('http://15.206.127.132:8000/users/user-info', {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+        if (data) {
+          setUserInfo(data);
+        }
+      } catch (error) {
+        console.error('Error fetching user info:', error);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
+  if (!userInfo) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#4B164C" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <View style={styles.profileHeader}>
-        <TouchableOpacity style={styles.backIconContainer}  onPress={() => navigation.goBack()} >
+        <TouchableOpacity style={styles.backIconContainer} onPress={() => navigation.goBack()}>
           <SvgXml xml={backIcon} width={40} height={40} />
         </TouchableOpacity>
-        <Image
-          source={require('../assets/profile.jpg')} // Replace with the actual profile image source
-          style={styles.profileImage}
-        />
-        <Text style={styles.name}>Melissa Peters</Text>
-        <Text style={styles.email}>melissa@gmail.com</Text>
-        <Text style={styles.location}>Lagos, Nigeria</Text>
+        <View style={styles.profileImageContainer}>
+          <Image
+            source={{ uri: userInfo.image_url }}
+            style={styles.profileImage}
+          />
+        </View>
+        <Text style={styles.name}>{userInfo.name}</Text>
+        <Text style={styles.email}>{userInfo.email}</Text>
+        <Text style={styles.location}>{userInfo.date_of_birth}</Text>
       </View>
 
       <View style={styles.statsContainer}>
@@ -49,6 +86,42 @@ const ProfileScreen = () => {
       <TouchableOpacity style={styles.editButton}>
         <Text style={styles.editButtonText}>Edit Profile</Text>
       </TouchableOpacity>
+
+      <View style={styles.aboutSection}>
+        <Text style={styles.sectionTitle}>About</Text>
+        <Text style={styles.aboutText}>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+        </Text>
+      </View>
+
+      <View style={styles.line} />
+
+      <View style={styles.photosSection}>
+        <Text style={styles.sectionTitle}>Photos</Text>
+        <View style={styles.photosContainer}>
+          <View style={styles.photoContainer}>
+          <Image
+              source={{ uri: 'https://via.placeholder.com/100' }}
+              style={styles.photo}
+            />
+          </View>
+          <View style={styles.photoContainer}>
+            <Image
+              source={{ uri: 'https://via.placeholder.com/100' }}
+              style={styles.photo}
+            />
+          </View>
+          <View style={styles.photoContainer}>
+            <Image
+              source={{ uri: 'https://via.placeholder.com/100' }}
+              style={styles.photo}
+            />
+          </View>
+        </View>
+      </View>
+      <View style={styles.bottomNavbarContainer}>
+        <BottomNavbar  />
+      </View>
     </View>
   );
 };
@@ -58,6 +131,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     padding: 20,
+  }, bottomNavbarContainer: {
+    position: 'absolute',
+    zIndex: 10,
+    left: 8,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4, // For Android shadow effect
   },
   profileHeader: {
     alignItems: 'center',
@@ -68,13 +150,22 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    zIndex: 1, // Ensure the icon is above other elements
+    zIndex: 1,
+  },
+  profileImageContainer: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    borderWidth: 2,
+    borderColor: '#DD88CF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   profileImage: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    marginBottom: 10,
   },
   name: {
     fontSize: 24,
@@ -111,11 +202,57 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
+    marginBottom: 20,
   },
   editButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  aboutSection: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  aboutText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  line: {
+    height: 1,
+    backgroundColor: '#ddd',
+    marginBottom: 20,
+  },
+  photosSection: {
+    marginBottom: 20,
+  },
+  photosContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  photoContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    elevation: 5, // Drop shadow for Android
+    shadowColor: '#000', // Drop shadow for iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+  },
+  photo: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
