@@ -225,7 +225,7 @@ const HomeScreen = () => {
           <View style={styles.newRectangle}>
             <TouchableOpacity onPress={handleLogout}>
               <Image
-                source={userInfo?.image_url ? { uri: userInfo.image_url } : require('../assets/profile.jpg')}
+                source={userInfo?.image_url ? { uri: userInfo.image_url } : require('../assets/profileava.jpg')}
                 style={styles.newImage}
               />
             </TouchableOpacity>
