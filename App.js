@@ -16,6 +16,7 @@ import LoginScreen from './components/LoginScreen';
 import Discover from './components/Discover';
 import Match from './components/Match';
 import Chat from './components/Chat';
+import ProfileScreen from './components/ProfileScreen';
 
 const Stack = createStackNavigator();
 SplashScreen.preventAutoHideAsync();
@@ -72,6 +73,7 @@ const App = () => {
           <Stack.Screen name="Discover" component={Discover} options={{ animationEnabled: false }} />
           <Stack.Screen name="Match" component={Match} options={{ animationEnabled: false }} />
           <Stack.Screen name="Chat" component={Chat} options={{ animationEnabled: false }} />
+          <Stack.Screen name="ProfileScreen" component={ProfileScreen} options={{ animationEnabled: false }} />
         </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>

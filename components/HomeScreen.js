@@ -7,14 +7,10 @@ import Swiper from 'react-native-deck-swiper';
 import BottomNavbar from '../Things/BottomNavbar';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 import * as Location from 'expo-location';
 
 
 
-
-const element = { width: 100 }; // Ensure width is defined here
-console.log(element.width); // Should work fine
 
 
 
@@ -121,6 +117,10 @@ const HomeScreen = () => {
     }
   };
 
+  const navigateToProfile = () => {
+    navigation.navigate('ProfileScreen'); // Navigate to the Profile screen
+  };
+
   const renderCard = (card) => {
     if (!card) {
       return null;
@@ -223,7 +223,7 @@ const HomeScreen = () => {
             <Text style={styles.locationText}>{hotspotData ? hotspotData.name : 'Loading...'}</Text>
           </View>
           <View style={styles.newRectangle}>
-            <TouchableOpacity onPress={handleLogout}>
+            <TouchableOpacity onPress={navigateToProfile}>
               <Image
                 source={userInfo?.image_url ? { uri: userInfo.image_url } : require('../assets/profileava.jpg')}
                 style={styles.newImage}
@@ -235,7 +235,7 @@ const HomeScreen = () => {
         <>
           <View style={styles.notMainReactangle}>
             <View style={styles.newRectangle}>
-              <TouchableOpacity onPress={handleLogout}>
+              <TouchableOpacity onPress={navigateToProfile}>
                 <Image
                   source={userInfo?.image_url ? { uri: userInfo.image_url } : require('../assets/profileava.jpg')}
                   style={styles.newImage}
