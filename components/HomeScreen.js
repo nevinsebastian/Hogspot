@@ -8,6 +8,7 @@ import BottomNavbar from '../Things/BottomNavbar';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import * as Location from 'expo-location';
 
 
 
@@ -34,21 +35,54 @@ const bellSvg = `
 `;
 
 
-
-
 const HomeScreen = () => {
   const navigation = useNavigation();
   const { width, height } = Dimensions.get('window');
   const [hotspotData, setHotspotData] = useState(null);
   const [otherUsers, setOtherUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isInHotspot, setIsInHotspot] = useState(false); // State to manage hotspot status
+  const [isInHotspot, setIsInHotspot] = useState(false);
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [userInfo, setUserInfo] = useState(null); // State to store user info
 
   useEffect(() => {
-    fetchHotspotData();
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+      fetchHotspotData(location.coords.latitude, location.coords.longitude);
+      fetchUserInfo(); // Fetch user info when the component mounts
+    })();
   }, []);
 
-  const fetchHotspotData = async () => {
+  // Fetch user info from the API
+  const fetchUserInfo = async () => {
+    try {
+      const token = await AsyncStorage.getItem('auth_token');
+      const response = await fetch('http://15.206.127.132:8000/users/user-info', {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (data) {
+        setUserInfo(data); // Set user info in state
+      }
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+    }
+  };
+
+  const fetchHotspotData = async (latitude, longitude) => {
     try {
       const token = await AsyncStorage.getItem('auth_token');
       const response = await fetch('http://15.206.127.132:8000/hotspot/start_swiping', {
@@ -59,18 +93,18 @@ const HomeScreen = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          latitude: 9.477034,
-          longitude: 76.335839,
+          latitude,
+          longitude,
         }),
       });
 
       const data = await response.json();
       if (data.status === 'success') {
         setHotspotData(data.hotspots[0]);
-        setOtherUsers(data.other_users || []); // Ensure other_users is an array
-        setIsInHotspot(true); // User is in a hotspot
+        setOtherUsers(data.other_users || []);
+        setIsInHotspot(true);
       } else if (data.status === 'failure') {
-        setIsInHotspot(false); // User is not in a hotspot
+        setIsInHotspot(false);
       }
     } catch (error) {
       console.error('Error fetching hotspot data:', error);
@@ -90,7 +124,7 @@ const HomeScreen = () => {
 
   const renderCard = (card) => {
     if (!card) {
-      return null; // Skip rendering if card is undefined
+      return null;
     }
 
     return (
@@ -98,6 +132,7 @@ const HomeScreen = () => {
         <Image
           source={card.images && card.images.length > 0 ? { uri: card.images[0] } : require('../assets/mish.jpg')}
           style={styles.cardImage}
+          onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
         />
         <LinearGradient
           colors={['transparent', 'rgba(75, 22, 76, 0.8)', '#4B164C']}
@@ -144,7 +179,11 @@ const HomeScreen = () => {
           </View>
           <View style={styles.newRectangle}>
             <TouchableOpacity onPress={handleLogout}>
-              <Image source={require('../assets/profile.jpg')} style={styles.newImage} />
+              {/* Use the image_url from userInfo if available */}
+              <Image
+                source={userInfo?.image_url ? { uri: userInfo.image_url } : require('../assets/profile.jpg')}
+                style={styles.newImage}
+              />
             </TouchableOpacity>
           </View>
         </>
@@ -153,7 +192,11 @@ const HomeScreen = () => {
           <View style={styles.notMainReactangle}>
             <View style={styles.newRectangle}>
               <TouchableOpacity onPress={handleLogout}>
-                <Image source={require('../assets/profile.jpg')} style={styles.newImage} />
+                {/* Use the image_url from userInfo if available */}
+                <Image
+                  source={userInfo?.image_url ? { uri: userInfo.image_url } : require('../assets/profile.jpg')}
+                  style={styles.newImage}
+                />
               </TouchableOpacity>
             </View>
             <Text style={styles.notLocationText}>Hogspot Near You</Text>
@@ -202,7 +245,6 @@ const HomeScreen = () => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
