@@ -129,7 +129,7 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fdf7fd',
     padding: 20,
   }, bottomNavbarContainer: {
     position: 'absolute',

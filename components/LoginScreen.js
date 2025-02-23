@@ -54,13 +54,17 @@ const LoginScreen = ({ navigation }) => {
     >
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
         <Text variant="headlineMedium" style={styles.title}>Login</Text>
-        <TextInput
-          label="Username"
-          value={username}
-          onChangeText={setUsername}
-          style={styles.input}
-          mode="outlined"
-        />
+      <TextInput
+        label="Email" // Show "Email" as the label
+        value={username}
+        onChangeText={setUsername}
+        style={styles.input}
+        mode="outlined"
+        keyboardType="email-address" // Set keyboard type to email
+        autoCapitalize="none" // Prevent auto-capitalization
+        autoCorrect={false} // Disable auto-correct
+        placeholder="Enter your email" // Optional: Add a placeholder
+      />
         <TextInput
           label="Password"
           value={password}
