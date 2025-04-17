@@ -1,20 +1,9 @@
-import { View, Text ,TouchableOpacity ,StyleSheet, ImageBackground , FlatList, ScrollView} from 'react-native'
+import { View, Text ,TouchableOpacity ,StyleSheet, ImageBackground , FlatList, ScrollView, ActivityIndicator} from 'react-native'
 import BottomNavbar from '../Things/BottomNavbar'
 import { SvgXml } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
-import { faker } from '@faker-js/faker';
-
-
-
-const generateUsers = (count) => {
-  return Array.from({ length: count }, (_, i) => ({
-    id: i.toString(),
-    name: faker.person.firstName(),
-    image: { uri: faker.image.avatar() }, // Generates a random avatar
-  }));
-};
-
-const users = generateUsers(10); // Change the number to get more users
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
@@ -52,6 +41,55 @@ const filterIconSvg = `
 
 
 const Match = () => {
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchMatches();
+  }, []);
+
+  const fetchMatches = async () => {
+    try {
+      const token = await AsyncStorage.getItem('auth_token');
+      const response = await fetch('http://15.206.127.132:8000/matches/', {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch matches');
+      }
+
+      const data = await response.json();
+      setMatches(data);
+    } catch (error) {
+      console.error('Error fetching matches:', error);
+      setError('Failed to load matches');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#4B164C" style={styles.loadingIndicator} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -74,15 +112,19 @@ const Match = () => {
       <ScrollView contentContainerStyle={styles.scrollViewContent}showsVerticalScrollIndicator={false}>
         {/* Story Section */}
         <FlatList
-          data={users}
+          data={matches}
           horizontal
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.storySection}
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
             <View style={styles.storyItem}>
               <View style={styles.storyRing}>
-                <ImageBackground source={item.image} style={styles.storyImage} imageStyle={{ borderRadius: 28 }}>
+                <ImageBackground 
+                  source={{ uri: 'https://via.placeholder.com/150' }} 
+                  style={styles.storyImage} 
+                  imageStyle={{ borderRadius: 28 }}
+                >
                   <View style={styles.imageOverlay} />
                 </ImageBackground>
               </View>
@@ -93,33 +135,34 @@ const Match = () => {
 
         {/* "Your Matches" Text */}
         <Text style={styles.subHeading}>
-          <Text style={styles.youMatchText}>Your Matches</Text> 47
+          <Text style={styles.youMatchText}>Your Matches</Text> {matches.length}
         </Text>
 
         {/* Boxes Section */}
-<View style={styles.boxesContainer}>
-  {users.slice(0, 66).map((user, index) => (
-    <View key={user.id} style={styles.box}>
-      <LinearGradient
-        colors={['#4B164C', '#4B164C']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={styles.gradient}
-      >
-        <ImageBackground source={user.image} style={styles.boxImage} imageStyle={{ borderRadius: 22 }}>
-          <View style={styles.boxOverlay} />
-        </ImageBackground>
-      </LinearGradient>
-      <View style={styles.locationTag}>
-                <Text style={styles.locationText}>Lulu , Kochi</Text>
+        <View style={styles.boxesContainer}>
+          {matches.map((match) => (
+            <View key={match.id} style={styles.box}>
+              <LinearGradient
+                colors={['#4B164C', '#4B164C']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={styles.gradient}
+              >
+                <ImageBackground 
+                  source={{ uri: 'https://via.placeholder.com/150' }} 
+                  style={styles.boxImage} 
+                  imageStyle={{ borderRadius: 22 }}
+                >
+                  <View style={styles.boxOverlay} />
+                </ImageBackground>
+              </LinearGradient>
+              <View style={styles.locationTag}>
+                <Text style={styles.locationText}>Lulu, Kochi</Text>
               </View>
-
-      {/* User's Name */}
-      <Text style={styles.boxUserName}>{user.name}</Text>
-    </View>
-  ))}
-</View>
-
+              <Text style={styles.boxUserName}>{match.name}</Text>
+            </View>
+          ))}
+        </View>
       </ScrollView>
 
       {/* Bottom Navbar */}
@@ -313,6 +356,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 4, // For Android shadow effect
+  },
+  loadingIndicator: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    color: '#FF0000',
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
   },
 });
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image ,Dimensions , ActivityIndicator} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image ,Dimensions , ActivityIndicator, Alert} from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -171,30 +171,19 @@ const HomeScreen = () => {
         }),
       });
   
-      // Log the raw response for debugging
-      const rawResponse = await response.text();
-      console.log('Raw API Response:', rawResponse);
-  
-      // Try to parse the response as JSON
-      let data;
-      try {
-        data = JSON.parse(rawResponse);
-      } catch (jsonError) {
-        console.error('Failed to parse JSON:', jsonError);
-        Alert.alert('Error', 'We ran into an issue. Please try again.');
-        return;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
   
-      // Check if the response status is 201 (success)
-      if (response.status === 201) {
-        console.log('Swipe recorded successfully:', data.detail);
-      } else {
-        console.error('API Error:', data);
-        Alert.alert('Error', 'We ran into an issue. Please try again.');
-      }
+      const data = await response.json();
+      console.log('Swipe recorded successfully:', data);
     } catch (error) {
       console.error('Error recording swipe:', error);
-      Alert.alert('Error', 'We ran into an issue. Please try again.');
+      Alert.alert(
+        'Error',
+        'Failed to record swipe. Please try again.',
+        [{ text: 'OK' }]
+      );
     }
   };
 
@@ -258,8 +247,8 @@ const HomeScreen = () => {
             <Swiper
               cards={otherUsers}
               renderCard={renderCard}
-              onSwiped={(index) => onSwiped(index, 'left')} // Swipe left
-              onSwipedRight={(index) => onSwiped(index, 'right')} // Swipe right
+              onSwiped={(index) => onSwiped(index, 'left')}
+              onSwipedRight={(index) => onSwiped(index, 'right')}
               infinite
               backgroundColor="transparent"
               cardHorizontalMargin={0}
@@ -272,6 +261,13 @@ const HomeScreen = () => {
               stackAnimationTension={60}
               containerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
               cardStyle={{ position: 'absolute' }}
+              cardIndex={0}
+              verticalSwipe={false}
+              horizontalSwipe={true}
+              outputRotationRange={['-8deg', '0deg', '8deg']}
+              onSwipedAll={() => {
+                console.log('All cards swiped');
+              }}
             />
           ) : (
             <Text style={styles.noUsersText}>No users found in this hotspot.</Text>

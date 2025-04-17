@@ -5,7 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Provider as PaperProvider } from 'react-native-paper';
 import * as SplashScreen from 'expo-splash-screen';
-import jwtDecode from 'jwt-decode'; // Import JWT decode library
+import { jwtDecode } from 'jwt-decode'; // Updated import
 
 import WelcomeScreen from './components/WelcomeScreen';
 import RegisterScreen from './components/RegisterScreen';
@@ -31,20 +31,18 @@ const App = () => {
 
       if (token) {
         try {
-          const decodedToken = jwtDecode(token); // Decode JWT token
-          const currentTime = Date.now() / 1000; // Get current time in seconds
-          console.log(jwtDecode);
+          const decodedToken = jwtDecode(token); // Updated usage
+          const currentTime = Date.now() / 1000;
 
           if (decodedToken.exp && decodedToken.exp > currentTime) {
             setIsLoggedIn(true);
           } else {
-            // Token expired, remove it
             await AsyncStorage.removeItem('auth_token');
             setIsLoggedIn(false);
           }
         } catch (error) {
           console.error('Error decoding token:', error);
-          await AsyncStorage.removeItem('auth_token'); // If there's an error, assume invalid token
+          await AsyncStorage.removeItem('auth_token');
           setIsLoggedIn(false);
         }
       } else {
