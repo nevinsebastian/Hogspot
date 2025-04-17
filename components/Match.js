@@ -121,7 +121,7 @@ const Match = () => {
             <View style={styles.storyItem}>
               <View style={styles.storyRing}>
                 <ImageBackground 
-                  source={{ uri: 'https://via.placeholder.com/150' }} 
+                  source={{ uri: 'https://i.pinimg.com/736x/d0/ed/47/d0ed476d90044123b73da39291c05549.jpg' }} 
                   style={styles.storyImage} 
                   imageStyle={{ borderRadius: 28 }}
                 >
@@ -149,7 +149,7 @@ const Match = () => {
                 style={styles.gradient}
               >
                 <ImageBackground 
-                  source={{ uri: 'https://via.placeholder.com/150' }} 
+                  source={{ uri: 'https://i.pinimg.com/736x/d0/ed/47/d0ed476d90044123b73da39291c05549.jpg' }} 
                   style={styles.boxImage} 
                   imageStyle={{ borderRadius: 22 }}
                 >
@@ -182,7 +182,8 @@ const styles = StyleSheet.create({
   locationTag: {
     position: 'absolute',
     bottom: 46,
-    left: 47,
+    left: '56%',
+    transform: [{ translateX: -50 }],
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 32,
     paddingHorizontal: 8,
@@ -211,19 +212,13 @@ const styles = StyleSheet.create({
    boxUserName: {
     fontFamily: 'Inter-Bold',
     fontSize: 18,
-
-
-
-
-
-
     color: '#FFFFFF',
-    lineHeight: 14,
-    position: 'absolute',
     lineHeight: 22,
+    position: 'absolute',
     bottom: 17,
-    left: 58,
-
+    left: '45%',
+    transform: [{ translateX: -50 }],
+    textAlign: 'center',
   },
   scrollViewContent: {
     paddingBottom: 80, //  spacing before bottom 
@@ -325,13 +320,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   box: {
-    width: '48%', // Two boxes per row with 4% spacing
+    width: '48%',
     height: 224,
     borderRadius: 22,
     borderWidth: 2,
     borderColor: '#DD88CF',
     overflow: 'hidden',
-    marginBottom: 16, // Space between rows
+    marginBottom: 16,
+    position: 'relative',
   },
   gradient: {
     flex: 1,
