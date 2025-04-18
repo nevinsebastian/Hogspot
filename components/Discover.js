@@ -441,37 +441,48 @@ const Discover = () => {
         <Text style={styles.hogspotSparksText}>"Hogspot"</Text> Sparks Await Nearby
       </Text>
       <View style={styles.mapContainer}>
+        <MapView
+          style={styles.map}
+          customMapStyle={customMapStyle}
+          initialRegion={{
+            latitude: location?.coords?.latitude || 10.0258,
+            longitude: location?.coords?.longitude || 76.3083,
+            latitudeDelta: 0.1,
+            longitudeDelta: 0.1,
+          }}
+        >
+          {hotspots.map((hotspot) => {
+            // Calculate center point of the polygon
+            const centerLat = hotspot.coordinates.reduce((sum, coord) => sum + coord[0], 0) / hotspot.coordinates.length;
+            const centerLon = hotspot.coordinates.reduce((sum, coord) => sum + coord[1], 0) / hotspot.coordinates.length;
 
-      <MapView
-        style={styles.map}
-        customMapStyle={customMapStyle}
-        initialRegion={{
-          latitude: 10.0258, // Lulu Mall Kochi
-          longitude: 76.3083,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
-      >
-        <Marker
-          coordinate={{ latitude: 10.027319117310457, longitude: 76.30801545317772 }}
-          title="Lulu Mall, Hogspot"
-          description="Find your Spot"
-          onPress={openMaps}
-        />
-        <Polygon
-          coordinates={[
-            { latitude: 10.026511, longitude: 76.308768 },
-            { latitude: 10.025846, longitude: 76.308317 },
-            { latitude: 10.026611265359561, longitude: 76.307586290024 },
-            { latitude: 10.028249, longitude: 76.307200 },
-            { latitude: 10.028534092768108, longitude: 76.30835879496146 },
-            { latitude: 10.027266289119712, longitude: 76.30840169468514 }
-          ]}
-          strokeColor="rgba(255, 0, 0, 0.8)"
-          fillColor="rgba(255, 0, 0, 0.2)"
-          strokeWidth={2}
-        />
-      </MapView>
+            // Convert coordinates to the format required by Polygon
+            const polygonCoordinates = hotspot.coordinates.map(coord => ({
+              latitude: coord[0],
+              longitude: coord[1]
+            }));
+
+            return (
+              <React.Fragment key={hotspot.id}>
+                <Polygon
+                  coordinates={polygonCoordinates}
+                  strokeColor="rgba(221, 136, 207, 0.8)" // Using the app's theme color
+                  fillColor="rgba(221, 136, 207, 0.2)"
+                  strokeWidth={2}
+                />
+                <Marker
+                  coordinate={{
+                    latitude: centerLat,
+                    longitude: centerLon,
+                  }}
+                  title={hotspot.name}
+                  description={hotspot.description}
+                  onPress={openMaps}
+                />
+              </React.Fragment>
+            );
+          })}
+        </MapView>
       </View>
 
       <View style={styles.bottomNavbarContainer}>
