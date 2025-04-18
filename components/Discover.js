@@ -709,7 +709,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 48,
+    marginTop: 58,
   },
   locationIcon: {
     width: 6,
@@ -730,7 +730,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 5,
+    marginTop: -3
   },
   mainText: {
     fontSize: 24,
@@ -751,7 +751,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: 'Inter-SemiBold',
     lineHeight: 16.25,
-    marginTop: -5,
+    marginTop: -18,
   },
   hogspotText: {
     color: '#DD88CF',
@@ -760,7 +760,7 @@ const styles = StyleSheet.create({
     color: '#626262',
   },
   hogspotScroll: {
-    marginTop: 32,
+    marginTop: 28,
     maxHeight: 180,
     width: '100%'
   },

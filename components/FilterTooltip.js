@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     left: 0,
     bottom: 0,
     right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   tooltipContainer: {
     position: 'absolute',
@@ -187,22 +187,22 @@ const styles = StyleSheet.create({
     borderBottomWidth: 8,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderBottomColor: '#FFFFFF',
+    borderBottomColor: '#DBD2DA',
   },
   tooltipContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#DBD2DA',
     borderRadius: 12,
     padding: 12,
     minWidth: 200,
     ...Platform.select({
       android: {
-        elevation: 12,
+        elevation: 16,
       },
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 12,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.3,
+        shadowRadius: 16,
       },
     }),
   },
@@ -216,10 +216,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: '#F0E6F0',
   },
   selectedFilterOption: {
-    backgroundColor: '#F0E6F0',
+    backgroundColor: '#AC8FA3',
   },
   filterOptionContent: {
     flexDirection: 'row',
