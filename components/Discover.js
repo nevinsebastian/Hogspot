@@ -315,6 +315,7 @@ const Discover = () => {
   const [city, setCity] = useState('');
   const [hotspots, setHotspots] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [mapRegion, setMapRegion] = useState(null);
 
   // Function to calculate distance between two points
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -332,6 +333,37 @@ const Discover = () => {
 
   const deg2rad = (deg) => {
     return deg * (Math.PI/180);
+  };
+
+  // Function to calculate map region based on hotspots
+  const calculateMapRegion = (spots) => {
+    if (!spots || spots.length === 0) return null;
+
+    let minLat = Number.MAX_VALUE;
+    let maxLat = Number.MIN_VALUE;
+    let minLon = Number.MAX_VALUE;
+    let maxLon = Number.MIN_VALUE;
+
+    spots.forEach(hotspot => {
+      hotspot.coordinates.forEach(coord => {
+        minLat = Math.min(minLat, coord[0]);
+        maxLat = Math.max(maxLat, coord[0]);
+        minLon = Math.min(minLon, coord[1]);
+        maxLon = Math.max(maxLon, coord[1]);
+      });
+    });
+
+    const centerLat = (minLat + maxLat) / 2;
+    const centerLon = (minLon + maxLon) / 2;
+    const latDelta = (maxLat - minLat) * 2.5; // Increased from 1.5 to 2.5
+    const lonDelta = (maxLon - minLon) * 2.5; // Increased from 1.5 to 2.5
+
+    return {
+      latitude: centerLat,
+      longitude: centerLon,
+      latitudeDelta: latDelta,
+      longitudeDelta: lonDelta,
+    };
   };
 
   useEffect(() => {
@@ -361,7 +393,6 @@ const Discover = () => {
         
         // Calculate distances and add to hotspot data
         const hotspotsWithDistance = data.map(hotspot => {
-          // Get center point of the polygon
           const centerLat = hotspot.coordinates.reduce((sum, coord) => sum + coord[0], 0) / hotspot.coordinates.length;
           const centerLon = hotspot.coordinates.reduce((sum, coord) => sum + coord[1], 0) / hotspot.coordinates.length;
           
@@ -379,6 +410,7 @@ const Discover = () => {
         });
 
         setHotspots(hotspotsWithDistance);
+        setMapRegion(calculateMapRegion(hotspotsWithDistance));
         setLoading(false);
       } catch (error) {
         console.log('Error:', error);
@@ -444,7 +476,7 @@ const Discover = () => {
         <MapView
           style={styles.map}
           customMapStyle={customMapStyle}
-          initialRegion={{
+          initialRegion={mapRegion || {
             latitude: location?.coords?.latitude || 10.0258,
             longitude: location?.coords?.longitude || 76.3083,
             latitudeDelta: 0.1,
