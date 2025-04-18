@@ -85,13 +85,6 @@ const FilterTooltip = ({
         >
           <View style={styles.tooltipArrow} />
           <View style={styles.tooltipContent}>
-            <View style={styles.filterHeader}>
-              <Text style={styles.filterTitle}>Sort by</Text>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                <SvgXml xml={closeIconSvg} style={styles.closeIcon} />
-              </TouchableOpacity>
-            </View>
-            
             <View style={styles.filterOptions}>
               <TouchableOpacity 
                 style={[
@@ -175,12 +168,12 @@ const styles = StyleSheet.create({
     left: 0,
     bottom: 0,
     right: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   tooltipContainer: {
     position: 'absolute',
-    top: 145,
-    right: 15,
+    top: 152,
+    right: 20,
     zIndex: 1000,
   },
   tooltipArrow: {
@@ -194,57 +187,35 @@ const styles = StyleSheet.create({
     borderBottomWidth: 8,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderBottomColor: 'white',
-    transform: [{ rotate: '180deg' }],
+    borderBottomColor: '#FFFFFF',
   },
   tooltipContent: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 16,
-    minWidth: 240,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 12,
+    minWidth: 200,
     ...Platform.select({
       android: {
         elevation: 12,
       },
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.15,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
         shadowRadius: 12,
       },
     }),
   },
-  filterHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  filterTitle: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 16,
-    color: '#4B164C',
-  },
-  closeButton: {
-    padding: 4,
-  },
-  closeIcon: {
-    width: 18,
-    height: 18,
-  },
   filterOptions: {
-    gap: 8,
+    gap: 6,
   },
   filterOption: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
     backgroundColor: '#F8F8F8',
   },
   selectedFilterOption: {
@@ -253,31 +224,31 @@ const styles = StyleSheet.create({
   filterOptionContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
   filterOptionIcon: {
-    width: 18,
-    height: 18,
+    width: 16,
+    height: 16,
   },
   filterOptionText: {
     fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    color: '#4B164C',
+    fontSize: 13,
+    color: '#666666',
   },
   selectedFilterOptionText: {
     color: '#4B164C',
   },
   checkmark: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
     backgroundColor: '#4B164C',
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkmarkIcon: {
-    width: 10,
-    height: 10,
+    width: 8,
+    height: 8,
   },
 });
 
