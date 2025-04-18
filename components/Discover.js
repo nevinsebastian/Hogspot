@@ -335,28 +335,34 @@ const Discover = () => {
     return deg * (Math.PI/180);
   };
 
-  // Function to calculate map region based on hotspots
+  // Function to calculate map region based on nearest hotspot
   const calculateMapRegion = (spots) => {
     if (!spots || spots.length === 0) return null;
 
+    // Find the nearest hotspot
+    const nearestHotspot = spots.reduce((nearest, current) => {
+      return current.distance < nearest.distance ? current : nearest;
+    });
+
+    // Get coordinates of the nearest hotspot
+    const coordinates = nearestHotspot.coordinates;
+    
     let minLat = Number.MAX_VALUE;
     let maxLat = Number.MIN_VALUE;
     let minLon = Number.MAX_VALUE;
     let maxLon = Number.MIN_VALUE;
 
-    spots.forEach(hotspot => {
-      hotspot.coordinates.forEach(coord => {
-        minLat = Math.min(minLat, coord[0]);
-        maxLat = Math.max(maxLat, coord[0]);
-        minLon = Math.min(minLon, coord[1]);
-        maxLon = Math.max(maxLon, coord[1]);
-      });
+    coordinates.forEach(coord => {
+      minLat = Math.min(minLat, coord[0]);
+      maxLat = Math.max(maxLat, coord[0]);
+      minLon = Math.min(minLon, coord[1]);
+      maxLon = Math.max(maxLon, coord[1]);
     });
 
     const centerLat = (minLat + maxLat) / 2;
     const centerLon = (minLon + maxLon) / 2;
-    const latDelta = (maxLat - minLat) * 2.5; // Increased from 1.5 to 2.5
-    const lonDelta = (maxLon - minLon) * 2.5; // Increased from 1.5 to 2.5
+    const latDelta = (maxLat - minLat) * 2.5;
+    const lonDelta = (maxLon - minLon) * 2.5;
 
     return {
       latitude: centerLat,
