@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, ImageBackground, Dimensions, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, ImageBackground, Dimensions, Platform, ActivityIndicator } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import BottomNavbar from '../Things/BottomNavbar';
 import MapView, { Marker, Polygon } from 'react-native-maps';
@@ -311,11 +311,95 @@ const hogspots = [
 ];
 
 const Discover = () => {
+  const [location, setLocation] = useState(null);
+  const [city, setCity] = useState('');
+  const [hotspots, setHotspots] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Function to calculate distance between two points
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Radius of the earth in km
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2); 
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    const distance = R * c; // Distance in km
+    return Math.round(distance);
+  };
+
+  const deg2rad = (deg) => {
+    return deg * (Math.PI/180);
+  };
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Permission to access location was denied');
+        return;
+      }
+
+      try {
+        let location = await Location.getCurrentPositionAsync({});
+        setLocation(location);
+        
+        let geocode = await Location.reverseGeocodeAsync({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude
+        });
+        
+        if (geocode && geocode.length > 0) {
+          setCity(geocode[0].city || geocode[0].subregion || 'Unknown location');
+        }
+
+        // Fetch hotspots
+        const response = await fetch('http://15.206.127.132:8000/hotspot/all');
+        const data = await response.json();
+        
+        // Calculate distances and add to hotspot data
+        const hotspotsWithDistance = data.map(hotspot => {
+          // Get center point of the polygon
+          const centerLat = hotspot.coordinates.reduce((sum, coord) => sum + coord[0], 0) / hotspot.coordinates.length;
+          const centerLon = hotspot.coordinates.reduce((sum, coord) => sum + coord[1], 0) / hotspot.coordinates.length;
+          
+          const distance = calculateDistance(
+            location.coords.latitude,
+            location.coords.longitude,
+            centerLat,
+            centerLon
+          );
+
+          return {
+            ...hotspot,
+            distance
+          };
+        });
+
+        setHotspots(hotspotsWithDistance);
+        setLoading(false);
+      } catch (error) {
+        console.log('Error:', error);
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#4B164C" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <SvgXml xml={locationSvg} style={styles.locationIcon} />
-        <Text style={styles.locationText}>Kochi</Text>
+        <Text style={styles.locationText}>{city || 'Loading...'}</Text>
         <SvgXml xml={otherIconSvg} style={styles.otherIcon} />
       </View>
       <View style={styles.mainTextContainer}>
@@ -335,17 +419,19 @@ const Discover = () => {
         contentContainerStyle={styles.hogspotScrollContent}
         showsHorizontalScrollIndicator={false}
       >
-        {hogspots.map(hogspot => (
-          <View key={hogspot.id} style={styles.hogspotItem}>
-            <ImageBackground source={hogspot.image} style={styles.hogspotImage} >
+        {hotspots.map(hotspot => (
+          <View key={hotspot.id} style={styles.hogspotItem}>
+            <ImageBackground source={require('../assets/lulu.jpg')} style={styles.hogspotImage}>
               <View style={styles.gradientOverlay} />
               <View style={styles.hotspotTag}>
                 <Text style={styles.hotspotText}>Hot️‍️‍🔥</Text>
               </View>
               <View style={styles.distanceTag}>
-                <Text style={styles.distanceText}>16 km away</Text>
+                <Text style={styles.distanceText}>{hotspot.distance} km away</Text>
               </View>
-              <Text style={styles.hogspotTitle}>Lulu, Kochi</Text>
+              <Text style={styles.hogspotTitle} numberOfLines={1}>
+                {hotspot.name.split(' ')[0].substring(0, 12)}
+              </Text>
             </ImageBackground>
           </View>
         ))}
@@ -528,7 +614,7 @@ const styles = StyleSheet.create({
   },
   distanceTag: {
     position: 'absolute',
-    bottom: 26,
+    bottom: 40,
     left: 15,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 32,
@@ -549,8 +635,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     lineHeight: 14,
     position: 'absolute',
-    bottom: 8,
-    left: 23,
+    bottom: 15,
+    left: 15,
+    right: 15,
+    textAlign: 'center',
+    paddingRight: 10,
+    numberOfLines: 1,
   },
   aroundMeText: {
     fontSize: 20,
