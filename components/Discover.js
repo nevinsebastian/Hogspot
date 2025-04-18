@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, ImageBackground, Dimensions, Platform, ActivityIndicator, Linking, Modal, TouchableOpacity } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import BottomNavbar from '../Things/BottomNavbar';
@@ -322,6 +322,7 @@ const Discover = () => {
   const [mapRegion, setMapRegion] = useState(null);
   const [selectedHotspot, setSelectedHotspot] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const mapRef = useRef(null);
 
   // Function to calculate distance between two points
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -376,6 +377,34 @@ const Discover = () => {
       latitudeDelta: latDelta,
       longitudeDelta: lonDelta,
     };
+  };
+
+  // Function to zoom to a specific hotspot
+  const zoomToHotspot = (hotspot) => {
+    const centerLat = hotspot.coordinates.reduce((sum, coord) => sum + coord[0], 0) / hotspot.coordinates.length;
+    const centerLon = hotspot.coordinates.reduce((sum, coord) => sum + coord[1], 0) / hotspot.coordinates.length;
+
+    let minLat = Number.MAX_VALUE;
+    let maxLat = Number.MIN_VALUE;
+    let minLon = Number.MAX_VALUE;
+    let maxLon = Number.MIN_VALUE;
+
+    hotspot.coordinates.forEach(coord => {
+      minLat = Math.min(minLat, coord[0]);
+      maxLat = Math.max(maxLat, coord[0]);
+      minLon = Math.min(minLon, coord[1]);
+      maxLon = Math.max(maxLon, coord[1]);
+    });
+
+    const latDelta = (maxLat - minLat) * 2.5;
+    const lonDelta = (maxLon - minLon) * 2.5;
+
+    mapRef.current?.animateToRegion({
+      latitude: centerLat,
+      longitude: centerLon,
+      latitudeDelta: latDelta,
+      longitudeDelta: lonDelta,
+    }, 1000);
   };
 
   useEffect(() => {
@@ -476,7 +505,11 @@ const Discover = () => {
         showsHorizontalScrollIndicator={false}
       >
         {hotspots.map(hotspot => (
-          <View key={hotspot.id} style={styles.hogspotItem}>
+          <TouchableOpacity 
+            key={hotspot.id} 
+            style={styles.hogspotItem}
+            onPress={() => zoomToHotspot(hotspot)}
+          >
             <ImageBackground source={require('../assets/lulu.jpg')} style={styles.hogspotImage}>
               <View style={styles.gradientOverlay} />
               <View style={styles.hotspotTag}>
@@ -489,7 +522,7 @@ const Discover = () => {
                 {hotspot.name.split(' ')[0].substring(0, 12)}
               </Text>
             </ImageBackground>
-          </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
       <Text style={styles.aroundMeText}>Around me</Text>
@@ -498,6 +531,7 @@ const Discover = () => {
       </Text>
       <View style={styles.mapContainer}>
         <MapView
+          ref={mapRef}
           style={styles.map}
           customMapStyle={customMapStyle}
           initialRegion={mapRegion || {
