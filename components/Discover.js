@@ -1,29 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, ImageBackground, Dimensions, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ImageBackground, Dimensions, Platform, ActivityIndicator, Linking } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import BottomNavbar from '../Things/BottomNavbar';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import * as Location from 'expo-location';
-import * as Linking from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
-const openMaps = async () => {
-  let { status } = await Location.requestForegroundPermissionsAsync();
-  if (status !== 'granted') {
-    alert('Permission to access location was denied');
-    return;
+const openMaps = async (hotspot) => {
+  try {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Permission to access location was denied');
+      return;
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+    const { latitude, longitude } = location.coords;
+
+    // Calculate center point of the hotspot
+    const centerLat = hotspot.coordinates.reduce((sum, coord) => sum + coord[0], 0) / hotspot.coordinates.length;
+    const centerLon = hotspot.coordinates.reduce((sum, coord) => sum + coord[1], 0) / hotspot.coordinates.length;
+
+    const url = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${centerLat},${centerLon}&travelmode=driving`;
+
+    Linking.openURL(url);
+  } catch (error) {
+    console.log('Error opening maps:', error);
   }
-
-  let location = await Location.getCurrentPositionAsync({});
-  const { latitude, longitude } = location.coords;
-
-  const destinationLatitude = 10.027319117310457;
-  const destinationLongitude = 76.30801545317772;
-
-  const url = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${destinationLatitude},${destinationLongitude}&travelmode=driving`;
-
-  Linking.openURL(url);
 };
 
 
@@ -490,11 +494,9 @@ const Discover = () => {
           }}
         >
           {hotspots.map((hotspot) => {
-            // Calculate center point of the polygon
             const centerLat = hotspot.coordinates.reduce((sum, coord) => sum + coord[0], 0) / hotspot.coordinates.length;
             const centerLon = hotspot.coordinates.reduce((sum, coord) => sum + coord[1], 0) / hotspot.coordinates.length;
 
-            // Convert coordinates to the format required by Polygon
             const polygonCoordinates = hotspot.coordinates.map(coord => ({
               latitude: coord[0],
               longitude: coord[1]
@@ -504,7 +506,7 @@ const Discover = () => {
               <React.Fragment key={hotspot.id}>
                 <Polygon
                   coordinates={polygonCoordinates}
-                  strokeColor="rgba(221, 136, 207, 0.8)" // Using the app's theme color
+                  strokeColor="rgba(221, 136, 207, 0.8)"
                   fillColor="rgba(221, 136, 207, 0.2)"
                   strokeWidth={2}
                 />
@@ -515,8 +517,14 @@ const Discover = () => {
                   }}
                   title={hotspot.name}
                   description={hotspot.description}
-                  onPress={openMaps}
-                />
+                  onPress={() => openMaps(hotspot)}
+                >
+                  <View style={styles.markerContainer}>
+                    <View style={styles.markerContent}>
+                      <Text style={styles.markerText}>{hotspot.name}</Text>
+                    </View>
+                  </View>
+                </Marker>
               </React.Fragment>
             );
           })}
@@ -718,6 +726,22 @@ const styles = StyleSheet.create({
     position: 'absolute',
     zIndex: 10,
     left: 8,
+  },
+  markerContainer: {
+    alignItems: 'center',
+  },
+  markerContent: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#DD88CF',
+  },
+  markerText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 12,
+    color: '#4B164C',
   },
 });
 
