@@ -4,6 +4,7 @@ import { SvgXml } from 'react-native-svg';
 import BottomNavbar from '../Things/BottomNavbar';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import * as Location from 'expo-location';
+import FilterTooltip from './FilterTooltip';
 
 const { width, height } = Dimensions.get('window');
 
@@ -88,6 +89,35 @@ const filterIconSvg = `
 </defs>
 </svg>
 `;
+
+const closeIconSvg = `
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M18 6L6 18" stroke="#4B164C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M6 6L18 18" stroke="#4B164C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;
+
+const nearestIconSvg = `
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2Z" stroke="#4B164C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M12 11.5C13.3807 11.5 14.5 10.3807 14.5 9C14.5 7.61929 13.3807 6.5 12 6.5C10.6193 6.5 9.5 7.61929 9.5 9C9.5 10.3807 10.6193 11.5 12 11.5Z" stroke="#4B164C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;
+
+const trendingIconSvg = `
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M23 6L13.5 15.5L8.5 10.5L1 18" stroke="#4B164C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M17 6H23V12" stroke="#4B164C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;
+
+const oldestIconSvg = `
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 8V12L15 15" stroke="#4B164C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#4B164C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;
+
 const customMapStyle = [
   {
     "elementType": "geometry",
@@ -322,6 +352,8 @@ const Discover = () => {
   const [mapRegion, setMapRegion] = useState(null);
   const [selectedHotspot, setSelectedHotspot] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [sortBy, setSortBy] = useState('nearest');
   const mapRef = useRef(null);
 
   // Function to calculate distance between two points
@@ -407,6 +439,23 @@ const Discover = () => {
     }, 1000);
   };
 
+  // Function to sort hotspots
+  const sortHotspots = (hotspots, sortType) => {
+    switch (sortType) {
+      case 'nearest':
+        return [...hotspots].sort((a, b) => a.distance - b.distance);
+      case 'trending':
+        // For trending, we'll sort by distance but in reverse (farthest first)
+        // You can replace this with actual trending logic when available
+        return [...hotspots].sort((a, b) => b.distance - a.distance);
+      case 'oldest':
+        // For oldest, we'll sort by ID (assuming lower IDs are older)
+        return [...hotspots].sort((a, b) => a.id - b.id);
+      default:
+        return hotspots;
+    }
+  };
+
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -489,9 +538,22 @@ const Discover = () => {
       </View>
       <View style={styles.mainTextContainer}>
         <Text style={styles.mainText}>Discover</Text>
-        <View style={styles.iconContainer}>
-          <SvgXml xml={searchIconSvg} style={styles.searchIcon} />
-          <SvgXml xml={filterIconSvg} style={styles.filterIcon} />
+        <View style={styles.filterContainer}>
+          <TouchableOpacity 
+            style={styles.filterButton}
+            onPress={() => setShowFilterModal(!showFilterModal)}
+          >
+            <SvgXml xml={filterIconSvg} style={styles.filterIcon} />
+          </TouchableOpacity>
+          
+          <FilterTooltip
+            visible={showFilterModal}
+            onClose={() => setShowFilterModal(false)}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            hotspots={hotspots}
+            setHotspots={setHotspots}
+          />
         </View>
       </View>
       <Text style={styles.subText}>
@@ -675,18 +737,15 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
     color: '#22172A',
   },
-  iconContainer: {
-    flexDirection: 'row',
+  filterContainer: {
+    position: 'relative',
   },
-  searchIcon: {
-    width: 24,
-    marginRight: 16,
-    marginTop: -13
+  filterButton: {
+    padding: 8,
   },
   filterIcon: {
     width: 24,
     height: 24,
-    marginTop: -13
   },
   subText: {
     fontSize: 13,
