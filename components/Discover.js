@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, ImageBackground, Dimensions, Platform, ActivityIndicator, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ImageBackground, Dimensions, Platform, ActivityIndicator, Linking, Modal, TouchableOpacity } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import BottomNavbar from '../Things/BottomNavbar';
 import MapView, { Marker, Polygon } from 'react-native-maps';
@@ -320,6 +320,8 @@ const Discover = () => {
   const [hotspots, setHotspots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mapRegion, setMapRegion] = useState(null);
+  const [selectedHotspot, setSelectedHotspot] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   // Function to calculate distance between two points
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -429,6 +431,18 @@ const Discover = () => {
     })();
   }, []);
 
+  const handleMarkerPress = (hotspot) => {
+    setSelectedHotspot(hotspot);
+    setShowModal(true);
+  };
+
+  const handleNavigation = async () => {
+    if (selectedHotspot) {
+      await openMaps(selectedHotspot);
+      setShowModal(false);
+    }
+  };
+
   if (loading) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
@@ -517,7 +531,7 @@ const Discover = () => {
                   }}
                   title={hotspot.name}
                   description={hotspot.description}
-                  onPress={() => openMaps(hotspot)}
+                  onPress={() => handleMarkerPress(hotspot)}
                 >
                   <View style={styles.markerContainer}>
                     <View style={styles.markerContent}>
@@ -534,6 +548,34 @@ const Discover = () => {
       <View style={styles.bottomNavbarContainer}>
         <BottomNavbar currentScreen="discover" />
       </View>
+
+      <Modal
+        visible={showModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Navigate to {selectedHotspot?.name}?</Text>
+            <Text style={styles.modalDescription}>{selectedHotspot?.description}</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.cancelButton]} 
+                onPress={() => setShowModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.navigateButton]} 
+                onPress={handleNavigation}
+              >
+                <Text style={styles.navigateButtonText}>Navigate</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
     
   );
@@ -742,6 +784,61 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
     fontSize: 12,
     color: '#4B164C',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 18,
+    color: '#4B164C',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  modalDescription: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 14,
+    color: '#626262',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  modalButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#F5F5F5',
+  },
+  navigateButton: {
+    backgroundColor: '#4B164C',
+  },
+  cancelButtonText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    color: '#626262',
+  },
+  navigateButtonText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    color: '#FFFFFF',
   },
 });
 
