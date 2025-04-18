@@ -1,24 +1,10 @@
-import { View, Text ,TouchableOpacity ,StyleSheet, ImageBackground , FlatList, ScrollView, ActivityIndicator} from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, FlatList, ScrollView, ActivityIndicator } from 'react-native'
 import BottomNavbar from '../Things/BottomNavbar'
 import { SvgXml } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-
-
-const backIcon = `<svg width="48" height="48" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect opacity="0.08" x="0.5" y="0.5" width="39" height="39" rx="19.5" stroke="#22172A"/>
-<g clip-path="url(#clip0_1473_352)">
-<path d="M23 14L17 20L23 26" stroke="#22172A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</g>
-<defs>
-<clipPath id="clip0_1473_352">
-<rect width="24" height="24" fill="white" transform="translate(8 8)"/>
-</clipPath>
-</defs>
-</svg>
-`
+import MatchFilterTooltip from './MatchFilterTooltip';
 
 const filterIconSvg = `
 <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -39,11 +25,12 @@ const filterIconSvg = `
 </svg>
 `
 
-
 const Match = () => {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
     fetchMatches();
@@ -94,22 +81,20 @@ const Match = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        {/* Back Icon */}
-        <TouchableOpacity style={[styles.iconContainer, styles.backIconPosition]}>
-          <SvgXml xml={backIcon} style={styles.icon} />
-        </TouchableOpacity>
-
         {/* Heading */}
         <Text style={styles.heading}>Matches</Text>
 
         {/* Filter Icon */}
-        <TouchableOpacity style={[styles.iconContainer, styles.filterIconPosition]}>
+        <TouchableOpacity 
+          style={[styles.iconContainer, styles.filterIconPosition]}
+          onPress={() => setShowFilterModal(true)}
+        >
           <SvgXml xml={filterIconSvg} style={styles.icon} />
         </TouchableOpacity>
       </View>
 
       {/* Scrollable Content */}
-      <ScrollView contentContainerStyle={styles.scrollViewContent}showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollViewContent} showsVerticalScrollIndicator={false}>
         {/* Story Section */}
         <FlatList
           data={matches}
@@ -165,6 +150,16 @@ const Match = () => {
         </View>
       </ScrollView>
 
+      {/* Filter Tooltip */}
+      <MatchFilterTooltip
+        visible={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        matches={matches}
+        setMatches={setMatches}
+      />
+
       {/* Bottom Navbar */}
       <View style={styles.bottomNavbarContainer}>
         <BottomNavbar currentScreen="match" />
@@ -198,18 +193,14 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#FFFFFF',
     lineHeight: 14,
-
   },
- 
   spotedPlaceText: {
     fontFamily: 'Inter-Medium',
     fontSize: 11,
-
-
     color: '#FFFFFF',
     lineHeight: 14,
   },
-   boxUserName: {
+  boxUserName: {
     fontFamily: 'Inter-Bold',
     fontSize: 18,
     color: '#FFFFFF',
@@ -221,15 +212,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   scrollViewContent: {
-    paddingBottom: 80, //  spacing before bottom 
+    paddingBottom: 80,
   },
-
-  // Header 
   header: {
     height: 110,
     justifyContent: 'center',
   },
-
   iconContainer: {
     position: 'absolute',
     top: 58,
@@ -238,31 +226,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
-  backIconPosition: {
-    left: 24,
-  },
   filterIconPosition: {
-    left: 319,
+    right: 24,
   },
-
   icon: {
     width: 24,
     height: 24,
   },
-
   heading: {
     fontSize: 24,
     fontFamily: 'Inter-Bold',
     color: '#22172A',
     position: 'absolute',
-    left: 136,
+    left: 140,
     top: 63,
   },
-
-  // Story Section
   storySection: {
-    marginTop: 45,
+    marginTop: 25,
     paddingHorizontal: 5,
   },
   storyItem: {
@@ -295,8 +275,6 @@ const styles = StyleSheet.create({
     color: '#22172A',
     fontFamily: 'Inter-Regular',
   },
-
-  // "Your Matches" Text
   subHeading: {
     fontSize: 20,
     fontFamily: 'Inter-Bold',
@@ -310,12 +288,10 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     color: '#4B164C',
   },
-
-  // Boxes Section
   boxesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between', // Ensures two boxes per row
+    justifyContent: 'space-between',
     marginTop: 20,
     marginHorizontal: 16,
   },
@@ -341,8 +317,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#4B164C',
     opacity: 0.5,
   },
-
-  // Bottom Navbar
   bottomNavbarContainer: {
     position: 'absolute',
     zIndex: 10,
@@ -351,7 +325,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 4, // For Android shadow effect
+    elevation: 4,
   },
   loadingIndicator: {
     flex: 1,
