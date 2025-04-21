@@ -1,13 +1,26 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert, TouchableOpacity, SafeAreaView, Dimensions } from 'react-native';
 import { TextInput, Button, Text, Checkbox, HelperText } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { isValidEmail } from '../utils/emailValidator';
 
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Define theme colors
+const THEME = {
+  primary: '#DD88CF',
+  primaryDark: '#4B164C',
+  background: '#FDF7FD',
+  inputBackground: '#dcdcdc',
+  text: '#2D2D2D',
+  placeholder: '#999999',
+};
+
 const RegisterScreen = ({ navigation }) => {
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [showFullForm, setShowFullForm] = useState(false);
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
@@ -23,15 +36,18 @@ const RegisterScreen = ({ navigation }) => {
     }
   };
 
-  const handleRegister = async () => {
-    if (!name || !email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
-    }
-
+  const handleContinue = () => {
     const { isValid, error } = isValidEmail(email);
     if (!isValid) {
       setEmailError(error);
+      return;
+    }
+    setShowFullForm(true);
+  };
+
+  const handleRegister = async () => {
+    if (!name || !email || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
@@ -46,138 +62,225 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-        <Text variant="headlineLarge" style={styles.title}>Create Account</Text>
-        <Text style={styles.subtitle}>Please fill the details and create account</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 25}
+      >
+        <TouchableOpacity 
+          style={styles.closeButton} 
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="close" size={24} color={THEME.text} />
+        </TouchableOpacity>
 
-        <View style={styles.inputContainer}>
-          <TextInput
-            label="Name"
-            value={name}
-            onChangeText={setName}
-            style={styles.input}
-            mode="outlined"
-            outlineColor="#E0E0E0"
-            activeOutlineColor="#2D4356"
-            theme={{ roundness: 8 }}
-          />
-
-          <View>
-            <TextInput
-              label="Email"
-              value={email}
-              onChangeText={validateAndSetEmail}
-              style={styles.input}
-              mode="outlined"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              outlineColor={emailError ? '#FF0000' : '#E0E0E0'}
-              activeOutlineColor={emailError ? '#FF0000' : '#2D4356'}
-              theme={{ roundness: 8 }}
-              error={!!emailError}
-            />
-            {emailError ? (
-              <HelperText type="error" visible={!!emailError}>
-                {emailError}
-              </HelperText>
-            ) : null}
-          </View>
-
-          <TextInput
-            label="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-            style={styles.input}
-            mode="outlined"
-            outlineColor="#E0E0E0"
-            activeOutlineColor="#2D4356"
-            theme={{ roundness: 8 }}
-            right={
-              <TextInput.Icon
-                icon={showPassword ? "eye-off" : "eye"}
-                onPress={() => setShowPassword(!showPassword)}
-                color="#2D4356"
-              />
-            }
-          />
-
-          <View style={styles.termsContainer}>
-            <Checkbox.Android
-              status={agreeToTerms ? 'checked' : 'unchecked'}
-              onPress={() => setAgreeToTerms(!agreeToTerms)}
-              color="#2D4356"
-            />
-            <Text style={styles.termsText}>
-              I agree with <Text style={styles.termsLink}>Terms & Conditions</Text>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContainer} 
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          <View style={styles.contentContainer}>
+            <Text variant="headlineLarge" style={styles.title}>
+              {showFullForm ? 'Create Account' : 'Log in or sign up'}
             </Text>
-          </View>
 
-          <Button
-            mode="contained"
-            onPress={handleRegister}
-            style={styles.button}
-            contentStyle={styles.buttonContent}
-            loading={loading}
-            disabled={loading || !!emailError}
-          >
-            {loading ? 'Creating Account...' : 'Sign Up'}
-          </Button>
+            <View style={styles.inputContainer}>
+              <TextInput
+                value={email}
+                onChangeText={validateAndSetEmail}
+                style={styles.input}
+                mode="outlined"
+                label="Email"
+                placeholder="Enter your email"
+                placeholderTextColor={THEME.placeholder}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                outlineStyle={styles.inputOutline}
+                outlineColor={emailError ? '#FF0000' : THEME.primary}
+                activeOutlineColor={emailError ? '#FF0000' : THEME.primaryDark}
+                theme={{
+                  colors: {
+                    primary: THEME.primaryDark,
+                    text: THEME.text,
+                    placeholder: THEME.placeholder,
+                    background: THEME.inputBackground,
+                  },
+                  roundness: 16,
+                }}
+                contentStyle={styles.inputContent}
+                disabled={showFullForm}
+              />
+              {emailError ? (
+                <HelperText type="error" style={styles.errorText}>
+                  {emailError}
+                </HelperText>
+              ) : null}
 
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>Or sign up with</Text>
-            <View style={styles.divider} />
-          </View>
+              {!showFullForm ? (
+                <>
+                  <Button
+                    mode="contained"
+                    onPress={handleContinue}
+                    style={[styles.button, !email || emailError ? styles.buttonDisabled : null]}
+                    contentStyle={styles.buttonContent}
+                    labelStyle={styles.buttonLabel}
+                    disabled={!email || !!emailError}
+                    buttonColor={THEME.primary}
+                  >
+                    Continue
+                  </Button>
 
-          <View style={styles.socialButtonsContainer}>
-            <TouchableOpacity style={styles.socialButton}>
-              <Icon name="apple" size={24} color="#000" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
-              <Icon name="google" size={24} color="#DB4437" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
-              <Icon name="facebook" size={24} color="#4267B2" />
-            </TouchableOpacity>
-          </View>
+                  <View style={styles.dividerContainer}>
+                    <View style={styles.divider} />
+                    <Text style={styles.dividerText}>or</Text>
+                    <View style={styles.divider} />
+                  </View>
 
-          <View style={styles.signInContainer}>
-            <Text style={styles.signInText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.signInLink}>Sign In</Text>
-            </TouchableOpacity>
+                  <View style={styles.socialButtonsContainer}>
+                    <TouchableOpacity style={styles.socialFullButton}>
+                      <Icon name="phone" size={24} color={THEME.text} style={styles.socialIcon} />
+                      <Text style={styles.socialButtonText}>Continue with Phone</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.socialFullButton}>
+                      <Icon name="apple" size={24} color={THEME.text} style={styles.socialIcon} />
+                      <Text style={styles.socialButtonText}>Continue with Apple</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.socialFullButton}>
+                      <Icon name="google" size={24} color="#DB4437" style={styles.socialIcon} />
+                      <Text style={styles.socialButtonText}>Continue with Google</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.socialFullButton}>
+                      <Icon name="facebook" size={24} color="#4267B2" style={styles.socialIcon} />
+                      <Text style={styles.socialButtonText}>Continue with Facebook</Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              ) : (
+                // Full registration form
+                <>
+                  <TextInput
+                    value={name}
+                    onChangeText={setName}
+                    style={styles.input}
+                    mode="outlined"
+                    label="Name"
+                    placeholder="Enter your name"
+                    placeholderTextColor={THEME.placeholder}
+                    outlineStyle={styles.inputOutline}
+                    outlineColor={THEME.primary}
+                    activeOutlineColor={THEME.primaryDark}
+                    theme={{
+                      colors: {
+                        primary: THEME.primaryDark,
+                        text: THEME.text,
+                        placeholder: THEME.placeholder,
+                        background: THEME.inputBackground,
+                      },
+                      roundness: 16,
+                    }}
+                    contentStyle={styles.inputContent}
+                  />
+
+                  <TextInput
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                    style={styles.input}
+                    mode="outlined"
+                    label="Password"
+                    placeholder="Enter your password"
+                    placeholderTextColor={THEME.placeholder}
+                    outlineStyle={styles.inputOutline}
+                    outlineColor={THEME.primary}
+                    activeOutlineColor={THEME.primaryDark}
+                    theme={{
+                      colors: {
+                        primary: THEME.primaryDark,
+                        text: THEME.text,
+                        placeholder: THEME.placeholder,
+                        background: THEME.inputBackground,
+                      },
+                      roundness: 16,
+                    }}
+                    contentStyle={styles.inputContent}
+                    right={
+                      <TextInput.Icon
+                        icon={showPassword ? "eye-off" : "eye"}
+                        onPress={() => setShowPassword(!showPassword)}
+                        color={THEME.primary}
+                      />
+                    }
+                  />
+
+                  <View style={styles.termsContainer}>
+                    <Checkbox.Android
+                      status={agreeToTerms ? 'checked' : 'unchecked'}
+                      onPress={() => setAgreeToTerms(!agreeToTerms)}
+                      color={THEME.primary}
+                    />
+                    <Text style={styles.termsText}>
+                      I agree with <Text style={styles.termsLink}>Terms & Conditions</Text>
+                    </Text>
+                  </View>
+
+                  <Button
+                    mode="contained"
+                    onPress={handleRegister}
+                    style={styles.button}
+                    contentStyle={styles.buttonContent}
+                    labelStyle={styles.buttonLabel}
+                    loading={loading}
+                    disabled={loading || !name || !password || !agreeToTerms}
+                    buttonColor={THEME.primary}
+                  >
+                    {loading ? 'Creating Account...' : 'Sign Up'}
+                  </Button>
+                </>
+              )}
+            </View>
           </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: THEME.background,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: THEME.background,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 10 : 20,
+    right: 20,
+    zIndex: 1,
+    padding: 8,
   },
   scrollContainer: {
     flexGrow: 1,
-    padding: 24,
+  },
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 24,
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#2D4356',
-    marginTop: 40,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 8,
+    fontSize: 24,
+    fontWeight: '600',
+    color: THEME.text,
+    textAlign: 'center',
     marginBottom: 32,
   },
   inputContainer: {
@@ -185,71 +288,86 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: 16,
-    backgroundColor: '#fff',
+    backgroundColor: THEME.inputBackground,
+    borderRadius: 16,
   },
-  termsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
+  inputOutline: {
+    borderRadius: 16,
   },
-  termsText: {
-    color: '#666',
-    fontSize: 14,
-    marginLeft: 8,
+  inputContent: {
+    height: 56,
   },
-  termsLink: {
-    color: '#2D4356',
-    fontWeight: 'bold',
+  errorText: {
+    color: '#FF0000',
+    marginTop: -12,
+    marginBottom: 12,
   },
   button: {
-    borderRadius: 8,
-    marginBottom: 24,
-    backgroundColor: '#2D4356',
+    borderRadius: 12,
+    marginVertical: 16,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   buttonContent: {
-    paddingVertical: 8,
+    height: 56,
+  },
+  buttonLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
+    marginVertical: 24,
   },
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: THEME.text,
+    opacity: 0.2,
   },
   dividerText: {
     marginHorizontal: 16,
-    color: '#666',
+    color: THEME.text,
     fontSize: 14,
+    opacity: 0.6,
   },
   socialButtonsContainer: {
+    width: '100%',
+    gap: 12,
+  },
+  socialFullButton: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
-  socialButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#F5F5F5',
-    marginHorizontal: 8,
-    justifyContent: 'center',
     alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: THEME.text + '20',
+    backgroundColor: '#fff',
   },
-  signInContainer: {
+  socialIcon: {
+    marginRight: 12,
+  },
+  socialButtonText: {
+    fontSize: 16,
+    color: THEME.text,
+    fontWeight: '500',
+  },
+  termsContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
+    marginVertical: 16,
   },
-  signInText: {
-    color: '#666',
+  termsText: {
+    color: THEME.text,
     fontSize: 14,
+    marginLeft: 8,
+    opacity: 0.7,
   },
-  signInLink: {
-    color: '#2D4356',
-    fontSize: 14,
+  termsLink: {
+    color: THEME.primaryDark,
     fontWeight: 'bold',
   },
 });
