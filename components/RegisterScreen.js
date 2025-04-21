@@ -36,13 +36,32 @@ const RegisterScreen = ({ navigation }) => {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     const { isValid, error } = isValidEmail(email);
     if (!isValid) {
       setEmailError(error);
       return;
     }
-    setShowFullForm(true);
+
+    try {
+      const response = await fetch(`http://15.206.127.132:8000/verify/verify-email?email=${encodeURIComponent(email)}`, {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      
+      if (response.ok && data.msg === "OTP sent to your email.") {
+        navigation.navigate('OTPVerification', { email });
+      } else {
+        Alert.alert('Error', 'Failed to send verification email. Please try again.');
+      }
+    } catch (error) {
+      console.error('Email verification error:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again later.');
+    }
   };
 
   const handleRegister = async () => {
@@ -98,6 +117,10 @@ const RegisterScreen = ({ navigation }) => {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                autoFocus={true}
+                textContentType="emailAddress"
+                enablesReturnKeyAutomatically
+                returnKeyType="next"
                 outlineStyle={styles.inputOutline}
                 outlineColor={emailError ? '#FF0000' : THEME.primary}
                 activeOutlineColor={emailError ? '#FF0000' : THEME.primaryDark}
