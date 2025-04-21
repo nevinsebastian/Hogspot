@@ -80,7 +80,7 @@ const ProfileScreen = () => {
   if (!userInfo) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4B164C" />
+        <ActivityIndicator size={64} color="#4B164C" />
       </View>
     );
   }

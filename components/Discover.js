@@ -524,7 +524,7 @@ const Discover = () => {
   if (loading) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color="#4B164C" />
+        <ActivityIndicator size={64} color="#4B164C" />
       </View>
     );
   }

@@ -51,7 +51,7 @@ const LoginScreen = ({ navigation }) => {
 
       if (response.ok) {
         await AsyncStorage.setItem('auth_token', data.access_token);
-        navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+        navigation.replace('Home');
       } else {
         Alert.alert('Login Failed', data.detail || 'Invalid credentials');
       }

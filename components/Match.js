@@ -64,7 +64,7 @@ const Match = () => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#4B164C" style={styles.loadingIndicator} />
+        <ActivityIndicator size={64} color="#4B164C" style={styles.loadingIndicator} />
       </View>
     );
   }
