@@ -10,6 +10,7 @@ import { jwtDecode } from 'jwt-decode';
 import WelcomeScreen from './components/WelcomeScreen';
 import RegisterScreen from './components/RegisterScreen';
 import OTPVerificationScreen from './components/OTPVerificationScreen';
+import CompleteRegistrationScreen from './components/CompleteRegistrationScreen';
 import LoginScreen from './components/LoginScreen';
 import HomeScreen from './components/HomeScreen';
 import Discover from './components/Discover';
@@ -74,6 +75,7 @@ const App = () => {
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
+          <Stack.Screen name="CompleteRegistration" component={CompleteRegistrationScreen} />
           
           {/* Main App Screens */}
           <Stack.Screen name="Home" component={HomeScreen} options={{ animationEnabled: false }} />

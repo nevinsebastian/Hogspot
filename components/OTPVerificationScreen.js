@@ -24,6 +24,8 @@ const OTPVerificationScreen = ({ navigation, route }) => {
   const [isComplete, setIsComplete] = useState(false);
   const { email } = route.params;
   const inputRef = useRef();
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     // Auto focus the input when screen mounts
@@ -70,29 +72,40 @@ const OTPVerificationScreen = ({ navigation, route }) => {
     }
   };
 
-  const handleConfirm = async () => {
-    if (isComplete) {
-      const otpString = otp.join('');
-      try {
-        const response = await fetch(`http://15.206.127.132:8000/verify/verify-otp?email=${encodeURIComponent(email)}&otp_code=${otpString}`, {
+  const handleVerifyOTP = async () => {
+    // Join the OTP array into a string
+    const otpCode = otp.join('');
+    
+    if (!otpCode || otpCode.length !== 6) {
+      Alert.alert('Error', 'Please enter a valid 6-digit OTP');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `http://15.206.127.132:8000/verify/verify-otp?email=${encodeURIComponent(email)}&otp_code=${otpCode}`,
+        {
           method: 'POST',
           headers: {
             'accept': 'application/json',
           },
-        });
-
-        const data = await response.json();
-        
-        if (response.ok && data.msg === "Email verified successfully.") {
-          // Navigate to the next screen (e.g., complete registration)
-          navigation.navigate('CompleteRegistration', { email });
-        } else {
-          Alert.alert('Error', 'Invalid OTP. Please try again.');
         }
-      } catch (error) {
-        console.error('OTP verification error:', error);
-        Alert.alert('Error', 'Something went wrong. Please try again later.');
+      );
+
+      const data = await response.json();
+      console.log('OTP verification response:', data); // Add logging
+
+      if (response.ok && data.msg === "Email verified successfully.") {
+        navigation.navigate('CompleteRegistration', { email });
+      } else {
+        Alert.alert('Error', data.detail || 'Invalid OTP');
       }
+    } catch (error) {
+      console.error('OTP verification error:', error); // Add error logging
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -119,7 +132,7 @@ const OTPVerificationScreen = ({ navigation, route }) => {
             {otp.map((digit, index) => (
               <View key={index} style={styles.digitContainer}>
                 <Text style={styles.digit}>{digit}</Text>
-                <View style={styles.underline} />
+                <View style={[styles.underline, isComplete && styles.underlineActive]} />
               </View>
             ))}
             <TextInput
@@ -133,21 +146,27 @@ const OTPVerificationScreen = ({ navigation, route }) => {
             />
           </View>
 
-          <TouchableOpacity onPress={handleResendCode}>
+          {loading ? (
+            <View style={[styles.confirmButton, styles.confirmButtonLoading]}>
+              <Text style={styles.confirmButtonText}>Verifying...</Text>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={[styles.confirmButton, !isComplete && styles.confirmButtonDisabled]}
+              onPress={handleVerifyOTP}
+              disabled={!isComplete || loading}
+            >
+              <Text style={[styles.confirmButtonText, !isComplete && styles.confirmButtonTextDisabled]}>
+                Confirm
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity onPress={handleResendCode} disabled={loading}>
             <View style={styles.resendContainer}>
               <Text style={styles.resendText}>Haven't received an email? </Text>
-              <Text style={styles.resendLink}>Send again</Text>
+              <Text style={[styles.resendLink, loading && styles.resendLinkDisabled]}>Send again</Text>
             </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.confirmButton, !isComplete && styles.confirmButtonDisabled]}
-            onPress={handleConfirm}
-            disabled={!isComplete}
-          >
-            <Text style={[styles.confirmButtonText, !isComplete && styles.confirmButtonTextDisabled]}>
-              Confirm
-            </Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -256,6 +275,17 @@ const styles = StyleSheet.create({
   },
   confirmButtonTextDisabled: {
     color: '#999999',
+  },
+  underlineActive: {
+    backgroundColor: THEME.primary,
+    opacity: 1,
+  },
+  confirmButtonLoading: {
+    backgroundColor: THEME.primary,
+    opacity: 0.8,
+  },
+  resendLinkDisabled: {
+    opacity: 0.5,
   },
 });
 
