@@ -6,6 +6,16 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
+// Define theme colors
+const THEME = {
+  primary: '#DD88CF',
+  primaryDark: '#4B164C',
+  background: '#FDF7FD',
+  inputBackground: '#dcdcdc',
+  text: '#2D2D2D',
+  placeholder: '#999999',
+};
+
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -58,6 +68,13 @@ const LoginScreen = ({ navigation }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 25}
       >
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="arrow-left" size={24} color={THEME.primaryDark} />
+        </TouchableOpacity>
+
         <ScrollView 
           contentContainerStyle={styles.scrollContainer} 
           keyboardShouldPersistTaps="handled"
@@ -78,12 +95,22 @@ const LoginScreen = ({ navigation }) => {
                 style={styles.input}
                 mode="outlined"
                 placeholder="Enter your email"
+                placeholderTextColor={THEME.placeholder}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
-                outlineColor="#E0E0E0"
-                activeOutlineColor="#2D4356"
-                theme={{ roundness: 12 }}
+                outlineStyle={styles.inputOutline}
+                outlineColor={THEME.primary}
+                activeOutlineColor={THEME.primaryDark}
+                theme={{
+                  colors: {
+                    primary: THEME.primaryDark,
+                    text: THEME.text,
+                    placeholder: THEME.placeholder,
+                    background: THEME.inputBackground,
+                  },
+                  roundness: 16,
+                }}
                 contentStyle={styles.inputContent}
               />
 
@@ -95,15 +122,26 @@ const LoginScreen = ({ navigation }) => {
                 style={styles.input}
                 mode="outlined"
                 placeholder="Enter your password"
-                outlineColor="#E0E0E0"
-                activeOutlineColor="#2D4356"
-                theme={{ roundness: 12 }}
+                placeholderTextColor={THEME.placeholder}
+                outlineStyle={styles.inputOutline}
+                outlineColor={THEME.primary}
+                activeOutlineColor={THEME.primaryDark}
+                theme={{
+                  colors: {
+                    primary: THEME.primaryDark,
+                    text: THEME.text,
+                    placeholder: THEME.placeholder,
+                    background: THEME.inputBackground,
+                  },
+                  roundness: 16,
+                }}
                 contentStyle={styles.inputContent}
                 right={
                   <TextInput.Icon
                     icon={showPassword ? "eye-off" : "eye"}
                     onPress={() => setShowPassword(!showPassword)}
-                    color="#2D4356"
+                    color={THEME.primary}
+                    style={styles.eyeIcon}
                   />
                 }
               />
@@ -117,8 +155,10 @@ const LoginScreen = ({ navigation }) => {
                 onPress={handleLogin}
                 style={styles.button}
                 contentStyle={styles.buttonContent}
+                labelStyle={styles.buttonLabel}
                 loading={loading}
                 disabled={loading}
+                buttonColor={THEME.primary}
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
@@ -158,11 +198,26 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: THEME.background,
   },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: THEME.background,
+  },
+  backButton: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 10 : 20,
+    left: 20,
+    zIndex: 1,
+    padding: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 3,
   },
   scrollContainer: {
     flexGrow: 1,
@@ -170,42 +225,53 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: Platform.OS === 'android' ? 20 : 0,
+    paddingTop: Platform.OS === 'ios' ? 80 : 40,
     paddingBottom: 24,
     minHeight: SCREEN_HEIGHT - (Platform.OS === 'ios' ? 120 : 80),
   },
   headerContainer: {
     alignItems: 'center',
     marginBottom: 32,
-    paddingTop: 20,
+    paddingTop: 0,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#2D4356',
+    color: THEME.primaryDark,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: THEME.text,
     marginTop: 8,
     textAlign: 'center',
+    opacity: 0.7,
   },
   inputContainer: {
     width: '100%',
+    marginTop: 0,
   },
   inputLabel: {
     fontSize: 16,
-    color: '#2D4356',
+    color: THEME.primaryDark,
     marginBottom: 8,
     fontWeight: '500',
   },
   input: {
     marginBottom: 8,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: THEME.inputBackground,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  inputOutline: {
+    borderRadius: 16,
   },
   inputContent: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: THEME.inputBackground,
+    height: 56,
+  },
+  eyeIcon: {
+    marginRight: 8,
   },
   forgotPassword: {
     alignSelf: 'flex-end',
@@ -213,17 +279,32 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   forgotPasswordText: {
-    color: '#2D4356',
+    color: THEME.primaryDark,
     fontSize: 14,
     textDecorationLine: 'underline',
   },
   button: {
-    borderRadius: 12,
+    borderRadius: 30,
     marginBottom: 24,
-    backgroundColor: '#2D4356',
+    elevation: 4,
+    shadowColor: THEME.primary,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
   buttonContent: {
     paddingVertical: 8,
+    height: 56,
+  },
+  buttonLabel: {
+    fontSize: 18,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    color: '#FFFFFF',
+    textTransform: 'none',
   },
   dividerContainer: {
     flexDirection: 'row',
@@ -233,12 +314,14 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: THEME.primary,
+    opacity: 0.3,
   },
   dividerText: {
     marginHorizontal: 16,
-    color: '#666',
+    color: THEME.text,
     fontSize: 14,
+    opacity: 0.7,
   },
   socialButtonsContainer: {
     flexDirection: 'row',
@@ -249,10 +332,18 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: THEME.inputBackground,
     marginHorizontal: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   signUpContainer: {
     flexDirection: 'row',
@@ -260,11 +351,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   signUpText: {
-    color: '#666',
+    color: THEME.text,
     fontSize: 14,
+    opacity: 0.7,
   },
   signUpLink: {
-    color: '#2D4356',
+    color: THEME.primaryDark,
     fontSize: 14,
     fontWeight: 'bold',
   },
