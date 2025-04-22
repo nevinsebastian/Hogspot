@@ -8,6 +8,8 @@ import BottomNavbar from '../Things/BottomNavbar';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
+import * as ImageManipulator from 'expo-image-manipulator';
+import { Image as ExpoImage } from 'expo-image';
 
 
 
@@ -41,6 +43,7 @@ const HomeScreen = () => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
+  const [swipedUsers, setSwipedUsers] = useState(new Set());
 
   useEffect(() => {
     (async () => {
@@ -79,6 +82,7 @@ const HomeScreen = () => {
 
   const fetchHotspotData = async (latitude, longitude) => {
     try {
+      setLoading(true);
       const token = await AsyncStorage.getItem('auth_token');
       const response = await fetch('http://15.206.127.132:8000/hotspot/start_swiping', {
         method: 'POST',
@@ -96,13 +100,25 @@ const HomeScreen = () => {
       const data = await response.json();
       if (data.status === 'success') {
         setHotspotData(data.hotspots[0]);
-        setOtherUsers(data.other_users || []);
+        // Ensure each user has a unique ID and images
+        const processedUsers = data.other_users.map(user => ({
+          ...user,
+          key: user.id.toString(), // Add unique key for React
+          images: user.images || [], // Ensure images array exists
+        }));
+        setOtherUsers(processedUsers);
         setIsInHotspot(true);
       } else if (data.status === 'failure') {
         setIsInHotspot(false);
+        setOtherUsers([]);
       }
     } catch (error) {
       console.error('Error fetching hotspot data:', error);
+      Alert.alert(
+        'Error',
+        'Failed to fetch users. Please try again.',
+        [{ text: 'OK' }]
+      );
     } finally {
       setLoading(false);
     }
@@ -130,10 +146,13 @@ const HomeScreen = () => {
 
     return (
       <View style={styles.card}>
-        <Image
+        <ExpoImage
           source={imageUrl ? { uri: imageUrl } : require('../assets/mish.jpg')}
           style={styles.cardImage}
-          onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
+          contentFit="cover"
+          transition={200}
+          cachePolicy="memory-disk"
+          placeholder={require('../assets/mish.jpg')}
         />
         <LinearGradient
           colors={['transparent', 'rgba(75, 22, 76, 0.8)', '#4B164C']}
@@ -152,11 +171,13 @@ const HomeScreen = () => {
 
   const onSwiped = async (index, swipeDirection) => {
     const swipedUser = otherUsers[index];
-    if (!swipedUser) return;
-  
+    if (!swipedUser || swipedUsers.has(swipedUser.id)) return;
+
     const swipeType = swipeDirection === 'right' ? 'right' : 'left';
-  
+
     try {
+      setSwipedUsers(prev => new Set([...prev, swipedUser.id]));
+
       const token = await AsyncStorage.getItem('auth_token');
       const response = await fetch('http://15.206.127.132:8000/swipe/', {
         method: 'POST',
@@ -170,20 +191,56 @@ const HomeScreen = () => {
           swipe_type: swipeType,
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
-      const data = await response.json();
-      console.log('Swipe recorded successfully:', data);
+
+      const responseText = await response.text();
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.log('Raw response:', responseText);
+        if (responseText.includes('success')) {
+          console.log('Swipe recorded successfully');
+          return;
+        }
+        throw parseError;
+      }
+
+      if (data.detail === 'Swipe recorded successfully') {
+        console.log('Swipe recorded successfully');
+        
+        if (data.is_match) {
+          Alert.alert(
+            'Match! 🎉',
+            `You matched with ${swipedUser.name}!`,
+            [
+              {
+                text: 'View Match',
+                onPress: () => {
+                  navigation.navigate('Match', { matchedUser: swipedUser });
+                },
+              },
+              {
+                text: 'Keep Swiping',
+                style: 'cancel',
+              },
+            ]
+          );
+        }
+      }
     } catch (error) {
       console.error('Error recording swipe:', error);
-      Alert.alert(
-        'Error',
-        'Failed to record swipe. Please try again.',
-        [{ text: 'OK' }]
-      );
+      if (!error.message.includes('success')) {
+        Alert.alert(
+          'Error',
+          'Failed to record swipe. Please try again.',
+          [{ text: 'OK' }]
+        );
+      }
     }
   };
 
@@ -207,15 +264,25 @@ const HomeScreen = () => {
           </TouchableOpacity>
           <View style={styles.mainRectangle}>
             <View style={styles.innerRectangle}>
-              <Image source={require('../assets/lulu.jpg')} style={styles.image} />
+              <ExpoImage
+                source={require('../assets/lulu.jpg')}
+                style={styles.image}
+                contentFit="cover"
+                transition={200}
+                cachePolicy="memory-disk"
+              />
             </View>
             <Text style={styles.locationText}>{hotspotData ? hotspotData.name : 'Loading...'}</Text>
           </View>
           <View style={styles.newRectangle}>
             <TouchableOpacity onPress={navigateToProfile}>
-              <Image
+              <ExpoImage
                 source={userInfo?.image_url ? { uri: userInfo.image_url } : require('../assets/profileava.jpg')}
                 style={styles.newImage}
+                contentFit="cover"
+                transition={200}
+                cachePolicy="memory-disk"
+                placeholder={require('../assets/profileava.jpg')}
               />
             </TouchableOpacity>
           </View>
@@ -225,9 +292,13 @@ const HomeScreen = () => {
           <View style={styles.notMainReactangle}>
             <View style={styles.newRectangle}>
               <TouchableOpacity onPress={navigateToProfile}>
-                <Image
+                <ExpoImage
                   source={userInfo?.image_url ? { uri: userInfo.image_url } : require('../assets/profileava.jpg')}
                   style={styles.newImage}
+                  contentFit="cover"
+                  transition={200}
+                  cachePolicy="memory-disk"
+                  placeholder={require('../assets/profileava.jpg')}
                 />
               </TouchableOpacity>
             </View>
@@ -249,7 +320,8 @@ const HomeScreen = () => {
               renderCard={renderCard}
               onSwiped={(index) => onSwiped(index, 'left')}
               onSwipedRight={(index) => onSwiped(index, 'right')}
-              infinite
+              keyExtractor={(card) => card.id.toString()}
+              infinite={false}
               backgroundColor="transparent"
               cardHorizontalMargin={0}
               stackSize={3}
@@ -266,11 +338,23 @@ const HomeScreen = () => {
               horizontalSwipe={true}
               outputRotationRange={['-8deg', '0deg', '8deg']}
               onSwipedAll={() => {
-                console.log('All cards swiped');
+                Alert.alert(
+                  'No more users',
+                  'There are no more users in this hotspot. Try again later!',
+                  [{ text: 'OK' }]
+                );
               }}
             />
           ) : (
-            <Text style={styles.noUsersText}>No users found in this hotspot.</Text>
+            <View style={styles.noUsersContainer}>
+              <Text style={styles.noUsersText}>No users found in this hotspot</Text>
+              <TouchableOpacity 
+                style={styles.refreshButton}
+                onPress={() => fetchHotspotData(location.coords.latitude, location.coords.longitude)}
+              >
+                <Text style={styles.refreshButtonText}>Refresh</Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       ) : (
@@ -514,6 +598,28 @@ notMainReactangle: {
     
     shadowRadius: 4,
     elevation: 4,
+  },
+  noUsersContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  noUsersText: {
+    fontSize: 18,
+    color: '#4B164C',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  refreshButton: {
+    backgroundColor: '#4B164C',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  refreshButtonText: {
+    color: 'white',
+    fontSize: 16,
   },
 });
 

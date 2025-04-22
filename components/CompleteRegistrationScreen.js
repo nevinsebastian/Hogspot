@@ -230,6 +230,19 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
               To sign up, you need to be at least 18. Your birthday won't be shared with other people who use Hogspot.
             </Text>
 
+            {showDatePicker && (
+              <DateTimePicker
+                value={dateOfBirth}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={handleDateChange}
+                maximumDate={new Date()}
+                minimumDate={new Date(1900, 0, 1)}
+                textColor={THEME.text}
+                themeVariant="light"
+              />
+            )}
+
             <Text style={styles.label}>Password</Text>
             <TextInput
               value={password}
@@ -301,17 +314,6 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
             </Text>
           </View>
         </ScrollView>
-
-        {showDatePicker && (
-          <DateTimePicker
-            value={dateOfBirth}
-            mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={handleDateChange}
-            maximumDate={new Date()}
-            minimumDate={new Date(1900, 0, 1)}
-          />
-        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
