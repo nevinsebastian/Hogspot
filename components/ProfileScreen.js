@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, Alert, Modal, Dimensions } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,6 +22,10 @@ const backIcon = `<svg width="48" height="48" viewBox="0 0 40 40" fill="none" xm
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const [userInfo, setUserInfo] = useState(null);
+  const [profileImages, setProfileImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const handleLogout = async () => {
     Alert.alert(
@@ -75,6 +79,32 @@ const ProfileScreen = () => {
     };
 
     fetchUserInfo();
+  }, []);
+
+  useEffect(() => {
+    const fetchProfileImages = async () => {
+      try {
+        const token = await AsyncStorage.getItem('auth_token');
+        const response = await fetch('http://15.206.127.132:8000/users/profile_images', {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+        if (data) {
+          setProfileImages(data);
+        }
+      } catch (error) {
+        console.error('Error fetching profile images:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileImages();
   }, []);
 
   if (!userInfo) {
@@ -131,29 +161,49 @@ const ProfileScreen = () => {
 
       <View style={styles.photosSection}>
         <Text style={styles.sectionTitle}>Photos</Text>
-        <View style={styles.photosContainer}>
-          <View style={styles.photoContainer}>
-          <Image
-              source={{ uri: 'https://via.placeholder.com/100' }}
-              style={styles.photo}
-            />
-          </View>
-          <View style={styles.photoContainer}>
-            <Image
-              source={{ uri: 'https://via.placeholder.com/100' }}
-              style={styles.photo}
-            />
-          </View>
-          <View style={styles.photoContainer}>
-            <Image
-              source={{ uri: 'https://via.placeholder.com/100' }}
-              style={styles.photo}
-            />
-          </View>
+        <View style={styles.photosGrid}>
+          {profileImages.map((image, index) => (
+            <TouchableOpacity
+              key={image.id}
+              style={styles.photoContainer}
+              onPress={() => {
+                setSelectedImage(image);
+                setModalVisible(true);
+              }}
+            >
+              <Image
+                source={{ uri: image.image_url }}
+                style={styles.photo}
+              />
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
+
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalContainer}
+          activeOpacity={1}
+          onPress={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContent}>
+            {selectedImage && (
+              <Image
+                source={{ uri: selectedImage.image_url }}
+                style={styles.modalImage}
+                resizeMode="contain"
+              />
+            )}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       <View style={styles.bottomNavbarContainer}>
-        <BottomNavbar  />
+        <BottomNavbar />
       </View>
     </View>
   );
@@ -279,30 +329,42 @@ const styles = StyleSheet.create({
   photosSection: {
     marginBottom: 20,
   },
-  photosContainer: {
+  photosGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
+    gap: 2,
   },
   photoContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
-    backgroundColor: '#fff',
-    elevation: 5, // Drop shadow for Android
-    shadowColor: '#000', // Drop shadow for iOS
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
+    width: (Dimensions.get('window').width - 40) / 3,
+    aspectRatio: 1,
+    marginBottom: 2,
   },
   photo: {
     width: '100%',
     height: '100%',
-    borderRadius: 10,
+    borderRadius: 2,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalImage: {
+    width: '100%',
+    height: '100%',
   },
 });
 
