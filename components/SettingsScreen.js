@@ -197,7 +197,7 @@ const SettingsScreen = () => {
       {activeTab === 'images' && (
         <View style={styles.content}>
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Profile Photos</Text>
+            <Text style={styles.sectionTitle}>Posts</Text>
             <Text style={styles.sectionSubtitle}>Hold and drag to reorder</Text>
           </View>
 
