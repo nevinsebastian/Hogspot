@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image ,Dimensions , ActivityIndicator, Alert} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, ActivityIndicator, Alert } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -10,12 +10,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { Image as ExpoImage } from 'expo-image';
-
-
-
-
-
-
 
 const bellSvg = `
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -32,7 +26,6 @@ const bellSvg = `
 </svg>
 `;
 
-
 const HomeScreen = () => {
   const navigation = useNavigation();
   const { width, height } = Dimensions.get('window');
@@ -43,7 +36,9 @@ const HomeScreen = () => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
-  const [swipedUsers, setSwipedUsers] = useState(new Set());
+  const [lastSwipeTime, setLastSwipeTime] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const [lastSwipedUser, setLastSwipedUser] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -100,11 +95,10 @@ const HomeScreen = () => {
       const data = await response.json();
       if (data.status === 'success') {
         setHotspotData(data.hotspots[0]);
-        // Ensure each user has a unique ID and images
         const processedUsers = data.other_users.map(user => ({
           ...user,
-          key: user.id.toString(), // Add unique key for React
-          images: user.images || [], // Ensure images array exists
+          key: user.id.toString(),
+          images: user.images || [],
         }));
         setOtherUsers(processedUsers);
         setIsInHotspot(true);
@@ -134,7 +128,7 @@ const HomeScreen = () => {
   };
 
   const navigateToProfile = () => {
-    navigation.navigate('ProfileScreen'); // Navigate to the Profile screen
+    navigation.navigate('ProfileScreen');
   };
 
   const renderCard = (card) => {
@@ -169,79 +163,11 @@ const HomeScreen = () => {
     );
   };
 
-  const onSwiped = async (index, swipeDirection) => {
+  const handleSwipe = (index, direction) => {
     const swipedUser = otherUsers[index];
-    if (!swipedUser || swipedUsers.has(swipedUser.id)) return;
+    if (!swipedUser) return;
 
-    const swipeType = swipeDirection === 'right' ? 'right' : 'left';
-
-    try {
-      setSwipedUsers(prev => new Set([...prev, swipedUser.id]));
-
-      const token = await AsyncStorage.getItem('auth_token');
-      const response = await fetch('http://15.206.127.132:8000/swipe/', {
-        method: 'POST',
-        headers: {
-          'accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          swiped_user_id: swipedUser.id,
-          swipe_type: swipeType,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const responseText = await response.text();
-      
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        console.log('Raw response:', responseText);
-        if (responseText.includes('success')) {
-          console.log('Swipe recorded successfully');
-          return;
-        }
-        throw parseError;
-      }
-
-      if (data.detail === 'Swipe recorded successfully') {
-        console.log('Swipe recorded successfully');
-        
-        if (data.is_match) {
-          Alert.alert(
-            'Match! 🎉',
-            `You matched with ${swipedUser.name}!`,
-            [
-              {
-                text: 'View Match',
-                onPress: () => {
-                  navigation.navigate('Match', { matchedUser: swipedUser });
-                },
-              },
-              {
-                text: 'Keep Swiping',
-                style: 'cancel',
-              },
-            ]
-          );
-        }
-      }
-    } catch (error) {
-      console.error('Error recording swipe:', error);
-      if (!error.message.includes('success')) {
-        Alert.alert(
-          'Error',
-          'Failed to record swipe. Please try again.',
-          [{ text: 'OK' }]
-        );
-      }
-    }
+    console.log(`Swiped user ID: ${swipedUser.id}, Direction: ${direction}`);
   };
 
   if (loading) {
@@ -318,9 +244,8 @@ const HomeScreen = () => {
             <Swiper
               cards={otherUsers}
               renderCard={renderCard}
-              onSwiped={(index) => onSwiped(index, 'left')}
-              onSwipedRight={(index) => onSwiped(index, 'right')}
-              keyExtractor={(card) => card.id.toString()}
+              onSwipedLeft={(index) => handleSwipe(index, 'left')}
+              onSwipedRight={(index) => handleSwipe(index, 'right')}
               infinite={false}
               backgroundColor="transparent"
               cardHorizontalMargin={0}
@@ -348,7 +273,7 @@ const HomeScreen = () => {
           ) : (
             <View style={styles.noUsersContainer}>
               <Text style={styles.noUsersText}>No users found in this hotspot</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.refreshButton}
                 onPress={() => fetchHotspotData(location.coords.latitude, location.coords.longitude)}
               >
@@ -369,8 +294,6 @@ const HomeScreen = () => {
     </View>
   );
 };
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -446,25 +369,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 8,
   },
-
-notMainReactangle: {
-  position: 'absolute',
-  left: 7,
-  top: 72,
-  width: 288,
-  height: 64,
-  borderRadius: 40,
-  backgroundColor: '#FFDFDF',
-  borderColor: '#DDDFDF',
-  borderWidth: 1,
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.2,
-  shadowRadius: 3,
-  flexDirection: 'row',
-  alignItems: 'center',
-  paddingHorizontal: 8,
-},
+  notMainReactangle: {
+    position: 'absolute',
+    left: 7,
+    top: 72,
+    width: 288,
+    height: 64,
+    borderRadius: 40,
+    backgroundColor: '#FFDFDF',
+    borderColor: '#DDDFDF',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
   innerRectangle: {
     width: 57,
     height: 50,
@@ -485,7 +407,7 @@ notMainReactangle: {
     fontFamily: 'Inter-Bold',
     color: '#4B164C',
     lineHeight: 31.2,
-    marginTop:14
+    marginTop: 14,
   },
   notLocationText: {
     fontSize: 20,
@@ -504,8 +426,8 @@ notMainReactangle: {
     position: 'absolute',
     left: 14,
     top: 200,
-    width: 360, // Same as swiperContainer
-    height: 459, // Same as swiperContainer
+    width: 360,
+    height: 459,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
@@ -593,9 +515,7 @@ notMainReactangle: {
     left: 8,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25, 
-
-    
+    shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 4,
   },
