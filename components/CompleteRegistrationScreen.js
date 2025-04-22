@@ -27,6 +27,35 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
+  const validatePassword = (pass, confirm) => {
+    if (pass.length < 6) {
+      return 'Password must be at least 6 characters long';
+    }
+    if (confirm && pass !== confirm) {
+      return 'Passwords do not match';
+    }
+    return '';
+  };
+
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+    const error = validatePassword(text, confirmPassword);
+    setErrors(prev => ({
+      ...prev,
+      password: error,
+      confirmPassword: error || validatePassword(text, confirmPassword)
+    }));
+  };
+
+  const handleConfirmPasswordChange = (text) => {
+    setConfirmPassword(text);
+    const error = validatePassword(password, text);
+    setErrors(prev => ({
+      ...prev,
+      confirmPassword: error
+    }));
+  };
+
   const validateForm = () => {
     const newErrors = {};
     
@@ -34,17 +63,19 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
       newErrors.name = 'Legal name is required';
     }
     
-    if (!password) {
-      newErrors.password = 'Password is required';
-    }
-    
-    if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+    const passwordError = validatePassword(password, confirmPassword);
+    if (passwordError) {
+      newErrors.password = passwordError;
     }
     
     const today = new Date();
     const age = today.getFullYear() - dateOfBirth.getFullYear();
-    if (age < 18) {
+    const monthDiff = today.getMonth() - dateOfBirth.getMonth();
+    const actualAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < dateOfBirth.getDate()) 
+      ? age - 1 
+      : age;
+      
+    if (actualAge < 18) {
       newErrors.dateOfBirth = 'You must be at least 18 years old';
     }
 
@@ -57,6 +88,15 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  };
+
+  const handleDateChange = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setDateOfBirth(selectedDate);
+      // Clear date error if exists
+      setErrors(prev => ({ ...prev, dateOfBirth: undefined }));
+    }
   };
 
   const handleRegister = async () => {
@@ -73,7 +113,7 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
           'accept': 'application/json',
         },
         body: JSON.stringify({
-          name,
+          name: name.trim(),
           email,
           password,
           confirm_password: confirmPassword,
@@ -82,15 +122,15 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
       });
 
       const data = await response.json();
+      console.log('Registration response:', data);
 
       if (response.status === 201) {
-        Alert.alert('Success', 'Registration successful!', [
-          { text: 'OK', onPress: () => navigation.navigate('Login') }
-        ]);
+        navigation.navigate('Login');
       } else {
-        Alert.alert('Error', data.detail || 'Registration failed');
+        Alert.alert('Error', data.detail || 'Registration failed. Please try again.');
       }
     } catch (error) {
+      console.error('Registration error:', error);
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
@@ -119,10 +159,13 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
           <Text style={styles.title}>Finish signing up</Text>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Legal name</Text>
+            <Text style={styles.label}>Full name</Text>
             <TextInput
               value={name}
-              onChangeText={setName}
+              onChangeText={(text) => {
+                setName(text);
+                setErrors(prev => ({ ...prev, name: undefined }));
+              }}
               style={styles.input}
               mode="outlined"
               placeholder="First name on ID"
@@ -159,14 +202,17 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
             />
 
             <Text style={styles.label}>Date of birth</Text>
-            <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+            <TouchableOpacity 
+              onPress={() => setShowDatePicker(true)}
+              style={styles.datePickerButton}
+            >
               <TextInput
                 value={formatDate(dateOfBirth)}
                 style={styles.input}
                 mode="outlined"
                 editable={false}
                 error={!!errors.dateOfBirth}
-                right={<TextInput.Icon icon="calendar" />}
+                right={<TextInput.Icon icon="calendar" onPress={() => setShowDatePicker(true)} />}
                 outlineStyle={styles.inputOutline}
                 theme={{
                   colors: {
@@ -187,7 +233,7 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
             <Text style={styles.label}>Password</Text>
             <TextInput
               value={password}
-              onChangeText={setPassword}
+              onChangeText={handlePasswordChange}
               style={styles.input}
               mode="outlined"
               secureTextEntry={!showPassword}
@@ -214,7 +260,7 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
             <Text style={styles.label}>Confirm Password</Text>
             <TextInput
               value={confirmPassword}
-              onChangeText={setConfirmPassword}
+              onChangeText={handleConfirmPasswordChange}
               style={styles.input}
               mode="outlined"
               secureTextEntry={!showConfirmPassword}
@@ -241,13 +287,13 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
             <Button
               mode="contained"
               onPress={handleRegister}
-              style={styles.button}
+              style={[styles.button, loading && styles.buttonDisabled]}
               loading={loading}
               disabled={loading}
               contentStyle={styles.buttonContent}
               labelStyle={styles.buttonLabel}
             >
-              Agree and continue
+              {loading ? 'Creating account...' : 'Agree and continue'}
             </Button>
 
             <Text style={styles.termsText}>
@@ -260,14 +306,10 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
           <DateTimePicker
             value={dateOfBirth}
             mode="date"
-            display="default"
-            onChange={(event, selectedDate) => {
-              setShowDatePicker(false);
-              if (selectedDate) {
-                setDateOfBirth(selectedDate);
-              }
-            }}
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={handleDateChange}
             maximumDate={new Date()}
+            minimumDate={new Date(1900, 0, 1)}
           />
         )}
       </KeyboardAvoidingView>
@@ -318,6 +360,9 @@ const styles = StyleSheet.create({
   inputOutline: {
     borderRadius: 8,
   },
+  datePickerButton: {
+    width: '100%',
+  },
   helperText: {
     fontSize: 12,
     color: THEME.text,
@@ -328,6 +373,9 @@ const styles = StyleSheet.create({
     marginTop: 16,
     borderRadius: 8,
     backgroundColor: THEME.primary,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   buttonContent: {
     height: 48,

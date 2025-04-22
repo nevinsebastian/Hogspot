@@ -70,7 +70,7 @@ const BottomNavbar = ({ currentScreen }) => {
       </TouchableOpacity>
 
       {/* Center Plus Button */}
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate('UploadPhoto')}>
         <SvgXml xml={plusSvg} width={50} height={50} />
       </TouchableOpacity>
 

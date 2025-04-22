@@ -17,6 +17,7 @@ import Discover from './components/Discover';
 import Match from './components/Match';
 import Chat from './components/Chat';
 import ProfileScreen from './components/ProfileScreen';
+import UploadPhotoScreen from './components/UploadPhotoScreen';
 
 const Stack = createStackNavigator();
 SplashScreen.preventAutoHideAsync();
@@ -83,6 +84,7 @@ const App = () => {
           <Stack.Screen name="Match" component={Match} options={{ animationEnabled: false }} />
           <Stack.Screen name="Chat" component={Chat} options={{ animationEnabled: false }} />
           <Stack.Screen name="ProfileScreen" component={ProfileScreen} options={{ animationEnabled: false }} />
+          <Stack.Screen name="UploadPhoto" component={UploadPhotoScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>
