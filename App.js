@@ -6,6 +6,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { Provider as PaperProvider } from 'react-native-paper';
 import * as SplashScreen from 'expo-splash-screen';
 import { jwtDecode } from 'jwt-decode';
+import Toast from 'react-native-toast-message';
 
 import WelcomeScreen from './components/WelcomeScreen';
 import RegisterScreen from './components/RegisterScreen';
@@ -18,6 +19,7 @@ import Match from './components/Match';
 import Chat from './components/Chat';
 import ProfileScreen from './components/ProfileScreen';
 import UploadPhotoScreen from './components/UploadPhotoScreen';
+import SettingsScreen from './components/SettingsScreen';
 
 const Stack = createStackNavigator();
 SplashScreen.preventAutoHideAsync();
@@ -85,8 +87,10 @@ const App = () => {
           <Stack.Screen name="Chat" component={Chat} options={{ animationEnabled: false }} />
           <Stack.Screen name="ProfileScreen" component={ProfileScreen} options={{ animationEnabled: false }} />
           <Stack.Screen name="UploadPhoto" component={UploadPhotoScreen} />
+          <Stack.Screen name="Settings" component={SettingsScreen} />
         </Stack.Navigator>
       </NavigationContainer>
+      <Toast />
     </PaperProvider>
   );
 };

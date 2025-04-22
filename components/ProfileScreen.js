@@ -1,31 +1,52 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, Alert, Modal, Dimensions } from 'react-native';
-import { SvgXml } from 'react-native-svg';
+import React, { useEffect, useState, useCallback } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  StatusBar,
+  Animated,
+  Modal,
+  TextInput,
+  ScrollView,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BottomNavbar from '../Things/BottomNavbar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { LinearGradient } from 'expo-linear-gradient';
+import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
+import SettingsScreen from './SettingsScreen';
 
-const backIcon = `<svg width="48" height="48" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect opacity="0.08" x="0.5" y="0.5" width="39" height="39" rx="19.5" stroke="#22172A"/>
-<g clip-path="url(#clip0_1473_352)">
-<path d="M23 14L17 20L23 26" stroke="#22172A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</g>
-<defs>
-<clipPath id="clip0_1473_352">
-<rect width="24" height="24" fill="white" transform="translate(8 8)"/>
-</clipPath>
-</defs>
-</svg>
-`;
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+const THEME = {
+  primary: '#FF5864',
+  secondary: '#FFE4E6',
+  background: '#FFFFFF',
+  text: '#FFFFFF',
+  darkText: '#2D2D2D',
+  lightText: '#8E8E8E',
+  modalBackground: '#F8F8F8',
+};
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const [userInfo, setUserInfo] = useState(null);
   const [profileImages, setProfileImages] = useState([]);
+  const [tempProfileImages, setTempProfileImages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showSettings, setShowSettings] = useState(false);
+  const [savingChanges, setSavingChanges] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [activeTab, setActiveTab] = useState('images');
+  const [aboutText, setAboutText] = useState('A good listener. I love having a good talk to know each other\'s side 😊');
+  const [editingAbout, setEditingAbout] = useState(false);
 
   const handleLogout = async () => {
     Alert.alert(
@@ -81,129 +102,211 @@ const ProfileScreen = () => {
     fetchUserInfo();
   }, []);
 
-  useEffect(() => {
-    const fetchProfileImages = async () => {
-      try {
-        const token = await AsyncStorage.getItem('auth_token');
-        const response = await fetch('http://15.206.127.132:8000/users/profile_images', {
-          method: 'GET',
-          headers: {
-            'accept': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+  const fetchProfileImages = useCallback(async () => {
+    try {
+      const token = await AsyncStorage.getItem('auth_token');
+      const response = await fetch('http://15.206.127.132:8000/users/profile_images', {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
 
-        const data = await response.json();
-        if (data) {
-          setProfileImages(data);
-        }
-      } catch (error) {
-        console.error('Error fetching profile images:', error);
-      } finally {
-        setLoading(false);
+      const data = await response.json();
+      if (data) {
+        setProfileImages(data);
+        setCurrentImageIndex(0);
       }
-    };
-
-    fetchProfileImages();
+    } catch (error) {
+      console.error('Error fetching profile images:', error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchProfileImages();
+  }, [fetchProfileImages, refreshKey]);
+
+  useEffect(() => {
+    if (showSettings) {
+      setTempProfileImages([...profileImages]);
+      setHasChanges(false);
+    }
+  }, [showSettings, profileImages]);
+
+  const handleDragEnd = ({ data }) => {
+    setTempProfileImages(data);
+    setHasChanges(true);
+  };
+
+  const updateImagePriority = async (imageId, newPriority) => {
+    const token = await AsyncStorage.getItem('auth_token');
+    const response = await fetch(
+      `http://15.206.127.132:8000/users/update_image_priority/${imageId}?priority=${newPriority}`,
+      {
+        method: 'PUT',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+    
+    if (!response.ok) {
+      throw new Error('Failed to update image priority');
+    }
+    return await response.json();
+  };
+
+  const handleSaveChanges = async () => {
+    if (!hasChanges || savingChanges) return;
+
+    setSavingChanges(true);
+    try {
+      // Make the API calls first
+      const updatePromises = tempProfileImages.map((image, index) => 
+        updateImagePriority(image.id, index + 1)
+      );
+      
+      await Promise.all(updatePromises);
+      
+      // Update the profile images state after successful API calls
+      setProfileImages([...tempProfileImages]);
+      
+      // Reset states
+      setHasChanges(false);
+      setSavingChanges(false);
+      
+    } catch (error) {
+      console.error('Error updating priorities:', error);
+      Alert.alert('Error', 'Failed to update image order. Please try again.');
+    } finally {
+      setSavingChanges(false);
+    }
+  };
+
+  const handleCloseSettings = () => {
+    if (hasChanges) {
+      Alert.alert(
+        'Unsaved Changes',
+        'You have unsaved changes. Are you sure you want to discard them?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Discard',
+            onPress: () => {
+              setHasChanges(false);
+              setTempProfileImages([...profileImages]);
+              setShowSettings(false);
+            },
+            style: 'destructive',
+          },
+        ]
+      );
+    } else {
+      setShowSettings(false);
+    }
+  };
+
+  const handleNextImage = useCallback(() => {
+    if (currentImageIndex < profileImages.length - 1) {
+      setCurrentImageIndex(prev => prev + 1);
+    }
+  }, [currentImageIndex, profileImages.length]);
+
+  const handlePreviousImage = useCallback(() => {
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex(prev => prev - 1);
+    }
+  }, [currentImageIndex]);
 
   if (!userInfo) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size={64} color="#4B164C" />
+        <ActivityIndicator size="large" color={THEME.primary} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.profileHeader}>
-        <TouchableOpacity style={styles.backIconContainer} onPress={() => navigation.goBack()}>
-          <SvgXml xml={backIcon} width={40} height={40} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Icon name="logout" size={24} color="#4B164C" />
-        </TouchableOpacity>
-        <View style={styles.profileImageContainer}>
+    <View style={styles.container} key={refreshKey}>
+      <StatusBar barStyle="light-content" />
+      
+      <View style={styles.mainContainer}>
+        {/* Current Image */}
+        {profileImages.length > 0 && (
           <Image
-            source={{ uri: userInfo.image_url }}
+            source={{ uri: profileImages[currentImageIndex]?.image_url }}
             style={styles.profileImage}
           />
+        )}
+        
+        {/* Gradient overlay */}
+        <LinearGradient
+          colors={['transparent', 'transparent', 'rgba(0,0,0,0.8)']}
+          style={styles.gradient}
+        />
+
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity 
+            style={styles.backButton} 
+            onPress={() => navigation.goBack()}
+          >
+            <Icon name="chevron-left" size={32} color={THEME.text} />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.editButton}
+            onPress={() => navigation.navigate('Settings')}
+          >
+            <Icon name="cog" size={24} color={THEME.text} />
+          </TouchableOpacity>
         </View>
-        <Text style={styles.name}>{userInfo.name}</Text>
-        <Text style={styles.email}>{userInfo.email}</Text>
-        <Text style={styles.location}>{userInfo.date_of_birth}</Text>
-      </View>
 
-      <View style={styles.statsContainer}>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>122</Text>
-          <Text style={styles.statLabel}>Spots</Text>
+        {/* Navigation Arrows */}
+        <View style={styles.navigationContainer}>
+          <TouchableOpacity 
+            style={[styles.navButton, { opacity: currentImageIndex === 0 ? 0.5 : 1 }]}
+            onPress={handlePreviousImage}
+            disabled={currentImageIndex === 0}
+          >
+            <Icon name="chevron-up" size={40} color={THEME.text} />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.navButton, { opacity: currentImageIndex === profileImages.length - 1 ? 0.5 : 1 }]}
+            onPress={handleNextImage}
+            disabled={currentImageIndex === profileImages.length - 1}
+          >
+            <Icon name="chevron-down" size={40} color={THEME.text} />
+          </TouchableOpacity>
         </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>67</Text>
-          <Text style={styles.statLabel}>Hogspoted</Text>
-        </View>
-      </View>
 
-      <TouchableOpacity style={styles.editButton}>
-        <Text style={styles.editButtonText}>Edit Profile</Text>
-      </TouchableOpacity>
+        {/* Bottom Content */}
+        <View style={styles.bottomContent}>
+          {/* Name and Age Section with Gradient */}
+          <LinearGradient
+            colors={['transparent', 'rgba(0,0,0,0.8)']}
+            style={styles.nameGradient}
+          >
+            <View style={styles.nameAgeContainer}>
+              <Text style={styles.nameText}>{userInfo.name},</Text>
+              <Text style={styles.ageText}>{userInfo.date_of_birth}</Text>
+            </View>
+          </LinearGradient>
 
-      <View style={styles.aboutSection}>
-        <Text style={styles.sectionTitle}>About</Text>
-        <Text style={styles.aboutText}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-        </Text>
-      </View>
-
-      <View style={styles.line} />
-
-      <View style={styles.photosSection}>
-        <Text style={styles.sectionTitle}>Photos</Text>
-        <View style={styles.photosGrid}>
-          {profileImages.map((image, index) => (
-            <TouchableOpacity
-              key={image.id}
-              style={styles.photoContainer}
-              onPress={() => {
-                setSelectedImage(image);
-                setModalVisible(true);
-              }}
-            >
-              <Image
-                source={{ uri: image.image_url }}
-                style={styles.photo}
-              />
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      <Modal
-        visible={modalVisible}
-        transparent={true}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalContainer}
-          activeOpacity={1}
-          onPress={() => setModalVisible(false)}
-        >
-          <View style={styles.modalContent}>
-            {selectedImage && (
-              <Image
-                source={{ uri: selectedImage.image_url }}
-                style={styles.modalImage}
-                resizeMode="contain"
-              />
-            )}
+          {/* About Box */}
+          <View style={styles.aboutBox}>
+            <Text style={styles.aboutTitle}>About</Text>
+            <Text style={styles.aboutText}>
+              A good listener. I love having a good talk to know each other's side 😊
+            </Text>
           </View>
-        </TouchableOpacity>
-      </Modal>
-
-      <View style={styles.bottomNavbarContainer}>
-        <BottomNavbar />
+        </View>
       </View>
     </View>
   );
@@ -212,159 +315,307 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fdf7fd',
-    padding: 20,
-  }, bottomNavbarContainer: {
-    position: 'absolute',
-    zIndex: 10,
-    left: 8,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4, // For Android shadow effect
+    backgroundColor: '#000',
   },
-  profileHeader: {
-    alignItems: 'center',
-    marginBottom: 20,
-    marginTop: 50,
-  },
-  backIconContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    zIndex: 1,
-  },
-  logoutButton: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    zIndex: 1,
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  profileImageContainer: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    borderWidth: 2,
-    borderColor: '#DD88CF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 10,
+  mainContainer: {
+    flex: 1,
   },
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    position: 'absolute',
+    width: screenWidth,
+    height: screenHeight,
+    resizeMode: 'cover',
   },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 5,
+  gradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: screenHeight,
   },
-  email: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 5,
-  },
-  location: {
-    fontSize: 16,
-    color: '#666',
-  },
-  statsContainer: {
+  header: {
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20,
-  },
-  statItem: {
+    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 20,
+    zIndex: 2,
   },
-  statNumber: {
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-  statLabel: {
-    fontSize: 16,
-    color: '#666',
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 20,
   },
   editButton: {
-    backgroundColor: '#4B164C',
-    padding: 15,
-    borderRadius: 10,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 20,
   },
-  editButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+  navigationContainer: {
+    position: 'absolute',
+    right: 20,
+    top: '50%',
+    transform: [{ translateY: -50 }],
+    zIndex: 2,
   },
-  aboutSection: {
-    marginBottom: 20,
+  navButton: {
+    width: 40,
+    height: 40,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 10,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  bottomContent: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  nameGradient: {
+    paddingVertical: 15,
     marginBottom: 10,
+    borderRadius: 20,
+  },
+  nameAgeContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    paddingHorizontal: 20,
+  },
+  nameText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: THEME.text,
+    marginRight: 8,
+  },
+  ageText: {
+    fontSize: 28,
+    color: THEME.text,
+  },
+  aboutBox: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+  },
+  aboutTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: THEME.darkText,
+    marginBottom: 8,
   },
   aboutText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  line: {
-    height: 1,
-    backgroundColor: '#ddd',
-    marginBottom: 20,
-  },
-  photosSection: {
-    marginBottom: 20,
-  },
-  photosGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 2,
-  },
-  photoContainer: {
-    width: (Dimensions.get('window').width - 40) / 3,
-    aspectRatio: 1,
-    marginBottom: 2,
-  },
-  photo: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 2,
+    fontSize: 16,
+    color: THEME.darkText,
+    lineHeight: 24,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#000',
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
   },
   modalContent: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: THEME.modalBackground,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    height: screenHeight * 0.8,
   },
-  modalImage: {
-    width: '100%',
-    height: '100%',
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: THEME.darkText,
+  },
+  closeButton: {
+    padding: 8,
+  },
+  tabsContainer: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+    paddingHorizontal: 20,
+  },
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 15,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  activeTab: {
+    borderBottomColor: THEME.primary,
+  },
+  tabText: {
+    marginLeft: 8,
+    color: THEME.lightText,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  activeTabText: {
+    color: THEME.primary,
+  },
+  tabContent: {
+    flex: 1,
+    padding: 20,
+  },
+  settingSection: {
+    padding: 20,
+    paddingBottom: 10,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: THEME.darkText,
+    marginBottom: 8,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: THEME.lightText,
+    marginBottom: 16,
+  },
+  dragListContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  imageOrderItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: THEME.background,
+    padding: 16,
+    marginBottom: 12,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  imageItemContent: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  orderImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+  },
+  orderPriority: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: THEME.darkText,
+    marginBottom: 4,
+  },
+  dragHint: {
+    fontSize: 12,
+    color: THEME.lightText,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFF',
+    padding: 16,
+    borderRadius: 12,
+    margin: 20,
+    marginTop: 0,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  logoutText: {
+    fontSize: 16,
+    color: '#FF3B30',
+    marginLeft: 8,
+    fontWeight: '600',
+  },
+  saveButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: THEME.primary,
+    padding: 16,
+    borderRadius: 12,
+    margin: 20,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  saveButtonDisabled: {
+    opacity: 0.7,
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: THEME.text,
+    marginLeft: 8,
+  },
+  aboutSection: {
+    marginTop: 20,
+  },
+  aboutInput: {
+    backgroundColor: THEME.background,
+    borderWidth: 1,
+    borderColor: THEME.lightText,
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 10,
+    minHeight: 100,
+    textAlignVertical: 'top',
+  },
+  aboutTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: THEME.background,
+    borderWidth: 1,
+    borderColor: THEME.lightText,
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 10,
+  },
+  preferencesSection: {
+    marginTop: 20,
   },
 });
 
