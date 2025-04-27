@@ -163,11 +163,33 @@ const HomeScreen = () => {
     );
   };
 
-  const handleSwipe = (index, direction) => {
+  const handleSwipe = async (index, direction) => {
     const swipedUser = otherUsers[index];
     if (!swipedUser) return;
 
-    console.log(`Swiped user ID: ${swipedUser.id}, Direction: ${direction}`);
+    try {
+      const token = await AsyncStorage.getItem('auth_token');
+      const response = await fetch('http://15.206.127.132:8000/swipe/', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          swiped_user_id: swipedUser.id,
+          swipe_type: direction === 'right' ? 'right' : 'left'
+        }),
+      });
+
+      if (response.status === 201) {
+        console.log('Swipe recorded successfully');
+      } else {
+        console.error('Failed to record swipe');
+      }
+    } catch (error) {
+      console.error('Error recording swipe:', error);
+    }
   };
 
   if (loading) {
@@ -407,7 +429,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
     color: '#4B164C',
     lineHeight: 31.2,
-    marginTop: 14,
+    marginTop: 5,
   },
   notLocationText: {
     fontSize: 20,
