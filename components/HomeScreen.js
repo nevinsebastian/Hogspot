@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, ActivityIndicator, Alert, Modal, ScrollView } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -42,6 +42,8 @@ const HomeScreen = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMoreUsers, setHasMoreUsers] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -217,7 +219,13 @@ const HomeScreen = () => {
     const imageUrl = card.images && card.images.length > 0 ? card.images[0].image_url : null;
 
     return (
-      <View style={styles.card}>
+      <TouchableOpacity 
+        style={styles.card}
+        onPress={() => {
+          setSelectedUser(card);
+          setIsModalVisible(true);
+        }}
+      >
         <ExpoImage
           source={imageUrl ? { uri: imageUrl } : require('../assets/mish.jpg')}
           style={styles.cardImage}
@@ -240,7 +248,7 @@ const HomeScreen = () => {
           <Text style={styles.personName}>{card.name}</Text>
           <Text style={styles.personLocation}>{card.age}</Text>
         </LinearGradient>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -275,6 +283,121 @@ const HomeScreen = () => {
     } catch (error) {
       console.error('Error recording swipe:', error);
     }
+  };
+
+  const renderUserDetails = () => {
+    if (!selectedUser) return null;
+
+    return (
+      <Modal
+        visible={isModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={() => setIsModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>×</Text>
+            </TouchableOpacity>
+            
+            <ScrollView style={styles.modalScrollView}>
+              <View style={styles.userImagesContainer}>
+                {selectedUser.images.map((image, index) => (
+                  <ExpoImage
+                    key={index}
+                    source={{ uri: image.image_url }}
+                    style={styles.userImage}
+                    contentFit="cover"
+                    transition={200}
+                  />
+                ))}
+              </View>
+
+              <View style={styles.userInfoContainer}>
+                <Text style={styles.userName}>{selectedUser.name}</Text>
+                <Text style={styles.userAge}>{selectedUser.age} years old</Text>
+                
+                {selectedUser.bio && (
+                  <View style={styles.infoSection}>
+                    <Text style={styles.sectionTitle}>About</Text>
+                    <Text style={styles.infoText}>{selectedUser.bio}</Text>
+                  </View>
+                )}
+
+                <View style={styles.infoSection}>
+                  <Text style={styles.sectionTitle}>Basic Info</Text>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Gender:</Text>
+                    <Text style={styles.infoValue}>{selectedUser.gender}</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Looking for:</Text>
+                    <Text style={styles.infoValue}>{selectedUser.gender_preference}</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Education:</Text>
+                    <Text style={styles.infoValue}>{selectedUser.education_level}</Text>
+                  </View>
+                  {selectedUser.college_name && (
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>College:</Text>
+                      <Text style={styles.infoValue}>{selectedUser.college_name}</Text>
+                    </View>
+                  )}
+                </View>
+
+                <View style={styles.infoSection}>
+                  <Text style={styles.sectionTitle}>Lifestyle</Text>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Profession:</Text>
+                    <Text style={styles.infoValue}>{selectedUser.profession || 'Not specified'}</Text>
+                  </View>
+                  {selectedUser.company && (
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>Company:</Text>
+                      <Text style={styles.infoValue}>{selectedUser.company}</Text>
+                    </View>
+                  )}
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Height:</Text>
+                    <Text style={styles.infoValue}>{selectedUser.height_cm} cm</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Smoking:</Text>
+                    <Text style={styles.infoValue}>{selectedUser.smoking}</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Drinking:</Text>
+                    <Text style={styles.infoValue}>{selectedUser.drinking}</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Workout:</Text>
+                    <Text style={styles.infoValue}>{selectedUser.workout}</Text>
+                  </View>
+                </View>
+
+                {selectedUser.interests && (
+                  <View style={styles.infoSection}>
+                    <Text style={styles.sectionTitle}>Interests</Text>
+                    <View style={styles.interestsContainer}>
+                      {selectedUser.interests.split(',').map((interest, index) => (
+                        <View key={index} style={styles.interestTag}>
+                          <Text style={styles.interestText}>{interest.trim()}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                )}
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+    );
   };
 
   if (loading) {
@@ -412,6 +535,7 @@ const HomeScreen = () => {
       <View style={styles.bottomNavbarContainer}>
         <BottomNavbar currentScreen="home" />
       </View>
+      {renderUserDetails()}
     </View>
   );
 };
@@ -661,6 +785,105 @@ const styles = StyleSheet.create({
   refreshButtonText: {
     color: 'white',
     fontSize: 16,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-start',
+    paddingTop: 50,
+  },
+  modalContent: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 1,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    fontSize: 24,
+    color: '#4B164C',
+  },
+  modalScrollView: {
+    flex: 1,
+  },
+  userImagesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 10,
+    marginBottom: 20,
+  },
+  userImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+  },
+  userInfoContainer: {
+    padding: 10,
+  },
+  userName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#4B164C',
+    marginBottom: 5,
+  },
+  userAge: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 20,
+  },
+  infoSection: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#4B164C',
+    marginBottom: 10,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  infoLabel: {
+    width: 100,
+    fontSize: 14,
+    color: '#666',
+  },
+  infoValue: {
+    flex: 1,
+    fontSize: 14,
+    color: '#333',
+  },
+  infoText: {
+    color: '#666',
+  },
+  interestsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  interestTag: {
+    backgroundColor: '#F0E6F0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+  },
+  interestText: {
+    color: '#4B164C',
+    fontSize: 12,
   },
 });
 

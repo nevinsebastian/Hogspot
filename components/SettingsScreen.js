@@ -65,24 +65,35 @@ const SettingsScreen = () => {
   const SMOKING_OPTIONS = [
     'Never',
     'Occasionally',
-    'Socially',
-    'Regularly',
-    'Prefer not to say'
+    'Socially'
   ];
 
   const DRINKING_OPTIONS = [
     'Never',
     'Occasionally',
-    'Socially',
-    'Regularly',
-    'Prefer not to say'
+    'Socially'
+  ];
+
+  const WORKOUT_OPTIONS = [
+    'Never',
+    'Sometimes',
+    'Daily'
   ];
 
   const INTERESTS_OPTIONS = [
-    'Travel', 'Music', 'Movies', 'Reading', 'Sports', 'Cooking',
-    'Photography', 'Art', 'Gaming', 'Fitness', 'Dancing', 'Technology',
-    'Fashion', 'Food', 'Pets', 'Nature', 'Politics', 'Science',
-    'Writing', 'Languages', 'Yoga', 'Meditation', 'Shopping', 'Adventure'
+    'football',
+    'tennis',
+    'cricket',
+    'other_sports',
+    'books',
+    'arts',
+    'rides',
+    'trekking',
+    'swimming',
+    'movies',
+    'music',
+    'coding',
+    'others'
   ];
 
   const aboutSections = [
@@ -102,7 +113,7 @@ const SettingsScreen = () => {
       value: profileInfo.gender,
       type: 'options',
       required: true,
-      options: ['Man', 'Woman', 'Other'],
+      options: ['Male', 'Female'],
       horizontal: true
     },
     { 
@@ -112,7 +123,7 @@ const SettingsScreen = () => {
       value: profileInfo.gender_preference,
       type: 'options',
       required: true,
-      options: ['Men', 'Women', 'Everyone'],
+      options: ['Male', 'Female'],
       horizontal: true
     },
     { 
@@ -121,7 +132,7 @@ const SettingsScreen = () => {
       label: 'Education Level', 
       value: profileInfo.education_level,
       type: 'options',
-      options: ['School', 'High School', 'Bachelor\'s', 'Master\'s', 'PhD', 'Other'],
+      options: ['School', 'College'],
       horizontal: true
     },
     { 
@@ -164,7 +175,7 @@ const SettingsScreen = () => {
       value: profileInfo.smoking,
       type: 'options',
       options: SMOKING_OPTIONS,
-      horizontal: true
+      grid: true
     },
     { 
       id: 'drinking', 
@@ -173,15 +184,16 @@ const SettingsScreen = () => {
       value: profileInfo.drinking,
       type: 'options',
       options: DRINKING_OPTIONS,
-      horizontal: true
+      grid: true
     },
     { 
       id: 'workout', 
       icon: 'dumbbell', 
       label: 'Workout', 
       value: profileInfo.workout,
-      type: 'text',
-      placeholder: 'Your workout frequency'
+      type: 'options',
+      options: WORKOUT_OPTIONS,
+      horizontal: true
     },
     { 
       id: 'interests', 
@@ -192,16 +204,7 @@ const SettingsScreen = () => {
     },
   ];
 
-  const moreSections = [
-    { id: 'height', icon: 'human-male-height', label: 'Height', value: profileInfo.height_cm },
-    { id: 'exercise', icon: 'dumbbell', label: 'Exercise', value: profileInfo.workout },
-    { id: 'education_level', icon: 'school', label: 'Education level', value: profileInfo.education_level },
-    { id: 'drinking', icon: 'glass-wine', label: 'Drinking', value: profileInfo.drinking },
-    { id: 'smoking', icon: 'smoking', label: 'Smoking', value: profileInfo.smoking },
-    { id: 'looking_for', icon: 'magnify', label: 'Looking for', value: profileInfo.gender_preference },
-    { id: 'want_kids', icon: 'baby-carriage', label: 'Kids', value: 'Not sure' },
-    { id: 'have_kids', icon: 'account-child', label: 'Have kids', value: 'Don\'t have kids' },
-  ];
+  const [hasProfileChanges, setHasProfileChanges] = useState(false);
 
   useEffect(() => {
     console.log('SettingsScreen mounted');
@@ -336,6 +339,7 @@ const SettingsScreen = () => {
         [id]: !value
       }));
     }
+    setHasProfileChanges(true);
   };
 
   const handleInterestToggle = (interest) => {
@@ -349,6 +353,68 @@ const SettingsScreen = () => {
       }
       return [...prev, interest];
     });
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      const token = await AsyncStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+
+      // Format interests to match API requirements
+      const formattedInterests = selectedInterests.map(interest => 
+        interest.toLowerCase().replace(/\s+/g, '_')
+      );
+
+      const requestBody = {
+        bio: profileInfo.bio || null,
+        gender: profileInfo.gender ? profileInfo.gender.toLowerCase() : null,
+        gender_preference: profileInfo.gender_preference ? profileInfo.gender_preference.toLowerCase() : null,
+        education_level: profileInfo.education_level ? profileInfo.education_level.toLowerCase() : null,
+        college_name: profileInfo.college_name || null,
+        profession: profileInfo.profession || null,
+        company: profileInfo.company || null,
+        height_cm: profileInfo.height_cm ? Number(profileInfo.height_cm) : null,
+        smoking: profileInfo.smoking ? profileInfo.smoking.toLowerCase() : null,
+        drinking: profileInfo.drinking ? profileInfo.drinking.toLowerCase() : null,
+        workout: profileInfo.workout ? profileInfo.workout.toLowerCase() : null,
+        interests: formattedInterests.length > 0 ? formattedInterests.join(',') : null
+      };
+
+      console.log('Sending request body:', requestBody);
+
+      const response = await fetch('http://15.206.127.132:8000/users/complete_profile', {
+        method: 'PUT',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle validation errors
+        if (response.status === 422 && data.detail) {
+          const errorMessages = data.detail.map(err => err.msg).join('\n');
+          throw new Error(errorMessages);
+        }
+        throw new Error(data.message || 'Failed to update profile');
+      }
+
+      console.log('Profile updated successfully:', data);
+      setHasProfileChanges(false);
+      Alert.alert('Success', 'Profile updated successfully');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      Alert.alert(
+        'Error',
+        typeof error === 'string' ? error : error.message || 'Failed to update profile. Please try again.'
+      );
+    }
   };
 
   const renderSectionContent = (section) => {
@@ -370,8 +436,8 @@ const SettingsScreen = () => {
             <Text style={styles.sliderValue}>
               {profileInfo[section.id] || section.min} cm
             </Text>
-          </View>
         </View>
+          </View>
       );
     }
 
@@ -405,7 +471,7 @@ const SettingsScreen = () => {
     }
 
     if (section.type === 'options') {
-      if (section.id === 'education_level') {
+      if (section.grid || section.id === 'education_level') {
         return (
           <View style={styles.expandedContent}>
             <View style={styles.gridOptionsContainer}>
@@ -431,11 +497,11 @@ const SettingsScreen = () => {
                   </Text>
                 </TouchableOpacity>
               ))}
-            </View>
+        </View>
             {errors[section.id] && (
               <Text style={styles.errorText}>This field is required</Text>
             )}
-          </View>
+        </View>
         );
       }
       
@@ -475,13 +541,13 @@ const SettingsScreen = () => {
           {errors[section.id] && (
             <Text style={styles.errorText}>This field is required</Text>
           )}
-        </View>
+          </View>
       );
     }
 
     return (
       <View style={styles.expandedContent}>
-        <TextInput
+            <TextInput
           style={[
             styles.expandedInput,
             section.multiline && styles.multilineInput
@@ -492,8 +558,8 @@ const SettingsScreen = () => {
           multiline={section.multiline}
           numberOfLines={section.multiline ? 4 : 1}
           keyboardType={section.keyboardType || 'default'}
-        />
-      </View>
+            />
+          </View>
     );
   };
 
@@ -527,8 +593,8 @@ const SettingsScreen = () => {
             name={expandedSection === section.id ? 'chevron-up' : 'chevron-right'} 
             size={24} 
             color={THEME.lightText} 
-          />
-        </View>
+            />
+          </View>
       </TouchableOpacity>
       {expandedSection === section.id && renderSectionContent(section)}
     </View>
@@ -554,7 +620,14 @@ const SettingsScreen = () => {
           <Icon name="arrow-left" size={24} color={THEME.darkText} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Edit Profile</Text>
-        <View style={styles.headerRight} />
+        {hasProfileChanges && (
+          <TouchableOpacity 
+            style={styles.saveHeaderButton}
+            onPress={handleSaveProfile}
+          >
+            <Text style={styles.saveHeaderText}>Save</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={styles.tabsContainer}>
@@ -642,10 +715,6 @@ const SettingsScreen = () => {
       {activeTab === 'about' && (
         <ScrollView style={styles.content}>
           {aboutSections.map(renderSection)}
-          
-          <Text style={styles.sectionTitle}>More about you</Text>
-          <Text style={styles.sectionSubtitle}>Cover the things most people are curious about.</Text>
-          {moreSections.map(renderSection)}
         </ScrollView>
       )}
 
@@ -967,6 +1036,20 @@ const styles = StyleSheet.create({
   },
   selectedInterestText: {
     color: THEME.text,
+  },
+  headerRight: {
+    width: 60,
+  },
+  saveHeaderButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: THEME.primary,
+    borderRadius: 8,
+  },
+  saveHeaderText: {
+    color: THEME.text,
+    fontWeight: '600',
+    fontSize: 16,
   },
 });
 
