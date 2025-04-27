@@ -17,6 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
+import Slider from '@react-native-community/slider';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -40,38 +41,166 @@ const SettingsScreen = () => {
   const [savingChanges, setSavingChanges] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [profileInfo, setProfileInfo] = useState({
-    work: 'Software Engineer',
-    education: 'Add',
-    gender: 'Man',
-    location: 'New York',
-    hometown: 'Boston',
-    height: '180 cm',
-    exercise: 'Active',
-    education_level: 'Bachelor\'s degree',
-    drinking: 'Socially',
-    smoking: 'Never',
-    looking_for: 'Relationship',
-    want_kids: 'Not sure',
-    have_kids: 'Don\'t have kids'
+    bio: '',
+    gender: '',
+    gender_preference: '',
+    education_level: '',
+    college_name: '',
+    profession: '',
+    company: '',
+    height_cm: '',
+    smoking: '',
+    drinking: '',
+    workout: '',
+    interests: ''
   });
 
+  const [errors, setErrors] = useState({
+    gender: false,
+    gender_preference: false
+  });
+
+  const [selectedInterests, setSelectedInterests] = useState([]);
+
+  const SMOKING_OPTIONS = [
+    'Never',
+    'Occasionally',
+    'Socially',
+    'Regularly',
+    'Prefer not to say'
+  ];
+
+  const DRINKING_OPTIONS = [
+    'Never',
+    'Occasionally',
+    'Socially',
+    'Regularly',
+    'Prefer not to say'
+  ];
+
+  const INTERESTS_OPTIONS = [
+    'Travel', 'Music', 'Movies', 'Reading', 'Sports', 'Cooking',
+    'Photography', 'Art', 'Gaming', 'Fitness', 'Dancing', 'Technology',
+    'Fashion', 'Food', 'Pets', 'Nature', 'Politics', 'Science',
+    'Writing', 'Languages', 'Yoga', 'Meditation', 'Shopping', 'Adventure'
+  ];
+
   const aboutSections = [
-    { id: 'work', icon: 'briefcase', label: 'Work', value: profileInfo.work },
-    { id: 'education', icon: 'school', label: 'Education', value: profileInfo.education },
-    { id: 'gender', icon: 'account', label: 'Gender', value: profileInfo.gender },
-    { id: 'location', icon: 'map-marker', label: 'Location', value: profileInfo.location },
-    { id: 'hometown', icon: 'home', label: 'Hometown', value: profileInfo.hometown },
+    { 
+      id: 'bio', 
+      icon: 'text', 
+      label: 'Bio', 
+      value: profileInfo.bio,
+      type: 'text',
+      multiline: true,
+      placeholder: 'Tell us about yourself...'
+    },
+    { 
+      id: 'gender', 
+      icon: 'account', 
+      label: 'Gender', 
+      value: profileInfo.gender,
+      type: 'options',
+      required: true,
+      options: ['Man', 'Woman', 'Other'],
+      horizontal: true
+    },
+    { 
+      id: 'gender_preference', 
+      icon: 'account-heart', 
+      label: 'Gender Preference', 
+      value: profileInfo.gender_preference,
+      type: 'options',
+      required: true,
+      options: ['Men', 'Women', 'Everyone'],
+      horizontal: true
+    },
+    { 
+      id: 'education_level', 
+      icon: 'school', 
+      label: 'Education Level', 
+      value: profileInfo.education_level,
+      type: 'options',
+      options: ['School', 'High School', 'Bachelor\'s', 'Master\'s', 'PhD', 'Other'],
+      horizontal: true
+    },
+    { 
+      id: 'college_name', 
+      icon: 'domain', 
+      label: 'College/University', 
+      value: profileInfo.college_name,
+      type: 'text',
+      placeholder: 'Your college/university'
+    },
+    { 
+      id: 'profession', 
+      icon: 'briefcase', 
+      label: 'Profession', 
+      value: profileInfo.profession,
+      type: 'text',
+      placeholder: 'Your profession'
+    },
+    { 
+      id: 'company', 
+      icon: 'office-building', 
+      label: 'Company', 
+      value: profileInfo.company,
+      type: 'text',
+      placeholder: 'Your company'
+    },
+    { 
+      id: 'height_cm', 
+      icon: 'human-male-height', 
+      label: 'Height', 
+      value: profileInfo.height_cm,
+      type: 'slider',
+      min: 140,
+      max: 220,
+    },
+    { 
+      id: 'smoking', 
+      icon: 'smoking', 
+      label: 'Smoking', 
+      value: profileInfo.smoking,
+      type: 'options',
+      options: SMOKING_OPTIONS,
+      horizontal: true
+    },
+    { 
+      id: 'drinking', 
+      icon: 'glass-wine', 
+      label: 'Drinking', 
+      value: profileInfo.drinking,
+      type: 'options',
+      options: DRINKING_OPTIONS,
+      horizontal: true
+    },
+    { 
+      id: 'workout', 
+      icon: 'dumbbell', 
+      label: 'Workout', 
+      value: profileInfo.workout,
+      type: 'text',
+      placeholder: 'Your workout frequency'
+    },
+    { 
+      id: 'interests', 
+      icon: 'heart', 
+      label: 'Interests', 
+      value: selectedInterests.join(', '),
+      type: 'interests',
+    },
   ];
 
   const moreSections = [
-    { id: 'height', icon: 'human-male-height', label: 'Height', value: profileInfo.height },
-    { id: 'exercise', icon: 'dumbbell', label: 'Exercise', value: profileInfo.exercise },
+    { id: 'height', icon: 'human-male-height', label: 'Height', value: profileInfo.height_cm },
+    { id: 'exercise', icon: 'dumbbell', label: 'Exercise', value: profileInfo.workout },
     { id: 'education_level', icon: 'school', label: 'Education level', value: profileInfo.education_level },
     { id: 'drinking', icon: 'glass-wine', label: 'Drinking', value: profileInfo.drinking },
     { id: 'smoking', icon: 'smoking', label: 'Smoking', value: profileInfo.smoking },
-    { id: 'looking_for', icon: 'magnify', label: 'Looking for', value: profileInfo.looking_for },
-    { id: 'want_kids', icon: 'baby-carriage', label: 'Kids', value: profileInfo.want_kids },
-    { id: 'have_kids', icon: 'account-child', label: 'Have kids', value: profileInfo.have_kids },
+    { id: 'looking_for', icon: 'magnify', label: 'Looking for', value: profileInfo.gender_preference },
+    { id: 'want_kids', icon: 'baby-carriage', label: 'Kids', value: 'Not sure' },
+    { id: 'have_kids', icon: 'account-child', label: 'Have kids', value: 'Don\'t have kids' },
   ];
 
   useEffect(() => {
@@ -195,60 +324,205 @@ const SettingsScreen = () => {
     setExpandedSection(expandedSection === sectionId ? null : sectionId);
   };
 
+  const handleUpdateField = (id, value) => {
+    setProfileInfo(prev => ({
+      ...prev,
+      [id]: value
+    }));
+    
+    if (id === 'gender' || id === 'gender_preference') {
+      setErrors(prev => ({
+        ...prev,
+        [id]: !value
+      }));
+    }
+  };
+
+  const handleInterestToggle = (interest) => {
+    setSelectedInterests(prev => {
+      if (prev.includes(interest)) {
+        return prev.filter(i => i !== interest);
+      }
+      if (prev.length >= 6) {
+        Alert.alert('Maximum Interests', 'You can select up to 6 interests');
+        return prev;
+      }
+      return [...prev, interest];
+    });
+  };
+
   const renderSectionContent = (section) => {
-    switch (section.id) {
-      case 'gender':
+    if (section.type === 'slider') {
+      return (
+        <View style={styles.expandedContent}>
+          <View style={styles.sliderContainer}>
+            <Slider
+              style={styles.slider}
+              minimumValue={section.min}
+              maximumValue={section.max}
+              step={1}
+              value={Number(profileInfo[section.id]) || section.min}
+              onValueChange={(value) => handleUpdateField(section.id, String(value))}
+              minimumTrackTintColor={THEME.primary}
+              maximumTrackTintColor="#E0E0E0"
+              thumbTintColor={THEME.primary}
+            />
+            <Text style={styles.sliderValue}>
+              {profileInfo[section.id] || section.min} cm
+            </Text>
+          </View>
+        </View>
+      );
+    }
+
+    if (section.type === 'interests') {
+      return (
+        <View style={styles.expandedContent}>
+          <Text style={styles.interestsHelper}>
+            Select up to 6 interests
+          </Text>
+          <View style={styles.interestsGrid}>
+            {INTERESTS_OPTIONS.map((interest) => (
+              <TouchableOpacity
+                key={interest}
+                style={[
+                  styles.interestButton,
+                  selectedInterests.includes(interest) && styles.selectedInterest
+                ]}
+                onPress={() => handleInterestToggle(interest)}
+              >
+                <Text style={[
+                  styles.interestText,
+                  selectedInterests.includes(interest) && styles.selectedInterestText
+                ]}>
+                  {interest}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      );
+    }
+
+    if (section.type === 'options') {
+      if (section.id === 'education_level') {
         return (
           <View style={styles.expandedContent}>
-            {['Man', 'Woman', 'Other'].map((option) => (
+            <View style={styles.gridOptionsContainer}>
+              {section.options.map((option) => (
+                <TouchableOpacity
+                  key={option}
+                  style={[
+                    styles.optionButton,
+                    styles.gridOptionButton,
+                    profileInfo[section.id] === option && styles.selectedOption,
+                    errors[section.id] && styles.errorButton,
+                  ]}
+                  onPress={() => {
+                    handleUpdateField(section.id, option);
+                    setExpandedSection(null);
+                  }}
+                >
+                  <Text style={[
+                    styles.optionText,
+                    profileInfo[section.id] === option && styles.selectedOptionText
+                  ]}>
+                    {option}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {errors[section.id] && (
+              <Text style={styles.errorText}>This field is required</Text>
+            )}
+          </View>
+        );
+      }
+      
+      return (
+        <View style={styles.expandedContent}>
+          <ScrollView 
+            horizontal={section.horizontal}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={[
+              styles.optionsContainer,
+              section.horizontal && styles.horizontalOptionsContainer
+            ]}
+          >
+            {section.options.map((option) => (
               <TouchableOpacity
                 key={option}
                 style={[
                   styles.optionButton,
-                  profileInfo.gender === option && styles.selectedOption
+                  profileInfo[section.id] === option && styles.selectedOption,
+                  errors[section.id] && styles.errorButton,
+                  section.horizontal && styles.horizontalOptionButton
                 ]}
                 onPress={() => {
-                  setProfileInfo({...profileInfo, gender: option});
+                  handleUpdateField(section.id, option);
                   setExpandedSection(null);
                 }}
               >
                 <Text style={[
                   styles.optionText,
-                  profileInfo.gender === option && styles.selectedOptionText
+                  profileInfo[section.id] === option && styles.selectedOptionText
                 ]}>
                   {option}
                 </Text>
               </TouchableOpacity>
             ))}
-          </View>
-        );
-      // Add more cases for other sections
-      default:
-        return (
-          <View style={styles.expandedContent}>
-            <TextInput
-              style={styles.expandedInput}
-              value={profileInfo[section.id]}
-              onChangeText={(text) => setProfileInfo({...profileInfo, [section.id]: text})}
-              placeholder={`Enter your ${section.label.toLowerCase()}`}
-            />
-          </View>
-        );
+          </ScrollView>
+          {errors[section.id] && (
+            <Text style={styles.errorText}>This field is required</Text>
+          )}
+        </View>
+      );
     }
+
+    return (
+      <View style={styles.expandedContent}>
+        <TextInput
+          style={[
+            styles.expandedInput,
+            section.multiline && styles.multilineInput
+          ]}
+          value={profileInfo[section.id]}
+          onChangeText={(text) => handleUpdateField(section.id, text)}
+          placeholder={section.placeholder}
+          multiline={section.multiline}
+          numberOfLines={section.multiline ? 4 : 1}
+          keyboardType={section.keyboardType || 'default'}
+        />
+      </View>
+    );
   };
 
   const renderSection = (section) => (
     <View key={section.id}>
       <TouchableOpacity
-        style={styles.sectionItem}
+        style={[
+          styles.sectionItem,
+          errors[section.id] && styles.errorSection
+        ]}
         onPress={() => handleSectionPress(section.id)}
       >
         <View style={styles.sectionLeft}>
-          <Icon name={section.icon} size={24} color={THEME.darkText} />
-          <Text style={styles.sectionLabel}>{section.label}</Text>
+          <Icon name={section.icon} size={24} color={errors[section.id] ? '#FF3B30' : THEME.darkText} />
+          <Text style={styles.sectionLabel}>
+            {section.label}
+            {section.required && <Text style={styles.requiredStar}> *</Text>}
+          </Text>
         </View>
         <View style={styles.sectionRight}>
-          <Text style={styles.sectionValue}>{section.value}</Text>
+          <Text 
+            style={[
+              styles.sectionValue,
+              !profileInfo[section.id] && styles.placeholderText
+            ]}
+            numberOfLines={1}
+          >
+            {profileInfo[section.id] || 'Add'}
+          </Text>
           <Icon 
             name={expandedSection === section.id ? 'chevron-up' : 'chevron-right'} 
             size={24} 
@@ -367,7 +641,6 @@ const SettingsScreen = () => {
 
       {activeTab === 'about' && (
         <ScrollView style={styles.content}>
-          <Text style={styles.sectionTitle}>About you</Text>
           {aboutSections.map(renderSection)}
           
           <Text style={styles.sectionTitle}>More about you</Text>
@@ -472,6 +745,14 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
   },
+  optionsContainer: {
+    flexDirection: 'column',
+    gap: 8,
+  },
+  horizontalOptionsContainer: {
+    flexDirection: 'row',
+    paddingRight: 20,
+  },
   optionButton: {
     paddingVertical: 12,
     paddingHorizontal: 16,
@@ -480,6 +761,13 @@ const styles = StyleSheet.create({
     backgroundColor: THEME.background,
     borderWidth: 1,
     borderColor: '#E0E0E0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  horizontalOptionButton: {
+    marginRight: 8,
+    marginBottom: 0,
+    minWidth: 100,
   },
   selectedOption: {
     backgroundColor: THEME.primary,
@@ -488,6 +776,7 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 16,
     color: THEME.darkText,
+    textAlign: 'center',
   },
   selectedOptionText: {
     color: THEME.text,
@@ -599,6 +888,85 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  errorSection: {
+    borderLeftWidth: 2,
+    borderLeftColor: '#FF3B30',
+  },
+  errorButton: {
+    borderColor: '#FF3B30',
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
+  },
+  requiredStar: {
+    color: '#FF3B30',
+  },
+  placeholderText: {
+    color: THEME.lightText,
+    fontStyle: 'italic',
+  },
+  multilineInput: {
+    minHeight: 100,
+    textAlignVertical: 'top',
+  },
+  gridOptionsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  gridOptionButton: {
+    width: '48%', // slightly less than 50% to account for gap
+    marginRight: 0,
+    marginBottom: 10,
+  },
+  sliderContainer: {
+    paddingHorizontal: 10,
+    alignItems: 'center',
+  },
+  slider: {
+    width: '100%',
+    height: 40,
+  },
+  sliderValue: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: THEME.darkText,
+    marginTop: 8,
+  },
+  interestsHelper: {
+    fontSize: 14,
+    color: THEME.lightText,
+    marginBottom: 16,
+  },
+  interestsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  interestButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: THEME.background,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    marginBottom: 8,
+  },
+  selectedInterest: {
+    backgroundColor: THEME.primary,
+    borderColor: THEME.primary,
+  },
+  interestText: {
+    fontSize: 14,
+    color: THEME.darkText,
+  },
+  selectedInterestText: {
+    color: THEME.text,
   },
 });
 
