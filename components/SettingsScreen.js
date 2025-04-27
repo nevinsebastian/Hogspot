@@ -32,28 +32,47 @@ const THEME = {
 
 const SettingsScreen = () => {
   const navigation = useNavigation();
-  const [activeTab, setActiveTab] = useState('images');
+  const [activeTab, setActiveTab] = useState('about');
+  const [expandedSection, setExpandedSection] = useState(null);
   const [profileImages, setProfileImages] = useState([]);
   const [tempProfileImages, setTempProfileImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [savingChanges, setSavingChanges] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  const [aboutText, setAboutText] = useState('A good listener. I love having a good talk to know each other\'s side 😊');
-  const [editingAbout, setEditingAbout] = useState(false);
   const [profileInfo, setProfileInfo] = useState({
-    bio: '',
-    gender: '',
-    gender_preference: '',
-    education_level: '',
-    college_name: '',
-    profession: '',
-    company: '',
-    height_cm: '',
-    smoking: '',
-    drinking: '',
-    workout: '',
-    interests: ''
+    work: 'Software Engineer',
+    education: 'Add',
+    gender: 'Man',
+    location: 'New York',
+    hometown: 'Boston',
+    height: '180 cm',
+    exercise: 'Active',
+    education_level: 'Bachelor\'s degree',
+    drinking: 'Socially',
+    smoking: 'Never',
+    looking_for: 'Relationship',
+    want_kids: 'Not sure',
+    have_kids: 'Don\'t have kids'
   });
+
+  const aboutSections = [
+    { id: 'work', icon: 'briefcase', label: 'Work', value: profileInfo.work },
+    { id: 'education', icon: 'school', label: 'Education', value: profileInfo.education },
+    { id: 'gender', icon: 'account', label: 'Gender', value: profileInfo.gender },
+    { id: 'location', icon: 'map-marker', label: 'Location', value: profileInfo.location },
+    { id: 'hometown', icon: 'home', label: 'Hometown', value: profileInfo.hometown },
+  ];
+
+  const moreSections = [
+    { id: 'height', icon: 'human-male-height', label: 'Height', value: profileInfo.height },
+    { id: 'exercise', icon: 'dumbbell', label: 'Exercise', value: profileInfo.exercise },
+    { id: 'education_level', icon: 'school', label: 'Education level', value: profileInfo.education_level },
+    { id: 'drinking', icon: 'glass-wine', label: 'Drinking', value: profileInfo.drinking },
+    { id: 'smoking', icon: 'smoking', label: 'Smoking', value: profileInfo.smoking },
+    { id: 'looking_for', icon: 'magnify', label: 'Looking for', value: profileInfo.looking_for },
+    { id: 'want_kids', icon: 'baby-carriage', label: 'Kids', value: profileInfo.want_kids },
+    { id: 'have_kids', icon: 'account-child', label: 'Have kids', value: profileInfo.have_kids },
+  ];
 
   useEffect(() => {
     console.log('SettingsScreen mounted');
@@ -100,11 +119,6 @@ const SettingsScreen = () => {
     }
   };
 
-  const handleDragEnd = ({ data }) => {
-    setTempProfileImages(data);
-    setHasChanges(true);
-  };
-
   const updateImagePriority = async (imageId, newPriority) => {
     const token = await AsyncStorage.getItem('auth_token');
     const response = await fetch(
@@ -124,6 +138,11 @@ const SettingsScreen = () => {
     return await response.json();
   };
 
+  const handleDragEnd = ({ data }) => {
+    setTempProfileImages(data);
+    setHasChanges(true);
+  };
+
   const handleSaveChanges = async () => {
     if (!hasChanges || savingChanges) return;
 
@@ -134,10 +153,8 @@ const SettingsScreen = () => {
       );
       
       await Promise.all(updatePromises);
-      
       setProfileImages([...tempProfileImages]);
       setHasChanges(false);
-      
       Alert.alert('Success', 'Image order updated successfully');
     } catch (error) {
       console.error('Error updating priorities:', error);
@@ -152,17 +169,12 @@ const SettingsScreen = () => {
       'Logout',
       'Are you sure you want to logout?',
       [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
+        { text: 'Cancel', style: 'cancel' },
         {
           text: 'Logout',
           onPress: async () => {
             try {
-              console.log('Logging out...');
               await AsyncStorage.removeItem('auth_token');
-              console.log('Auth token removed');
               navigation.reset({
                 index: 0,
                 routes: [{ name: 'Login' }],
@@ -179,140 +191,72 @@ const SettingsScreen = () => {
     );
   };
 
-  const renderProfileInfoSection = () => (
-    <View style={styles.profileInfoContainer}>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Personal Information</Text>
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Bio</Text>
-          <TextInput
-            style={styles.textInput}
-            value={profileInfo.bio}
-            onChangeText={(text) => setProfileInfo({...profileInfo, bio: text})}
-            placeholder="Tell us about yourself"
-            multiline
-            numberOfLines={3}
-          />
-        </View>
-        <View style={styles.rowInputs}>
-          <View style={styles.halfInput}>
-            <Text style={styles.inputLabel}>Gender</Text>
-            <TextInput
-              style={styles.textInput}
-              value={profileInfo.gender}
-              onChangeText={(text) => setProfileInfo({...profileInfo, gender: text})}
-              placeholder="Your gender"
-            />
-          </View>
-          <View style={styles.halfInput}>
-            <Text style={styles.inputLabel}>Gender Preference</Text>
-            <TextInput
-              style={styles.textInput}
-              value={profileInfo.gender_preference}
-              onChangeText={(text) => setProfileInfo({...profileInfo, gender_preference: text})}
-              placeholder="Preferred gender"
-            />
-          </View>
-        </View>
-      </View>
+  const handleSectionPress = (sectionId) => {
+    setExpandedSection(expandedSection === sectionId ? null : sectionId);
+  };
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Education & Work</Text>
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Education Level</Text>
-          <TextInput
-            style={styles.textInput}
-            value={profileInfo.education_level}
-            onChangeText={(text) => setProfileInfo({...profileInfo, education_level: text})}
-            placeholder="Your education level"
-          />
-        </View>
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>College/University</Text>
-          <TextInput
-            style={styles.textInput}
-            value={profileInfo.college_name}
-            onChangeText={(text) => setProfileInfo({...profileInfo, college_name: text})}
-            placeholder="Your college/university"
-          />
-        </View>
-        <View style={styles.rowInputs}>
-          <View style={styles.halfInput}>
-            <Text style={styles.inputLabel}>Profession</Text>
+  const renderSectionContent = (section) => {
+    switch (section.id) {
+      case 'gender':
+        return (
+          <View style={styles.expandedContent}>
+            {['Man', 'Woman', 'Other'].map((option) => (
+              <TouchableOpacity
+                key={option}
+                style={[
+                  styles.optionButton,
+                  profileInfo.gender === option && styles.selectedOption
+                ]}
+                onPress={() => {
+                  setProfileInfo({...profileInfo, gender: option});
+                  setExpandedSection(null);
+                }}
+              >
+                <Text style={[
+                  styles.optionText,
+                  profileInfo.gender === option && styles.selectedOptionText
+                ]}>
+                  {option}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        );
+      // Add more cases for other sections
+      default:
+        return (
+          <View style={styles.expandedContent}>
             <TextInput
-              style={styles.textInput}
-              value={profileInfo.profession}
-              onChangeText={(text) => setProfileInfo({...profileInfo, profession: text})}
-              placeholder="Your profession"
+              style={styles.expandedInput}
+              value={profileInfo[section.id]}
+              onChangeText={(text) => setProfileInfo({...profileInfo, [section.id]: text})}
+              placeholder={`Enter your ${section.label.toLowerCase()}`}
             />
           </View>
-          <View style={styles.halfInput}>
-            <Text style={styles.inputLabel}>Company</Text>
-            <TextInput
-              style={styles.textInput}
-              value={profileInfo.company}
-              onChangeText={(text) => setProfileInfo({...profileInfo, company: text})}
-              placeholder="Your company"
-            />
-          </View>
-        </View>
-      </View>
+        );
+    }
+  };
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Lifestyle</Text>
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Height (cm)</Text>
-          <TextInput
-            style={styles.textInput}
-            value={profileInfo.height_cm}
-            onChangeText={(text) => setProfileInfo({...profileInfo, height_cm: text})}
-            placeholder="Your height in cm"
-            keyboardType="numeric"
+  const renderSection = (section) => (
+    <View key={section.id}>
+      <TouchableOpacity
+        style={styles.sectionItem}
+        onPress={() => handleSectionPress(section.id)}
+      >
+        <View style={styles.sectionLeft}>
+          <Icon name={section.icon} size={24} color={THEME.darkText} />
+          <Text style={styles.sectionLabel}>{section.label}</Text>
+        </View>
+        <View style={styles.sectionRight}>
+          <Text style={styles.sectionValue}>{section.value}</Text>
+          <Icon 
+            name={expandedSection === section.id ? 'chevron-up' : 'chevron-right'} 
+            size={24} 
+            color={THEME.lightText} 
           />
         </View>
-        <View style={styles.rowInputs}>
-          <View style={styles.halfInput}>
-            <Text style={styles.inputLabel}>Smoking</Text>
-            <TextInput
-              style={styles.textInput}
-              value={profileInfo.smoking}
-              onChangeText={(text) => setProfileInfo({...profileInfo, smoking: text})}
-              placeholder="Smoking habits"
-            />
-          </View>
-          <View style={styles.halfInput}>
-            <Text style={styles.inputLabel}>Drinking</Text>
-            <TextInput
-              style={styles.textInput}
-              value={profileInfo.drinking}
-              onChangeText={(text) => setProfileInfo({...profileInfo, drinking: text})}
-              placeholder="Drinking habits"
-            />
-          </View>
-        </View>
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Workout Frequency</Text>
-          <TextInput
-            style={styles.textInput}
-            value={profileInfo.workout}
-            onChangeText={(text) => setProfileInfo({...profileInfo, workout: text})}
-            placeholder="How often do you workout?"
-          />
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Interests</Text>
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Your Interests</Text>
-          <TextInput
-            style={styles.textInput}
-            value={profileInfo.interests}
-            onChangeText={(text) => setProfileInfo({...profileInfo, interests: text})}
-            placeholder="What are you interested in?"
-          />
-        </View>
-      </View>
+      </TouchableOpacity>
+      {expandedSection === section.id && renderSectionContent(section)}
     </View>
   );
 
@@ -335,7 +279,7 @@ const SettingsScreen = () => {
         >
           <Icon name="arrow-left" size={24} color={THEME.darkText} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Settings</Text>
+        <Text style={styles.headerTitle}>Edit Profile</Text>
         <View style={styles.headerRight} />
       </View>
 
@@ -368,7 +312,7 @@ const SettingsScreen = () => {
       {activeTab === 'images' && (
         <View style={styles.content}>
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Posts</Text>
+            <Text style={styles.sectionTitle}>Photos</Text>
             <Text style={styles.sectionSubtitle}>Hold and drag to reorder</Text>
           </View>
 
@@ -404,10 +348,7 @@ const SettingsScreen = () => {
 
           {hasChanges && (
             <TouchableOpacity 
-              style={[
-                styles.saveButton,
-                savingChanges && styles.saveButtonDisabled
-              ]}
+              style={[styles.saveButton, savingChanges && styles.saveButtonDisabled]}
               onPress={handleSaveChanges}
               disabled={savingChanges}
             >
@@ -426,28 +367,12 @@ const SettingsScreen = () => {
 
       {activeTab === 'about' && (
         <ScrollView style={styles.content}>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>About Me</Text>
-            {editingAbout ? (
-              <TextInput
-                style={styles.aboutInput}
-                value={aboutText}
-                onChangeText={setAboutText}
-                multiline
-                numberOfLines={4}
-                onBlur={() => setEditingAbout(false)}
-              />
-            ) : (
-              <TouchableOpacity 
-                style={styles.aboutTextContainer}
-                onPress={() => setEditingAbout(true)}
-              >
-                <Text style={styles.aboutText}>{aboutText}</Text>
-                <Icon name="pencil" size={20} color={THEME.lightText} />
-              </TouchableOpacity>
-            )}
-          </View>
-          {renderProfileInfoSection()}
+          <Text style={styles.sectionTitle}>About you</Text>
+          {aboutSections.map(renderSection)}
+          
+          <Text style={styles.sectionTitle}>More about you</Text>
+          <Text style={styles.sectionSubtitle}>Cover the things most people are curious about.</Text>
+          {moreSections.map(renderSection)}
         </ScrollView>
       )}
 
@@ -473,18 +398,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: THEME.background,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: THEME.background,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
   },
@@ -493,23 +412,98 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: THEME.darkText,
   },
-  headerRight: {
-    width: 24,
+  content: {
+    flex: 1,
   },
-  backButton: {
-    padding: 8,
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: THEME.darkText,
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 8,
+  },
+  sectionSubtitle: {
+    fontSize: 16,
+    color: THEME.lightText,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  sectionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    backgroundColor: THEME.background,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  sectionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  sectionLabel: {
+    fontSize: 16,
+    color: THEME.darkText,
+    marginLeft: 16,
+  },
+  sectionRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sectionValue: {
+    fontSize: 16,
+    color: THEME.lightText,
+    marginRight: 8,
+  },
+  expandedContent: {
+    padding: 20,
+    backgroundColor: '#F8F8F8',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  expandedInput: {
+    backgroundColor: THEME.background,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+  },
+  optionButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 8,
+    backgroundColor: THEME.background,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  selectedOption: {
+    backgroundColor: THEME.primary,
+    borderColor: THEME.primary,
+  },
+  optionText: {
+    fontSize: 16,
+    color: THEME.darkText,
+  },
+  selectedOptionText: {
+    color: THEME.text,
   },
   tabsContainer: {
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
+    backgroundColor: THEME.background,
   },
   tab: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 15,
+    paddingVertical: 16,
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
   },
@@ -518,54 +512,35 @@ const styles = StyleSheet.create({
   },
   tabText: {
     marginLeft: 8,
-    color: THEME.lightText,
     fontSize: 14,
-    fontWeight: '500',
+    color: THEME.lightText,
+    fontWeight: '600',
   },
   activeTabText: {
     color: THEME.primary,
-  },
-  content: {
-    flex: 1,
-  },
-  section: {
-    padding: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: THEME.darkText,
-    marginBottom: 8,
-  },
-  sectionSubtitle: {
-    fontSize: 14,
-    color: THEME.lightText,
-    marginBottom: 16,
   },
   imageOrderItem: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: THEME.background,
     padding: 16,
+    marginHorizontal: 20,
     marginBottom: 12,
     borderRadius: 12,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
+    shadowRadius: 4,
     elevation: 3,
   },
   orderImage: {
-    width: 60,
-    height: 60,
+    width: 80,
+    height: 80,
     borderRadius: 8,
   },
   imageItemContent: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 16,
   },
   orderPriority: {
     fontSize: 16,
@@ -577,9 +552,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: THEME.lightText,
   },
-  dragListContainer: {
-    paddingHorizontal: 20,
-  },
   saveButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -588,14 +560,10 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     margin: 20,
-    marginBottom: 10,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
+    shadowRadius: 4,
     elevation: 3,
   },
   saveButtonDisabled: {
@@ -607,33 +575,6 @@ const styles = StyleSheet.create({
     color: THEME.text,
     marginLeft: 8,
   },
-  aboutInput: {
-    backgroundColor: THEME.background,
-    borderWidth: 1,
-    borderColor: THEME.lightText,
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 10,
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  aboutTextContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: THEME.background,
-    borderWidth: 1,
-    borderColor: THEME.lightText,
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 10,
-  },
-  aboutText: {
-    flex: 1,
-    color: THEME.darkText,
-    fontSize: 16,
-    lineHeight: 24,
-  },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -641,14 +582,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     padding: 16,
     borderRadius: 12,
-    marginTop: 20,
+    margin: 20,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
+    shadowRadius: 4,
     elevation: 3,
   },
   logoutText: {
@@ -657,34 +595,10 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontWeight: '600',
   },
-  profileInfoContainer: {
-    paddingHorizontal: 20,
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  rowInputs: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  halfInput: {
-    width: '48%',
-  },
-  inputLabel: {
-    fontSize: 14,
-    color: THEME.darkText,
-    marginBottom: 8,
-    fontWeight: '500',
-  },
-  textInput: {
-    backgroundColor: THEME.background,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: THEME.darkText,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
