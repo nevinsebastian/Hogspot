@@ -39,25 +39,51 @@ const HomeScreen = () => {
   const [lastSwipeTime, setLastSwipeTime] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
   const [lastSwipedUser, setLastSwipedUser] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMoreUsers, setHasMoreUsers] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        return;
-      }
+    let isMounted = true;
 
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-      fetchHotspotData(location.coords.latitude, location.coords.longitude);
-      fetchUserInfo();
-    })();
+    const initializeLocation = async () => {
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (!isMounted) return;
+
+        if (status !== 'granted') {
+          setErrorMsg('Permission to access location was denied');
+          return;
+        }
+
+        let location = await Location.getCurrentPositionAsync({});
+        if (!isMounted) return;
+
+        setLocation(location);
+        await fetchHotspotData(location.coords.latitude, location.coords.longitude);
+        await fetchUserInfo();
+      } catch (error) {
+        console.error('Location initialization error:', error);
+        if (isMounted) {
+          setErrorMsg('Failed to get location. Please try again.');
+        }
+      }
+    };
+
+    initializeLocation();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const fetchUserInfo = async () => {
     try {
       const token = await AsyncStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
       const response = await fetch('http://15.206.127.132:8000/users/user-info', {
         method: 'GET',
         headers: {
@@ -66,20 +92,38 @@ const HomeScreen = () => {
         },
       });
 
+      if (!response.ok) {
+        throw new Error('Failed to fetch user info');
+      }
+
       const data = await response.json();
       if (data) {
         setUserInfo(data);
       }
     } catch (error) {
       console.error('Error fetching user info:', error);
+      Alert.alert(
+        'Error',
+        'Failed to load user information. Please try again.',
+        [{ text: 'OK' }]
+      );
     }
   };
 
-  const fetchHotspotData = async (latitude, longitude) => {
+  const fetchHotspotData = async (latitude, longitude, page = 1) => {
     try {
-      setLoading(true);
+      if (page === 1) {
+        setLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
+
       const token = await AsyncStorage.getItem('auth_token');
-      const response = await fetch('http://15.206.127.132:8000/hotspot/start_swiping', {
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(`http://15.206.127.132:8000/hotspot/start_swiping?page=${page}&limit=10`, {
         method: 'POST',
         headers: {
           'accept': 'application/json',
@@ -92,15 +136,30 @@ const HomeScreen = () => {
         }),
       });
 
+      if (!response.ok) {
+        throw new Error('Failed to fetch hotspot data');
+      }
+
       const data = await response.json();
       if (data.status === 'success') {
-        setHotspotData(data.hotspots[0]);
+        if (data.hotspots && data.hotspots.length > 0) {
+          setHotspotData(data.hotspots[0]);
+        }
+
         const processedUsers = data.other_users.map(user => ({
           ...user,
           key: user.id.toString(),
           images: user.images || [],
         }));
-        setOtherUsers(processedUsers);
+
+        if (page === 1) {
+          setOtherUsers(processedUsers);
+        } else {
+          setOtherUsers(prevUsers => [...prevUsers, ...processedUsers]);
+        }
+
+        setCurrentPage(page);
+        setHasMoreUsers(data.pagination.has_next);
         setIsInHotspot(true);
       } else if (data.status === 'failure') {
         setIsInHotspot(false);
@@ -115,7 +174,15 @@ const HomeScreen = () => {
       );
     } finally {
       setLoading(false);
+      setIsLoadingMore(false);
     }
+  };
+
+  const loadMoreUsers = async () => {
+    if (!hasMoreUsers || isLoadingMore || !location) return;
+    
+    const nextPage = currentPage + 1;
+    await fetchHotspotData(location.coords.latitude, location.coords.longitude, nextPage);
   };
 
   const handleLogout = async () => {
@@ -147,6 +214,9 @@ const HomeScreen = () => {
           transition={200}
           cachePolicy="memory-disk"
           placeholder={require('../assets/mish.jpg')}
+          onError={(error) => {
+            console.error('Error loading image:', error);
+          }}
         />
         <LinearGradient
           colors={['transparent', 'rgba(75, 22, 76, 0.8)', '#4B164C']}
@@ -184,6 +254,10 @@ const HomeScreen = () => {
 
       if (response.status === 201) {
         console.log('Swipe recorded successfully');
+        
+        if (index >= otherUsers.length - 3 && hasMoreUsers) {
+          await loadMoreUsers();
+        }
       } else {
         console.error('Failed to record swipe');
       }
@@ -213,11 +287,15 @@ const HomeScreen = () => {
           <View style={styles.mainRectangle}>
             <View style={styles.innerRectangle}>
               <ExpoImage
-                source={require('../assets/lulu.jpg')}
+                source={hotspotData?.image_url ? { uri: hotspotData.image_url } : require('../assets/lulu.jpg')}
                 style={styles.image}
                 contentFit="cover"
                 transition={200}
                 cachePolicy="memory-disk"
+                placeholder={require('../assets/lulu.jpg')}
+                onError={(error) => {
+                  console.error('Error loading hotspot image:', error);
+                }}
               />
             </View>
             <Text style={styles.locationText}>{hotspotData ? hotspotData.name : 'Loading...'}</Text>
@@ -285,11 +363,15 @@ const HomeScreen = () => {
               horizontalSwipe={true}
               outputRotationRange={['-8deg', '0deg', '8deg']}
               onSwipedAll={() => {
-                Alert.alert(
-                  'No more users',
-                  'There are no more users in this hotspot. Try again later!',
-                  [{ text: 'OK' }]
-                );
+                if (hasMoreUsers) {
+                  loadMoreUsers();
+                } else {
+                  Alert.alert(
+                    'No more users',
+                    'There are no more users in this hotspot. Try again later!',
+                    [{ text: 'OK' }]
+                  );
+                }
               }}
             />
           ) : (
@@ -297,7 +379,7 @@ const HomeScreen = () => {
               <Text style={styles.noUsersText}>No users found in this hotspot</Text>
               <TouchableOpacity
                 style={styles.refreshButton}
-                onPress={() => fetchHotspotData(location.coords.latitude, location.coords.longitude)}
+                onPress={() => fetchHotspotData(location.coords.latitude, location.coords.longitude, 1)}
               >
                 <Text style={styles.refreshButtonText}>Refresh</Text>
               </TouchableOpacity>

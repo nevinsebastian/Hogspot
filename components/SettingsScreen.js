@@ -40,14 +40,38 @@ const SettingsScreen = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [aboutText, setAboutText] = useState('A good listener. I love having a good talk to know each other\'s side 😊');
   const [editingAbout, setEditingAbout] = useState(false);
+  const [profileInfo, setProfileInfo] = useState({
+    bio: '',
+    gender: '',
+    gender_preference: '',
+    education_level: '',
+    college_name: '',
+    profession: '',
+    company: '',
+    height_cm: '',
+    smoking: '',
+    drinking: '',
+    workout: '',
+    interests: ''
+  });
 
   useEffect(() => {
-    fetchProfileImages();
+    console.log('SettingsScreen mounted');
+    fetchProfileImages().catch(error => {
+      console.error('Error in fetchProfileImages:', error);
+      Alert.alert('Error', 'Failed to load profile images. Please try again.');
+    });
   }, []);
 
   const fetchProfileImages = async () => {
     try {
+      console.log('Fetching profile images...');
       const token = await AsyncStorage.getItem('auth_token');
+      if (!token) {
+        console.error('No auth token found');
+        throw new Error('Authentication token not found');
+      }
+
       const response = await fetch('http://15.206.127.132:8000/users/profile_images', {
         method: 'GET',
         headers: {
@@ -56,13 +80,21 @@ const SettingsScreen = () => {
         },
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('API Error:', errorData);
+        throw new Error(errorData.message || 'Failed to fetch profile images');
+      }
+
       const data = await response.json();
+      console.log('Profile images fetched successfully:', data);
       if (data) {
         setProfileImages(data);
         setTempProfileImages(data);
       }
     } catch (error) {
       console.error('Error fetching profile images:', error);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -128,7 +160,9 @@ const SettingsScreen = () => {
           text: 'Logout',
           onPress: async () => {
             try {
+              console.log('Logging out...');
               await AsyncStorage.removeItem('auth_token');
+              console.log('Auth token removed');
               navigation.reset({
                 index: 0,
                 routes: [{ name: 'Login' }],
@@ -144,6 +178,143 @@ const SettingsScreen = () => {
       { cancelable: true }
     );
   };
+
+  const renderProfileInfoSection = () => (
+    <View style={styles.profileInfoContainer}>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Personal Information</Text>
+        <View style={styles.inputGroup}>
+          <Text style={styles.inputLabel}>Bio</Text>
+          <TextInput
+            style={styles.textInput}
+            value={profileInfo.bio}
+            onChangeText={(text) => setProfileInfo({...profileInfo, bio: text})}
+            placeholder="Tell us about yourself"
+            multiline
+            numberOfLines={3}
+          />
+        </View>
+        <View style={styles.rowInputs}>
+          <View style={styles.halfInput}>
+            <Text style={styles.inputLabel}>Gender</Text>
+            <TextInput
+              style={styles.textInput}
+              value={profileInfo.gender}
+              onChangeText={(text) => setProfileInfo({...profileInfo, gender: text})}
+              placeholder="Your gender"
+            />
+          </View>
+          <View style={styles.halfInput}>
+            <Text style={styles.inputLabel}>Gender Preference</Text>
+            <TextInput
+              style={styles.textInput}
+              value={profileInfo.gender_preference}
+              onChangeText={(text) => setProfileInfo({...profileInfo, gender_preference: text})}
+              placeholder="Preferred gender"
+            />
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Education & Work</Text>
+        <View style={styles.inputGroup}>
+          <Text style={styles.inputLabel}>Education Level</Text>
+          <TextInput
+            style={styles.textInput}
+            value={profileInfo.education_level}
+            onChangeText={(text) => setProfileInfo({...profileInfo, education_level: text})}
+            placeholder="Your education level"
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text style={styles.inputLabel}>College/University</Text>
+          <TextInput
+            style={styles.textInput}
+            value={profileInfo.college_name}
+            onChangeText={(text) => setProfileInfo({...profileInfo, college_name: text})}
+            placeholder="Your college/university"
+          />
+        </View>
+        <View style={styles.rowInputs}>
+          <View style={styles.halfInput}>
+            <Text style={styles.inputLabel}>Profession</Text>
+            <TextInput
+              style={styles.textInput}
+              value={profileInfo.profession}
+              onChangeText={(text) => setProfileInfo({...profileInfo, profession: text})}
+              placeholder="Your profession"
+            />
+          </View>
+          <View style={styles.halfInput}>
+            <Text style={styles.inputLabel}>Company</Text>
+            <TextInput
+              style={styles.textInput}
+              value={profileInfo.company}
+              onChangeText={(text) => setProfileInfo({...profileInfo, company: text})}
+              placeholder="Your company"
+            />
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Lifestyle</Text>
+        <View style={styles.inputGroup}>
+          <Text style={styles.inputLabel}>Height (cm)</Text>
+          <TextInput
+            style={styles.textInput}
+            value={profileInfo.height_cm}
+            onChangeText={(text) => setProfileInfo({...profileInfo, height_cm: text})}
+            placeholder="Your height in cm"
+            keyboardType="numeric"
+          />
+        </View>
+        <View style={styles.rowInputs}>
+          <View style={styles.halfInput}>
+            <Text style={styles.inputLabel}>Smoking</Text>
+            <TextInput
+              style={styles.textInput}
+              value={profileInfo.smoking}
+              onChangeText={(text) => setProfileInfo({...profileInfo, smoking: text})}
+              placeholder="Smoking habits"
+            />
+          </View>
+          <View style={styles.halfInput}>
+            <Text style={styles.inputLabel}>Drinking</Text>
+            <TextInput
+              style={styles.textInput}
+              value={profileInfo.drinking}
+              onChangeText={(text) => setProfileInfo({...profileInfo, drinking: text})}
+              placeholder="Drinking habits"
+            />
+          </View>
+        </View>
+        <View style={styles.inputGroup}>
+          <Text style={styles.inputLabel}>Workout Frequency</Text>
+          <TextInput
+            style={styles.textInput}
+            value={profileInfo.workout}
+            onChangeText={(text) => setProfileInfo({...profileInfo, workout: text})}
+            placeholder="How often do you workout?"
+          />
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Interests</Text>
+        <View style={styles.inputGroup}>
+          <Text style={styles.inputLabel}>Your Interests</Text>
+          <TextInput
+            style={styles.textInput}
+            value={profileInfo.interests}
+            onChangeText={(text) => setProfileInfo({...profileInfo, interests: text})}
+            placeholder="What are you interested in?"
+          />
+        </View>
+      </View>
+    </View>
+  );
 
   if (loading) {
     return (
@@ -276,6 +447,7 @@ const SettingsScreen = () => {
               </TouchableOpacity>
             )}
           </View>
+          {renderProfileInfoSection()}
         </ScrollView>
       )}
 
@@ -484,6 +656,35 @@ const styles = StyleSheet.create({
     color: '#FF3B30',
     marginLeft: 8,
     fontWeight: '600',
+  },
+  profileInfoContainer: {
+    paddingHorizontal: 20,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  rowInputs: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  halfInput: {
+    width: '48%',
+  },
+  inputLabel: {
+    fontSize: 14,
+    color: THEME.darkText,
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  textInput: {
+    backgroundColor: THEME.background,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    color: THEME.darkText,
   },
 });
 

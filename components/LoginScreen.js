@@ -47,17 +47,32 @@ const LoginScreen = ({ navigation }) => {
       });
 
       const data = await response.json();
-      setLoading(false);
-
-      if (response.ok) {
-        await AsyncStorage.setItem('auth_token', data.access_token);
-        navigation.replace('Home');
-      } else {
-        Alert.alert('Login Failed', data.detail || 'Invalid credentials');
+      
+      if (!response.ok) {
+        throw new Error(data.detail || 'Invalid credentials');
       }
+
+      if (!data.access_token) {
+        throw new Error('Invalid response from server');
+      }
+
+      // Store token and navigate
+      await AsyncStorage.setItem('auth_token', data.access_token);
+      
+      // Use navigation.reset instead of replace for more reliable navigation
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
     } catch (error) {
+      console.error('Login error:', error);
+      Alert.alert(
+        'Login Failed',
+        error.message || 'Something went wrong. Please try again later.',
+        [{ text: 'OK' }]
+      );
+    } finally {
       setLoading(false);
-      Alert.alert('Error', 'Something went wrong. Please try again later.');
     }
   };
 
