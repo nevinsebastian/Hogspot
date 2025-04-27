@@ -20,6 +20,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
 import SettingsScreen from './SettingsScreen';
+import { Image as ExpoImage } from 'expo-image';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -47,6 +48,7 @@ const ProfileScreen = () => {
   const [activeTab, setActiveTab] = useState('images');
   const [aboutText, setAboutText] = useState('A good listener. I love having a good talk to know each other\'s side 😊');
   const [editingAbout, setEditingAbout] = useState(false);
+  const [preloadedImages, setPreloadedImages] = useState({});
 
   const handleLogout = async () => {
     Alert.alert(
@@ -213,17 +215,57 @@ const ProfileScreen = () => {
     }
   };
 
+  // Preload next and previous images
+  const preloadImages = useCallback((currentIndex) => {
+    const nextIndex = currentIndex + 1;
+    const prevIndex = currentIndex - 1;
+
+    if (nextIndex < profileImages.length) {
+      const nextImage = profileImages[nextIndex];
+      if (nextImage && !preloadedImages[nextImage.id]) {
+        setPreloadedImages(prev => ({
+          ...prev,
+          [nextImage.id]: true
+        }));
+      }
+    }
+
+    if (prevIndex >= 0) {
+      const prevImage = profileImages[prevIndex];
+      if (prevImage && !preloadedImages[prevImage.id]) {
+        setPreloadedImages(prev => ({
+          ...prev,
+          [prevImage.id]: true
+        }));
+      }
+    }
+  }, [profileImages, preloadedImages]);
+
+  useEffect(() => {
+    if (profileImages.length > 0) {
+      preloadImages(currentImageIndex);
+    }
+  }, [currentImageIndex, profileImages, preloadImages]);
+
   const handleNextImage = useCallback(() => {
     if (currentImageIndex < profileImages.length - 1) {
-      setCurrentImageIndex(prev => prev + 1);
+      setCurrentImageIndex(prev => {
+        const newIndex = prev + 1;
+        preloadImages(newIndex);
+        return newIndex;
+      });
     }
-  }, [currentImageIndex, profileImages.length]);
+  }, [currentImageIndex, profileImages.length, preloadImages]);
 
   const handlePreviousImage = useCallback(() => {
     if (currentImageIndex > 0) {
-      setCurrentImageIndex(prev => prev - 1);
+      setCurrentImageIndex(prev => {
+        const newIndex = prev - 1;
+        preloadImages(newIndex);
+        return newIndex;
+      });
     }
-  }, [currentImageIndex]);
+  }, [currentImageIndex, preloadImages]);
 
   if (!userInfo) {
     return (
@@ -240,10 +282,39 @@ const ProfileScreen = () => {
       <View style={styles.mainContainer}>
         {/* Current Image */}
         {profileImages.length > 0 && (
-          <Image
+          <ExpoImage
             source={{ uri: profileImages[currentImageIndex]?.image_url }}
             style={styles.profileImage}
+            contentFit="cover"
+            transition={200}
+            cachePolicy="memory-disk"
+            placeholder={require('../assets/profileava.jpg')}
+            onError={(error) => {
+              console.error('Error loading profile image:', error);
+            }}
           />
+        )}
+        
+        {/* Preload next and previous images */}
+        {profileImages.length > 0 && (
+          <>
+            {currentImageIndex > 0 && (
+              <ExpoImage
+                source={{ uri: profileImages[currentImageIndex - 1]?.image_url }}
+                style={styles.hiddenImage}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+              />
+            )}
+            {currentImageIndex < profileImages.length - 1 && (
+              <ExpoImage
+                source={{ uri: profileImages[currentImageIndex + 1]?.image_url }}
+                style={styles.hiddenImage}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+              />
+            )}
+          </>
         )}
         
         {/* Gradient overlay */}
@@ -303,7 +374,7 @@ const ProfileScreen = () => {
           <View style={styles.aboutBox}>
             <Text style={styles.aboutTitle}>About</Text>
             <Text style={styles.aboutText}>
-              A good listener. I love having a good talk to know each other's side 😊
+              {aboutText}
             </Text>
           </View>
         </View>
@@ -616,6 +687,12 @@ const styles = StyleSheet.create({
   },
   preferencesSection: {
     marginTop: 20,
+  },
+  hiddenImage: {
+    position: 'absolute',
+    width: 1,
+    height: 1,
+    opacity: 0,
   },
 });
 

@@ -97,6 +97,7 @@ const HomeScreen = () => {
       }
 
       const data = await response.json();
+      console.log('User Info:', data);
       if (data) {
         setUserInfo(data);
       }
@@ -108,6 +109,16 @@ const HomeScreen = () => {
         [{ text: 'OK' }]
       );
     }
+  };
+
+  const getPriorityOneImage = (user) => {
+    if (!user?.images || !Array.isArray(user.images)) {
+      console.log('No images array found in user data');
+      return null;
+    }
+    const priorityOneImage = user.images.find(img => img.priority === 1);
+    console.log('Priority 1 Image:', priorityOneImage);
+    return priorityOneImage?.image_url || null;
   };
 
   const fetchHotspotData = async (latitude, longitude, page = 1) => {
@@ -303,12 +314,15 @@ const HomeScreen = () => {
           <View style={styles.newRectangle}>
             <TouchableOpacity onPress={navigateToProfile}>
               <ExpoImage
-                source={userInfo?.image_url ? { uri: userInfo.image_url } : require('../assets/profileava.jpg')}
+                source={getPriorityOneImage(userInfo) ? { uri: getPriorityOneImage(userInfo) } : require('../assets/profileava.jpg')}
                 style={styles.newImage}
                 contentFit="cover"
                 transition={200}
                 cachePolicy="memory-disk"
                 placeholder={require('../assets/profileava.jpg')}
+                onError={(error) => {
+                  console.error('Error loading profile image:', error);
+                }}
               />
             </TouchableOpacity>
           </View>
@@ -319,12 +333,15 @@ const HomeScreen = () => {
             <View style={styles.newRectangle}>
               <TouchableOpacity onPress={navigateToProfile}>
                 <ExpoImage
-                  source={userInfo?.image_url ? { uri: userInfo.image_url } : require('../assets/profileava.jpg')}
+                  source={getPriorityOneImage(userInfo) ? { uri: getPriorityOneImage(userInfo) } : require('../assets/profileava.jpg')}
                   style={styles.newImage}
                   contentFit="cover"
                   transition={200}
                   cachePolicy="memory-disk"
                   placeholder={require('../assets/profileava.jpg')}
+                  onError={(error) => {
+                    console.error('Error loading profile image:', error);
+                  }}
                 />
               </TouchableOpacity>
             </View>
