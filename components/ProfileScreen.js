@@ -271,6 +271,21 @@ const ProfileScreen = () => {
     }
   }, [currentImageIndex]);
 
+  // Add this function to calculate age
+  const calculateAge = (dob) => {
+    if (!dob) return '';
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age;
+  };
+
   if (!userInfo) {
     return (
       <View style={styles.loadingContainer}>
@@ -336,7 +351,7 @@ const ProfileScreen = () => {
           >
             <View style={styles.nameAgeContainer}>
               <Text style={styles.nameText}>{userInfo.name},</Text>
-              <Text style={styles.ageText}>{userInfo.date_of_birth}</Text>
+              <Text style={styles.ageText}>{calculateAge(userInfo.date_of_birth)}</Text>
             </View>
           </LinearGradient>
 
