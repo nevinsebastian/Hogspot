@@ -215,57 +215,61 @@ const ProfileScreen = () => {
     }
   };
 
-  // Preload next and previous images
-  const preloadImages = useCallback((currentIndex) => {
-    const nextIndex = currentIndex + 1;
-    const prevIndex = currentIndex - 1;
-
-    if (nextIndex < profileImages.length) {
-      const nextImage = profileImages[nextIndex];
-      if (nextImage && !preloadedImages[nextImage.id]) {
-        setPreloadedImages(prev => ({
-          ...prev,
-          [nextImage.id]: true
-        }));
-      }
-    }
-
-    if (prevIndex >= 0) {
-      const prevImage = profileImages[prevIndex];
-      if (prevImage && !preloadedImages[prevImage.id]) {
-        setPreloadedImages(prev => ({
-          ...prev,
-          [prevImage.id]: true
-        }));
-      }
-    }
-  }, [profileImages, preloadedImages]);
-
+  // Preload all images when component mounts or when profileImages changes
   useEffect(() => {
-    if (profileImages.length > 0) {
-      preloadImages(currentImageIndex);
-    }
-  }, [currentImageIndex, profileImages, preloadImages]);
+    const preloadAllImages = async () => {
+      if (profileImages.length > 0) {
+        const preloadPromises = profileImages.map(async (image) => {
+          if (!preloadedImages[image.id]) {
+            try {
+              await ExpoImage.prefetch(image.image_url);
+              setPreloadedImages(prev => ({
+                ...prev,
+                [image.id]: true
+              }));
+            } catch (error) {
+              console.error('Error preloading image:', error);
+            }
+          }
+        });
+        await Promise.all(preloadPromises);
+      }
+    };
 
+    preloadAllImages();
+  }, [profileImages]);
+
+  // Optimize image loading with better caching
+  const renderProfileImage = () => {
+    if (profileImages.length === 0) return null;
+
+    return (
+      <ExpoImage
+        source={{ uri: profileImages[currentImageIndex]?.image_url }}
+        style={styles.profileImage}
+        contentFit="cover"
+        transition={100}
+        cachePolicy="memory-disk"
+        placeholder={require('../assets/profileava.jpg')}
+        onError={(error) => {
+          console.error('Error loading profile image:', error);
+        }}
+      />
+    );
+  };
+
+  // Optimize navigation handlers
   const handleNextImage = useCallback(() => {
     if (currentImageIndex < profileImages.length - 1) {
-      setCurrentImageIndex(prev => {
-        const newIndex = prev + 1;
-        preloadImages(newIndex);
-        return newIndex;
-      });
+      setCurrentImageIndex(prev => prev + 1);
     }
-  }, [currentImageIndex, profileImages.length, preloadImages]);
+  }, [currentImageIndex, profileImages.length]);
 
   const handlePreviousImage = useCallback(() => {
     if (currentImageIndex > 0) {
-      setCurrentImageIndex(prev => {
-        const newIndex = prev - 1;
-        preloadImages(newIndex);
-        return newIndex;
-      });
+      setCurrentImageIndex(prev => prev - 1);
     }
-  }, [currentImageIndex, preloadImages]);
+  }, [currentImageIndex]);
 
   if (!userInfo) {
     return (
@@ -281,41 +285,7 @@ const ProfileScreen = () => {
       
       <View style={styles.mainContainer}>
         {/* Current Image */}
-        {profileImages.length > 0 && (
-          <ExpoImage
-            source={{ uri: profileImages[currentImageIndex]?.image_url }}
-            style={styles.profileImage}
-            contentFit="cover"
-            transition={200}
-            cachePolicy="memory-disk"
-            placeholder={require('../assets/profileava.jpg')}
-            onError={(error) => {
-              console.error('Error loading profile image:', error);
-            }}
-          />
-        )}
-        
-        {/* Preload next and previous images */}
-        {profileImages.length > 0 && (
-          <>
-            {currentImageIndex > 0 && (
-              <ExpoImage
-                source={{ uri: profileImages[currentImageIndex - 1]?.image_url }}
-                style={styles.hiddenImage}
-                contentFit="cover"
-                cachePolicy="memory-disk"
-              />
-            )}
-            {currentImageIndex < profileImages.length - 1 && (
-              <ExpoImage
-                source={{ uri: profileImages[currentImageIndex + 1]?.image_url }}
-                style={styles.hiddenImage}
-                contentFit="cover"
-                cachePolicy="memory-disk"
-              />
-            )}
-          </>
-        )}
+        {renderProfileImage()}
         
         {/* Gradient overlay */}
         <LinearGradient
