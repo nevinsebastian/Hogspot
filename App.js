@@ -21,6 +21,7 @@ const Chat = lazy(() => import('./components/Chat'));
 const ProfileScreen = lazy(() => import('./components/ProfileScreen'));
 const UploadPhotoScreen = lazy(() => import('./components/UploadPhotoScreen'));
 const SettingsScreen = lazy(() => import('./components/SettingsScreen'));
+const OnboardingScreen = lazy(() => import('./components/OnboardingScreen'));
 
 const Stack = createStackNavigator();
 SplashScreen.preventAutoHideAsync();
@@ -36,6 +37,7 @@ const App = () => {
   const [appReady, setAppReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(null);
   const [initialRoute, setInitialRoute] = useState('Welcome');
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
 
   useEffect(() => {
     const prepareApp = async () => {
@@ -48,7 +50,25 @@ const App = () => {
             const currentTime = Date.now() / 1000;
             if (decodedToken.exp && decodedToken.exp > currentTime) {
               setIsLoggedIn(true);
-              setInitialRoute('Home');
+              
+              // Check if user needs onboarding
+              const response = await fetch('http://15.206.127.132:8000/users/user-info', {
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                },
+              });
+              
+              if (response.ok) {
+                const userInfo = await response.json();
+                if (!userInfo.gender || !userInfo.gender_preference) {
+                  setNeedsOnboarding(true);
+                  setInitialRoute('Onboarding');
+                } else {
+                  setInitialRoute('Home');
+                }
+              } else {
+                setInitialRoute('Home');
+              }
             } else {
               await AsyncStorage.removeItem('auth_token');
               setIsLoggedIn(false);
@@ -99,6 +119,9 @@ const App = () => {
             <Stack.Screen name="Register" component={RegisterScreen} />
             <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
             <Stack.Screen name="CompleteRegistration" component={CompleteRegistrationScreen} />
+            
+            {/* Onboarding Screen */}
+            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
             
             {/* Main App Screens */}
             <Stack.Screen name="Home" component={HomeScreen} />

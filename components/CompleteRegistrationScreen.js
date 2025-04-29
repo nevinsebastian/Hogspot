@@ -186,11 +186,32 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
         await AsyncStorage.setItem('auth_token', loginData.access_token);
         await AsyncStorage.setItem('userEmail', email);
         
-        // Navigate to Home screen instead of Settings (to match LoginScreen behavior)
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Home' }],
+        // Check if user needs onboarding
+        const userInfoResponse = await fetch('http://15.206.127.132:8000/users/user-info', {
+          headers: {
+            'Authorization': `Bearer ${loginData.access_token}`,
+          },
         });
+        
+        if (userInfoResponse.ok) {
+          const userInfo = await userInfoResponse.json();
+          if (!userInfo.gender || !userInfo.gender_preference) {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Onboarding' }],
+            });
+          } else {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Home' }],
+            });
+          }
+        } else {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Home' }],
+          });
+        }
       } else {
         console.error('Login failed:', loginData);
         // If login fails, navigate to login screen

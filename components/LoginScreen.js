@@ -56,14 +56,35 @@ const LoginScreen = ({ navigation }) => {
         throw new Error('Invalid response from server');
       }
 
-      // Store token and navigate
+      // Store token
       await AsyncStorage.setItem('auth_token', data.access_token);
       
-      // Use navigation.reset instead of replace for more reliable navigation
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Home' }],
+      // Check if user needs onboarding
+      const userInfoResponse = await fetch('http://15.206.127.132:8000/users/user-info', {
+        headers: {
+          'Authorization': `Bearer ${data.access_token}`,
+        },
       });
+      
+      if (userInfoResponse.ok) {
+        const userInfo = await userInfoResponse.json();
+        if (!userInfo.gender || !userInfo.gender_preference) {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Onboarding' }],
+          });
+        } else {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Home' }],
+          });
+        }
+      } else {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
+        });
+      }
     } catch (error) {
       console.error('Login error:', error);
       Alert.alert(
