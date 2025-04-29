@@ -18,6 +18,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
 import Slider from '@react-native-community/slider';
+import { Image as ExpoImage } from 'expo-image';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -205,6 +206,7 @@ const SettingsScreen = () => {
   ];
 
   const [hasProfileChanges, setHasProfileChanges] = useState(false);
+  const [preloadedImages, setPreloadedImages] = useState({});
 
   useEffect(() => {
     console.log('SettingsScreen mounted');
@@ -213,6 +215,29 @@ const SettingsScreen = () => {
       Alert.alert('Error', 'Failed to load profile images. Please try again.');
     });
   }, []);
+
+  useEffect(() => {
+    const preloadAllImages = async () => {
+      if (tempProfileImages.length > 0) {
+        const preloadPromises = tempProfileImages.map(async (image) => {
+          if (!preloadedImages[image.id]) {
+            try {
+              await ExpoImage.prefetch(image.image_url);
+              setPreloadedImages(prev => ({
+                ...prev,
+                [image.id]: true
+              }));
+            } catch (error) {
+              console.error('Error preloading image:', error);
+            }
+          }
+        });
+        await Promise.all(preloadPromises);
+      }
+    };
+
+    preloadAllImages();
+  }, [tempProfileImages]);
 
   const fetchProfileImages = async () => {
     try {
@@ -678,9 +703,16 @@ const SettingsScreen = () => {
                   delayLongPress={150}
                   disabled={isActive}
                 >
-                  <Image 
-                    source={{ uri: item.image_url }} 
-                    style={styles.orderImage} 
+                  <ExpoImage
+                    source={{ uri: item.image_url }}
+                    style={styles.orderImage}
+                    contentFit="cover"
+                    transition={100}
+                    cachePolicy="memory-disk"
+                    placeholder={require('../assets/profileava.jpg')}
+                    onError={(error) => {
+                      console.error('Error loading image:', error);
+                    }}
                   />
                   <View style={styles.imageItemContent}>
                     <Text style={styles.orderPriority}>Priority {item.priority}</Text>

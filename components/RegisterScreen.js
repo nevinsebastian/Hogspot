@@ -25,6 +25,7 @@ const RegisterScreen = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const validateAndSetEmail = (text) => {
     setEmail(text);
@@ -43,6 +44,7 @@ const RegisterScreen = ({ navigation }) => {
       return;
     }
 
+    setIsVerifying(true);
     try {
       const response = await fetch(`http://15.206.127.132:8000/verify/verify-email?email=${encodeURIComponent(email)}`, {
         method: 'POST',
@@ -61,6 +63,8 @@ const RegisterScreen = ({ navigation }) => {
     } catch (error) {
       console.error('Email verification error:', error);
       Alert.alert('Error', 'Something went wrong. Please try again later.');
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -150,10 +154,11 @@ const RegisterScreen = ({ navigation }) => {
                     style={[styles.button, !email || emailError ? styles.buttonDisabled : null]}
                     contentStyle={styles.buttonContent}
                     labelStyle={styles.buttonLabel}
-                    disabled={!email || !!emailError}
+                    disabled={!email || !!emailError || isVerifying}
                     buttonColor={THEME.primary}
+                    loading={isVerifying}
                   >
-                    Continue
+                    {isVerifying ? 'Sending OTP...' : 'Continue'}
                   </Button>
 
                   <View style={styles.dividerContainer}>
