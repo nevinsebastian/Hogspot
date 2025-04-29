@@ -223,10 +223,10 @@ const ProfileScreen = () => {
           if (!preloadedImages[image.id]) {
             try {
               await ExpoImage.prefetch(image.image_url);
-              setPreloadedImages(prev => ({
-                ...prev,
+        setPreloadedImages(prev => ({
+          ...prev,
                 [image.id]: true
-              }));
+        }));
             } catch (error) {
               console.error('Error preloading image:', error);
             }

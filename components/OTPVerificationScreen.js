@@ -19,6 +19,8 @@ const THEME = {
   text: '#2D2D2D',
 };
 
+const OTP_TIME_LIMIT = 90; // 1:30 minutes in seconds
+
 const OTPVerificationScreen = ({ navigation, route }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [isComplete, setIsComplete] = useState(false);
@@ -26,13 +28,35 @@ const OTPVerificationScreen = ({ navigation, route }) => {
   const inputRef = useRef();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(OTP_TIME_LIMIT);
+  const [isTimerActive, setIsTimerActive] = useState(true);
 
   useEffect(() => {
     // Auto focus the input when screen mounts
     setTimeout(() => {
       inputRef.current?.focus();
     }, 100);
+
+    // Start the countdown timer
+    const timer = setInterval(() => {
+      setTimeRemaining((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(timer);
+          setIsTimerActive(false);
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, []);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
 
   const handleOtpChange = (text) => {
     // Remove any non-numeric characters
@@ -51,6 +75,8 @@ const OTPVerificationScreen = ({ navigation, route }) => {
   };
 
   const handleResendCode = async () => {
+    if (isTimerActive) return;
+
     try {
       const response = await fetch(`http://15.206.127.132:8000/verify/verify-email?email=${encodeURIComponent(email)}`, {
         method: 'POST',
@@ -62,6 +88,9 @@ const OTPVerificationScreen = ({ navigation, route }) => {
       const data = await response.json();
       
       if (response.ok && data.msg === "OTP sent to your email.") {
+        // Reset timer and states
+        setTimeRemaining(OTP_TIME_LIMIT);
+        setIsTimerActive(true);
         Alert.alert('Success', 'New OTP has been sent to your email.');
       } else {
         Alert.alert('Error', 'Failed to resend OTP. Please try again.');
@@ -73,6 +102,11 @@ const OTPVerificationScreen = ({ navigation, route }) => {
   };
 
   const handleVerifyOTP = async () => {
+    if (!isTimerActive) {
+      Alert.alert('Error', 'OTP has expired. Please request a new one.');
+      return;
+    }
+
     // Join the OTP array into a string
     const otpCode = otp.join('');
     
@@ -94,7 +128,7 @@ const OTPVerificationScreen = ({ navigation, route }) => {
       );
 
       const data = await response.json();
-      console.log('OTP verification response:', data); // Add logging
+      console.log('OTP verification response:', data);
 
       if (response.ok && data.msg === "Email verified successfully.") {
         navigation.navigate('CompleteRegistration', { email });
@@ -102,7 +136,7 @@ const OTPVerificationScreen = ({ navigation, route }) => {
         Alert.alert('Error', data.detail || 'Invalid OTP');
       }
     } catch (error) {
-      console.error('OTP verification error:', error); // Add error logging
+      console.error('OTP verification error:', error);
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
@@ -152,21 +186,29 @@ const OTPVerificationScreen = ({ navigation, route }) => {
             </View>
           ) : (
             <TouchableOpacity
-              style={[styles.confirmButton, !isComplete && styles.confirmButtonDisabled]}
+              style={[styles.confirmButton, (!isComplete || !isTimerActive) && styles.confirmButtonDisabled]}
               onPress={handleVerifyOTP}
-              disabled={!isComplete || loading}
+              disabled={!isComplete || !isTimerActive || loading}
             >
-              <Text style={[styles.confirmButtonText, !isComplete && styles.confirmButtonTextDisabled]}>
+              <Text style={[styles.confirmButtonText, (!isComplete || !isTimerActive) && styles.confirmButtonTextDisabled]}>
                 Confirm
               </Text>
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity onPress={handleResendCode} disabled={loading}>
-            <View style={styles.resendContainer}>
-              <Text style={styles.resendText}>Haven't received an email? </Text>
-              <Text style={[styles.resendLink, loading && styles.resendLinkDisabled]}>Send again</Text>
-            </View>
+          <TouchableOpacity 
+            onPress={handleResendCode} 
+            disabled={isTimerActive || loading}
+            style={styles.resendContainer}
+          >
+            <Text style={styles.resendText}>Haven't received an email? </Text>
+            <Text style={[
+              styles.resendLink, 
+              isTimerActive && styles.resendLinkDisabled,
+              !isTimerActive && styles.resendLinkActive
+            ]}>
+              {isTimerActive ? `Send again (${formatTime(timeRemaining)})` : 'Send again'}
+            </Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -284,7 +326,12 @@ const styles = StyleSheet.create({
     backgroundColor: THEME.primary,
     opacity: 0.8,
   },
+  resendLinkActive: {
+    color: THEME.primaryDark,
+    fontWeight: '600',
+  },
   resendLinkDisabled: {
+    color: THEME.text,
     opacity: 0.5,
   },
 });

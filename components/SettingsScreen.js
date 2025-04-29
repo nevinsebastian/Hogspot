@@ -704,8 +704,8 @@ const SettingsScreen = () => {
                   disabled={isActive}
                 >
                   <ExpoImage
-                    source={{ uri: item.image_url }}
-                    style={styles.orderImage}
+                    source={{ uri: item.image_url }} 
+                    style={styles.orderImage} 
                     contentFit="cover"
                     transition={100}
                     cachePolicy="memory-disk"
