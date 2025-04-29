@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert, TouchableOpacity, SafeAreaView } from 'react-native';
 import { TextInput, Button, Text, HelperText } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Define theme colors (matching RegisterScreen)
 const THEME = {
@@ -22,10 +22,15 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [dateOfBirth, setDateOfBirth] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [day, setDay] = useState('');
+  const [month, setMonth] = useState('');
+  const [year, setYear] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isAgeValid, setIsAgeValid] = useState(true);
+  
+  const monthRef = useRef(null);
+  const yearRef = useRef(null);
 
   const validatePassword = (pass, confirm) => {
     if (pass.length < 6) {
@@ -56,6 +61,74 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
     }));
   };
 
+  const checkAge = (d, m, y) => {
+    if (!d || !m || !y || y.length !== 4) return true; // Don't show error until complete date is entered
+    
+    const birthDate = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+    const today = new Date();
+    
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    // Adjust age if birthday hasn't occurred this year
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age >= 18;
+  };
+
+  const handleDayChange = (text) => {
+    const numericValue = text.replace(/[^0-9]/g, '');
+    if (numericValue.length <= 2) {
+      setDay(numericValue);
+      setIsAgeValid(checkAge(numericValue, month, year));
+      if (numericValue.length === 2 && parseInt(numericValue) <= 31 && parseInt(numericValue) > 0) {
+        monthRef.current?.focus();
+      }
+    }
+  };
+
+  const handleMonthChange = (text) => {
+    const numericValue = text.replace(/[^0-9]/g, '');
+    if (numericValue.length <= 2) {
+      setMonth(numericValue);
+      setIsAgeValid(checkAge(day, numericValue, year));
+      if (numericValue.length === 2 && parseInt(numericValue) <= 12 && parseInt(numericValue) > 0) {
+        yearRef.current?.focus();
+      }
+    }
+  };
+
+  const handleYearChange = (text) => {
+    const numericValue = text.replace(/[^0-9]/g, '');
+    if (numericValue.length <= 4) {
+      setYear(numericValue);
+      setIsAgeValid(checkAge(day, month, numericValue));
+    }
+  };
+
+  const validateDate = () => {
+    const currentDate = new Date();
+    const inputDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    
+    // Check if date is valid
+    if (inputDate.toString() === 'Invalid Date') {
+      return 'Please enter a valid date';
+    }
+
+    // Check if all parts are filled
+    if (!day || !month || !year || year.length !== 4) {
+      return 'Please enter a complete date';
+    }
+
+    if (!isAgeValid) {
+      return 'You must be at least 18 years old';
+    }
+
+    return '';
+  };
+
   const validateForm = () => {
     const newErrors = {};
     
@@ -67,35 +140,71 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
     if (passwordError) {
       newErrors.password = passwordError;
     }
-    
-    const today = new Date();
-    const age = today.getFullYear() - dateOfBirth.getFullYear();
-    const monthDiff = today.getMonth() - dateOfBirth.getMonth();
-    const actualAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < dateOfBirth.getDate()) 
-      ? age - 1 
-      : age;
-      
-    if (actualAge < 18) {
-      newErrors.dateOfBirth = 'You must be at least 18 years old';
+
+    const dateError = validateDate();
+    if (dateError) {
+      newErrors.dateOfBirth = dateError;
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const formatDate = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+  const formatDateForApi = () => {
+    const paddedDay = day.padStart(2, '0');
+    const paddedMonth = month.padStart(2, '0');
+    return `${year}-${paddedMonth}-${paddedDay}`;
   };
 
-  const handleDateChange = (event, selectedDate) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      setDateOfBirth(selectedDate);
-      // Clear date error if exists
-      setErrors(prev => ({ ...prev, dateOfBirth: undefined }));
+  const handleLogin = async (email, password) => {
+    try {
+      console.log('Attempting login with:', { email });
+      
+      // Create form data
+      const formData = new URLSearchParams();
+      formData.append('username', email);
+      formData.append('password', password);
+      formData.append('grant_type', '');
+      formData.append('scope', '');
+      formData.append('client_id', '');
+      formData.append('client_secret', '');
+
+      const loginResponse = await fetch('http://15.206.127.132:8000/login', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+      });
+
+      const loginData = await loginResponse.json();
+      console.log('Login response:', loginData);
+
+      if (loginResponse.ok && loginData.access_token) {
+        // Store the token with the same key as LoginScreen
+        await AsyncStorage.setItem('auth_token', loginData.access_token);
+        await AsyncStorage.setItem('userEmail', email);
+        
+        // Navigate to Home screen instead of Settings (to match LoginScreen behavior)
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
+        });
+      } else {
+        console.error('Login failed:', loginData);
+        // If login fails, navigate to login screen
+        navigation.navigate('Login', {
+          email,
+          message: 'Registration successful. Please log in to continue.'
+        });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      navigation.navigate('Login', {
+        email,
+        message: 'Registration successful. Please log in to continue.'
+      });
     }
   };
 
@@ -117,7 +226,7 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
           email,
           password,
           confirm_password: confirmPassword,
-          date_of_birth: formatDate(dateOfBirth),
+          date_of_birth: formatDateForApi(),
         }),
       });
 
@@ -125,8 +234,11 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
       console.log('Registration response:', data);
 
       if (response.status === 201) {
-        navigation.navigate('Login');
+        // Registration successful, attempt immediate login
+        console.log('Registration successful, attempting immediate login');
+        await handleLogin(email, password);
       } else {
+        console.error('Registration failed:', data);
         Alert.alert('Error', data.detail || 'Registration failed. Please try again.');
       }
     } catch (error) {
@@ -168,7 +280,7 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
               }}
               style={styles.input}
               mode="outlined"
-              placeholder="First name on ID"
+              placeholder="Name"
               error={!!errors.name}
               outlineStyle={styles.inputOutline}
               theme={{
@@ -202,46 +314,85 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
             />
 
             <Text style={styles.label}>Date of birth</Text>
-            <TouchableOpacity 
-              onPress={() => setShowDatePicker(true)}
-              style={styles.datePickerButton}
-            >
-              <TextInput
-                value={formatDate(dateOfBirth)}
-                style={styles.input}
-                mode="outlined"
-                editable={false}
-                error={!!errors.dateOfBirth}
-                right={<TextInput.Icon icon="calendar" onPress={() => setShowDatePicker(true)} />}
-                outlineStyle={styles.inputOutline}
-                theme={{
-                  colors: {
-                    primary: THEME.primaryDark,
-                    text: THEME.text,
-                    error: THEME.error,
-                    background: THEME.inputBackground,
-                  },
-                  roundness: 8,
-                }}
-              />
-            </TouchableOpacity>
-            {errors.dateOfBirth && <HelperText type="error">{errors.dateOfBirth}</HelperText>}
+            <View style={styles.dateContainer}>
+              <View style={styles.dateInputGroup}>
+                <TextInput
+                  value={day}
+                  onChangeText={handleDayChange}
+                  style={[styles.input, styles.dateInput]}
+                  mode="outlined"
+                  placeholder="DD"
+                  keyboardType="number-pad"
+                  maxLength={2}
+                  error={!!errors.dateOfBirth || !isAgeValid}
+                  outlineStyle={styles.inputOutline}
+                  theme={{
+                    colors: {
+                      primary: THEME.primaryDark,
+                      text: THEME.text,
+                      error: THEME.error,
+                      placeholder: THEME.placeholder,
+                      background: THEME.inputBackground,
+                    },
+                    roundness: 8,
+                  }}
+                />
+                <Text style={styles.dateSeparator}>/</Text>
+                <TextInput
+                  ref={monthRef}
+                  value={month}
+                  onChangeText={handleMonthChange}
+                  style={[styles.input, styles.dateInput]}
+                  mode="outlined"
+                  placeholder="MM"
+                  keyboardType="number-pad"
+                  maxLength={2}
+                  error={!!errors.dateOfBirth || !isAgeValid}
+                  outlineStyle={styles.inputOutline}
+                  theme={{
+                    colors: {
+                      primary: THEME.primaryDark,
+                      text: THEME.text,
+                      error: THEME.error,
+                      placeholder: THEME.placeholder,
+                      background: THEME.inputBackground,
+                    },
+                    roundness: 8,
+                  }}
+                />
+                <Text style={styles.dateSeparator}>/</Text>
+                <TextInput
+                  ref={yearRef}
+                  value={year}
+                  onChangeText={handleYearChange}
+                  style={[styles.input, styles.dateInput, styles.yearInput]}
+                  mode="outlined"
+                  placeholder="YYYY"
+                  keyboardType="number-pad"
+                  maxLength={4}
+                  error={!!errors.dateOfBirth || !isAgeValid}
+                  outlineStyle={styles.inputOutline}
+                  theme={{
+                    colors: {
+                      primary: THEME.primaryDark,
+                      text: THEME.text,
+                      error: THEME.error,
+                      placeholder: THEME.placeholder,
+                      background: THEME.inputBackground,
+                    },
+                    roundness: 8,
+                  }}
+                />
+              </View>
+            </View>
+            {(errors.dateOfBirth || !isAgeValid) && (
+              <HelperText type="error" style={styles.errorText}>
+                {errors.dateOfBirth || 'You must be at least 18 years old'}
+              </HelperText>
+            )}
             <Text style={styles.helperText}>
               To sign up, you need to be at least 18. Your birthday won't be shared with other people who use Hogspot.
             </Text>
-
-            {showDatePicker && (
-              <DateTimePicker
-                value={dateOfBirth}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={handleDateChange}
-                maximumDate={new Date()}
-                minimumDate={new Date(1900, 0, 1)}
-                textColor={THEME.text}
-                themeVariant="light"
-              />
-            )}
 
             <Text style={styles.label}>Password</Text>
             <TextInput
@@ -300,9 +451,9 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
             <Button
               mode="contained"
               onPress={handleRegister}
-              style={[styles.button, loading && styles.buttonDisabled]}
+              style={[styles.button, (loading || !isAgeValid) && styles.buttonDisabled]}
               loading={loading}
-              disabled={loading}
+              disabled={loading || !isAgeValid}
               contentStyle={styles.buttonContent}
               labelStyle={styles.buttonLabel}
             >
@@ -362,8 +513,25 @@ const styles = StyleSheet.create({
   inputOutline: {
     borderRadius: 8,
   },
-  datePickerButton: {
+  dateContainer: {
     width: '100%',
+  },
+  dateInputGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dateInput: {
+    flex: 2,
+    textAlign: 'center',
+  },
+  yearInput: {
+    flex: 3,
+  },
+  dateSeparator: {
+    fontSize: 20,
+    color: THEME.text,
+    marginHorizontal: 4,
   },
   helperText: {
     fontSize: 12,
@@ -391,6 +559,11 @@ const styles = StyleSheet.create({
     color: THEME.text,
     opacity: 0.7,
     marginTop: 16,
+  },
+  errorText: {
+    color: THEME.error,
+    marginTop: 4,
+    marginBottom: 4,
   },
 });
 
