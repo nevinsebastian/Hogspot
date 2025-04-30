@@ -177,6 +177,7 @@ const HomeScreen = () => {
       } else if (data.status === 'failure') {
         setIsInHotspot(false);
         setOtherUsers([]);
+        navigation.navigate('Discover');
       }
     } catch (error) {
       console.error('Error fetching hotspot data:', error);
