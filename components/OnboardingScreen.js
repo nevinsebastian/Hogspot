@@ -634,7 +634,15 @@ const OnboardingScreen = () => {
         {currentStep > 2 && (
           <TouchableOpacity 
             style={styles.skipButton}
-            onPress={() => setCurrentStep(currentStep + 1)}
+            onPress={() => {
+              if (currentStep === steps.length - 1) {
+                // If on last step, treat as complete with null interests
+                setSelectedInterests([]);
+                handleNext();
+              } else {
+                setCurrentStep(currentStep + 1);
+              }
+            }}
           >
             <Text style={styles.skipButtonText}>Skip</Text>
           </TouchableOpacity>
@@ -1002,8 +1010,8 @@ const styles = StyleSheet.create({
     margin: 6,
   },
   selectedPillOption: {
-    borderColor: '#0066CC',
-    backgroundColor: '#0066CC',
+    borderColor: '#c188dd',
+    backgroundColor: '#DD88CF',
   },
   pillOptionText: {
     fontSize: 14,
