@@ -30,7 +30,7 @@ const LoginScreen = ({ navigation }) => {
 
     setLoading(true);
     try {
-      const response = await fetch('http://15.206.127.132:8000/login', {
+      const response = await fetch('http://18.207.241.126/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
