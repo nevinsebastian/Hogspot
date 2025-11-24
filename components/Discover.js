@@ -478,7 +478,7 @@ const Discover = () => {
         }
 
         // Fetch hotspots
-        const response = await fetch('http://15.206.127.132:8000/hotspot/all');
+        const response = await fetch('http://18.207.241.126/hotspot/all');
         const data = await response.json();
         
         // Calculate distances and add to hotspot data

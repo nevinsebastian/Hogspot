@@ -74,7 +74,7 @@ const UploadPhotoScreen = ({ navigation }) => {
         });
       });
 
-      const response = await fetch('http://15.206.127.132:8000/users/upload_images', {
+      const response = await fetch('http://18.207.241.126/users/upload_images', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

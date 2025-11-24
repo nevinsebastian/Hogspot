@@ -86,7 +86,7 @@ const HomeScreen = () => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch('http://15.206.127.132:8000/users/user-info', {
+      const response = await fetch('http://18.207.241.126/users/user-info', {
         method: 'GET',
         headers: {
           'accept': 'application/json',
@@ -136,7 +136,7 @@ const HomeScreen = () => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`http://15.206.127.132:8000/hotspot/start_swiping?page=${page}&limit=10`, {
+      const response = await fetch(`http://18.207.241.126/hotspot/start_swiping?page=${page}&limit=10`, {
         method: 'POST',
         headers: {
           'accept': 'application/json',
@@ -259,7 +259,7 @@ const HomeScreen = () => {
 
     try {
       const token = await AsyncStorage.getItem('auth_token');
-      const response = await fetch('http://15.206.127.132:8000/swipe/', {
+      const response = await fetch('http://18.207.241.126/swipe/', {
         method: 'POST',
         headers: {
           'accept': 'application/json',

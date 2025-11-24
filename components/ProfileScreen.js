@@ -84,7 +84,7 @@ const ProfileScreen = () => {
     const fetchUserInfo = async () => {
       try {
         const token = await AsyncStorage.getItem('auth_token');
-        const response = await fetch('http://15.206.127.132:8000/users/user-info', {
+        const response = await fetch('http://18.207.241.126/users/user-info', {
           method: 'GET',
           headers: {
             'accept': 'application/json',
@@ -107,7 +107,7 @@ const ProfileScreen = () => {
   const fetchProfileImages = useCallback(async () => {
     try {
       const token = await AsyncStorage.getItem('auth_token');
-      const response = await fetch('http://15.206.127.132:8000/users/profile_images', {
+      const response = await fetch('http://18.207.241.126/users/profile_images', {
         method: 'GET',
         headers: {
           'accept': 'application/json',
@@ -146,7 +146,7 @@ const ProfileScreen = () => {
   const updateImagePriority = async (imageId, newPriority) => {
     const token = await AsyncStorage.getItem('auth_token');
     const response = await fetch(
-      `http://15.206.127.132:8000/users/update_image_priority/${imageId}?priority=${newPriority}`,
+      `http://18.207.241.126/users/update_image_priority/${imageId}?priority=${newPriority}`,
       {
         method: 'PUT',
         headers: {

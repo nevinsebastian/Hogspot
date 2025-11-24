@@ -78,7 +78,7 @@ const OTPVerificationScreen = ({ navigation, route }) => {
     if (isTimerActive) return;
 
     try {
-      const response = await fetch(`http://15.206.127.132:8000/verify/verify-email?email=${encodeURIComponent(email)}`, {
+      const response = await fetch(`http://18.207.241.126/verify/verify-email?email=${encodeURIComponent(email)}`, {
         method: 'POST',
         headers: {
           'accept': 'application/json',
@@ -118,7 +118,7 @@ const OTPVerificationScreen = ({ navigation, route }) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://15.206.127.132:8000/verify/verify-otp?email=${encodeURIComponent(email)}&otp_code=${otpCode}`,
+        `http://18.207.241.126/verify/verify-otp?email=${encodeURIComponent(email)}&otp_code=${otpCode}`,
         {
           method: 'POST',
           headers: {

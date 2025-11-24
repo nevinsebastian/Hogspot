@@ -248,7 +248,7 @@ const SettingsScreen = () => {
         throw new Error('Authentication token not found');
       }
 
-      const response = await fetch('http://15.206.127.132:8000/users/profile_images', {
+      const response = await fetch('http://18.207.241.126/users/profile_images', {
         method: 'GET',
         headers: {
           'accept': 'application/json',
@@ -279,7 +279,7 @@ const SettingsScreen = () => {
   const updateImagePriority = async (imageId, newPriority) => {
     const token = await AsyncStorage.getItem('auth_token');
     const response = await fetch(
-      `http://15.206.127.132:8000/users/update_image_priority/${imageId}?priority=${newPriority}`,
+      `http://18.207.241.126/users/update_image_priority/${imageId}?priority=${newPriority}`,
       {
         method: 'PUT',
         headers: {
@@ -409,7 +409,7 @@ const SettingsScreen = () => {
 
       console.log('Sending request body:', requestBody);
 
-      const response = await fetch('http://15.206.127.132:8000/users/complete_profile', {
+      const response = await fetch('http://18.207.241.126/users/complete_profile', {
         method: 'PUT',
         headers: {
           'accept': 'application/json',

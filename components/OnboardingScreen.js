@@ -222,7 +222,7 @@ const OnboardingScreen = () => {
         );
 
         // First API call: Complete profile
-        const profileResponse = await fetch('http://15.206.127.132:8000/users/complete_profile', {
+        const profileResponse = await fetch('http://18.207.241.126/users/complete_profile', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -249,7 +249,7 @@ const OnboardingScreen = () => {
             }
           });
 
-          const photoResponse = await fetch('http://15.206.127.132:8000/users/upload_images', {
+          const photoResponse = await fetch('http://18.207.241.126/users/upload_images', {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,

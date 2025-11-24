@@ -30,6 +30,9 @@ const LoginScreen = ({ navigation }) => {
 
     setLoading(true);
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       const response = await fetch('http://18.207.241.126/login', {
         method: 'POST',
         headers: {
@@ -37,14 +40,17 @@ const LoginScreen = ({ navigation }) => {
           Accept: 'application/json',
         },
         body: new URLSearchParams({
+          grant_type: '',
           username,
           password,
-          grant_type: '',
           scope: '',
           client_id: '',
           client_secret: '',
         }).toString(),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       const data = await response.json();
       
@@ -52,44 +58,28 @@ const LoginScreen = ({ navigation }) => {
         throw new Error(data.detail || 'Invalid credentials');
       }
 
-      if (!data.access_token) {
+      if (!data.access_token || !data.token_type) {
         throw new Error('Invalid response from server');
       }
 
-      // Store token
-      await AsyncStorage.setItem('auth_token', data.access_token);
-      
-      // Check if user needs onboarding
-      const userInfoResponse = await fetch('http://15.206.127.132:8000/users/user-info', {
-        headers: {
-          'Authorization': `Bearer ${data.access_token}`,
-        },
+      await AsyncStorage.multiSet([
+        ['auth_token', data.access_token],
+        ['token_type', data.token_type],
+      ]);
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
       });
-      
-      if (userInfoResponse.ok) {
-        const userInfo = await userInfoResponse.json();
-        if (!userInfo.gender || !userInfo.gender_preference) {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Onboarding' }],
-          });
-        } else {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Home' }],
-          });
-        }
-      } else {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Home' }],
-        });
-      }
     } catch (error) {
+      const message =
+        error.name === 'AbortError'
+          ? 'Request timed out. Please check your connection and try again.'
+          : error.message || 'Something went wrong. Please try again later.';
       console.error('Login error:', error);
       Alert.alert(
         'Login Failed',
-        error.message || 'Something went wrong. Please try again later.',
+        message,
         [{ text: 'OK' }]
       );
     } finally {

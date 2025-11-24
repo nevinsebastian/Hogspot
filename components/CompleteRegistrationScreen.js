@@ -169,7 +169,7 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
       formData.append('client_id', '');
       formData.append('client_secret', '');
 
-      const loginResponse = await fetch('http://15.206.127.132:8000/login', {
+      const loginResponse = await fetch('http://18.207.241.126/login', {
         method: 'POST',
         headers: {
           'accept': 'application/json',
@@ -187,7 +187,7 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
         await AsyncStorage.setItem('userEmail', email);
         
         // Check if user needs onboarding
-        const userInfoResponse = await fetch('http://15.206.127.132:8000/users/user-info', {
+        const userInfoResponse = await fetch('http://18.207.241.126/users/user-info', {
           headers: {
             'Authorization': `Bearer ${loginData.access_token}`,
           },
@@ -236,7 +236,7 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
 
     setLoading(true);
     try {
-      const response = await fetch('http://15.206.127.132:8000/users/register', {
+      const response = await fetch('http://18.207.241.126/users/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

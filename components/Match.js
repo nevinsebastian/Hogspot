@@ -39,7 +39,7 @@ const Match = () => {
   const fetchMatches = async () => {
     try {
       const token = await AsyncStorage.getItem('auth_token');
-      const response = await fetch('http://15.206.127.132:8000/matches/', {
+      const response = await fetch('http://18.207.241.126/matches/', {
         method: 'GET',
         headers: {
           'accept': 'application/json',
