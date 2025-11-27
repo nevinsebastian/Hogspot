@@ -52,7 +52,7 @@ const App = () => {
               setIsLoggedIn(true);
               
               // Check if user needs onboarding
-              const response = await fetch('http://18.207.241.126/users/user-', {
+              const response = await fetch('http://18.207.241.126/users/user-info', {
                 headers: {
                   'Authorization': `Bearer ${token}`,
                 },
