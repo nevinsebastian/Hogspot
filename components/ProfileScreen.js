@@ -18,8 +18,6 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
-import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
-import SettingsScreen from './SettingsScreen';
 import { Image as ExpoImage } from 'expo-image';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
