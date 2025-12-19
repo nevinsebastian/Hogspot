@@ -1,5 +1,4 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
-import BottomNavbar from '../Things/BottomNavbar';
 import { SvgXml } from 'react-native-svg';
 import { faker } from '@faker-js/faker';
 
@@ -59,7 +58,6 @@ const Chat = () => {
         </ScrollView>
       </View>
 
-      <BottomNavbar style={styles.bottomNavbar} currentScreen="chat" />
       </View>
   );
 };

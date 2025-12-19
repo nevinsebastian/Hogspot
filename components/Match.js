@@ -1,5 +1,4 @@
 import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, FlatList, ScrollView, ActivityIndicator } from 'react-native'
-import BottomNavbar from '../Things/BottomNavbar'
 import { SvgXml } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
@@ -160,10 +159,6 @@ const Match = () => {
         setMatches={setMatches}
       />
 
-      {/* Bottom Navbar */}
-      <View style={styles.bottomNavbarContainer}>
-        <BottomNavbar currentScreen="match" />
-      </View>
     </View>
   );
 };

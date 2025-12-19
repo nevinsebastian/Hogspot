@@ -4,7 +4,6 @@ import { SvgXml } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import Swiper from 'react-native-deck-swiper';
-import BottomNavbar from '../Things/BottomNavbar';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
@@ -533,9 +532,6 @@ const HomeScreen = () => {
         </View>
       )}
 
-      <View style={styles.bottomNavbarContainer}>
-        <BottomNavbar currentScreen="home" />
-      </View>
       {renderUserDetails()}
     </View>
   );

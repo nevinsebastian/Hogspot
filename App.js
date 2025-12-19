@@ -3,13 +3,16 @@ import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Provider as PaperProvider } from 'react-native-paper';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 import { jwtDecode } from 'jwt-decode';
 import Toast from 'react-native-toast-message';
 
 // Regular import for ProfileScreen (frequently accessed, lazy loading causes issues)
 import ProfileScreen from './components/ProfileScreen';
+import CustomTabBar from './components/CustomTabBar';
 
 // Lazy load screens
 const WelcomeScreen = lazy(() => import('./components/WelcomeScreen'));
@@ -26,6 +29,7 @@ const SettingsScreen = lazy(() => import('./components/SettingsScreen'));
 const OnboardingScreen = lazy(() => import('./components/OnboardingScreen'));
 
 const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
 SplashScreen.preventAutoHideAsync();
 
 // Loading component
@@ -34,6 +38,46 @@ const LoadingScreen = () => (
     <ActivityIndicator size="large" color="#4B164C" />
   </View>
 );
+
+// Main Tab Navigator for bottom navigation
+const MainTabs = () => {
+  return (
+    <Tab.Navigator
+      tabBar={(props) => <CustomTabBar {...props} />}
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: { 
+          position: 'absolute',
+          height: 0,
+          opacity: 0,
+          elevation: 0,
+        },
+        lazy: false, // Preload all tabs for instant switching
+      }}
+    >
+      <Tab.Screen 
+        name="Home" 
+        component={HomeScreen}
+        options={{ tabBarLabel: '' }}
+      />
+      <Tab.Screen 
+        name="Discover" 
+        component={Discover}
+        options={{ tabBarLabel: '' }}
+      />
+      <Tab.Screen 
+        name="Match" 
+        component={Match}
+        options={{ tabBarLabel: '' }}
+      />
+      <Tab.Screen 
+        name="Chat" 
+        component={Chat}
+        options={{ tabBarLabel: '' }}
+      />
+    </Tab.Navigator>
+  );
+};
 
 const App = () => {
   const [appReady, setAppReady] = useState(false);
@@ -66,10 +110,10 @@ const App = () => {
                   setNeedsOnboarding(true);
                   setInitialRoute('Onboarding');
                 } else {
-                  setInitialRoute('Home');
+                  setInitialRoute('MainTabs');
                 }
               } else {
-                setInitialRoute('Home');
+                setInitialRoute('MainTabs');
               }
             } else {
               await AsyncStorage.removeItem('auth_token');
@@ -104,15 +148,17 @@ const App = () => {
   }
 
   return (
-    <PaperProvider>
-      <NavigationContainer>
-        <Suspense fallback={<LoadingScreen />}>
+    <SafeAreaProvider>
+      <PaperProvider>
+        <NavigationContainer>
+          <Suspense fallback={<LoadingScreen />}>
           <Stack.Navigator 
             initialRouteName={initialRoute}
             screenOptions={{ 
               headerShown: false,
               cardStyle: { backgroundColor: '#FDF7FD' },
-              animationEnabled: false, // Disable animations for faster transitions
+              animation: 'fade', // Use fade animation instead of slide
+              animationDuration: 150, // Quick fade transition
             }}
           >
             {/* Authentication Screens */}
@@ -125,19 +171,46 @@ const App = () => {
             {/* Onboarding Screen */}
             <Stack.Screen name="Onboarding" component={OnboardingScreen} />
             
-            {/* Main App Screens */}
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="Discover" component={Discover} />
-            <Stack.Screen name="Match" component={Match} />
-            <Stack.Screen name="Chat" component={Chat} />
-            <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
-            <Stack.Screen name="UploadPhoto" component={UploadPhotoScreen} />
-            <Stack.Screen name="Settings" component={SettingsScreen} />
+            {/* Main Tab Navigator */}
+            <Stack.Screen 
+              name="MainTabs" 
+              component={MainTabs}
+              options={{
+                animation: 'none', // No animation for tab navigator
+              }}
+            />
+            
+            {/* Modal/Stack Screens */}
+            <Stack.Screen 
+              name="ProfileScreen" 
+              component={ProfileScreen}
+              options={{
+                presentation: 'modal',
+                animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen 
+              name="UploadPhoto" 
+              component={UploadPhotoScreen}
+              options={{
+                presentation: 'modal',
+                animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen 
+              name="Settings" 
+              component={SettingsScreen}
+              options={{
+                presentation: 'modal',
+                animation: 'slide_from_bottom',
+              }}
+            />
           </Stack.Navigator>
-        </Suspense>
-      </NavigationContainer>
-      <Toast />
-    </PaperProvider>
+          </Suspense>
+        </NavigationContainer>
+        <Toast />
+      </PaperProvider>
+    </SafeAreaProvider>
   );
 };
 

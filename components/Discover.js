@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, ImageBackground, Dimensions, Platform, ActivityIndicator, Linking, Modal, TouchableOpacity } from 'react-native';
 import { SvgXml } from 'react-native-svg';
-import BottomNavbar from '../Things/BottomNavbar';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import * as Location from 'expo-location';
 import FilterTooltip from './FilterTooltip';
@@ -642,7 +641,6 @@ const Discover = () => {
       </View>
 
       <View style={styles.bottomNavbarContainer}>
-        <BottomNavbar currentScreen="discover" />
       </View>
 
       <Modal
