@@ -32,6 +32,7 @@ const THEME = {
   modalBackground: '#F8F8F8',
 };
 
+
 const SettingsScreen = () => {
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('about');
