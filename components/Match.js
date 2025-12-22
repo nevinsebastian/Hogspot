@@ -156,7 +156,9 @@ const Match = () => {
                     <View style={styles.imageOverlay} />
                   </ImageBackground>
                 </View>
-                <Text style={styles.userName}>{item.name}</Text>
+                <Text style={styles.userName}>
+                {item.name ? item.name.charAt(0).toUpperCase() + item.name.slice(1).toLowerCase() : ''}
+              </Text>
               </View>
             );
           }}
@@ -203,7 +205,9 @@ const Match = () => {
                 <View style={styles.locationTag}>
                   <Text style={styles.locationText}>{getLocationText()}</Text>
                 </View>
-                <Text style={styles.boxUserName}>{match.name}</Text>
+                <Text style={styles.boxUserName}>
+                  {match.name ? match.name.charAt(0).toUpperCase() + match.name.slice(1).toLowerCase() : ''}
+                </Text>
               </View>
             );
           })}
@@ -233,7 +237,7 @@ const styles = StyleSheet.create({
   locationTag: {
     position: 'absolute',
     bottom: 46,
-    left: '56%',
+    left: '50%',
     transform: [{ translateX: -50 }],
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 32,
