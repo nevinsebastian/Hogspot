@@ -1,15 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator, RefreshControl } from 'react-native';
 import { SvgXml } from 'react-native-svg';
-import { faker } from '@faker-js/faker';
-
-const users = Array.from({ length: 10 }, (_, id) => ({
-  id,
-  name: faker.person.fullName(),
-  lastMessage: faker.lorem.sentence(),
-  time: faker.date.recent().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  unread: faker.datatype.boolean(),
-  profileImage: faker.image.avatar(),
-}));
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Image as ExpoImage } from 'expo-image';
 
 
 const backIcon = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -27,38 +21,191 @@ const backIcon = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xm
 `
 
 const Chat = () => {
+  const navigation = useNavigation();
+  const [conversations, setConversations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchConversations = async (isRefresh = false) => {
+    try {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setError(null);
+
+      const token = await AsyncStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch('http://18.207.241.126/chat/conversations', {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch conversations');
+      }
+
+      const data = await response.json();
+      setConversations(data || []);
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+      setError('Failed to load conversations');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchConversations();
+  }, []);
+
+  // Refetch conversations when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchConversations();
+    }, [])
+  );
+
+  const onRefresh = useCallback(() => {
+    fetchConversations(true);
+  }, []);
+
+  const formatTime = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = (now - date) / (1000 * 60 * 60);
+    
+    if (diffInHours < 24) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else if (diffInHours < 48) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+  };
+
+  const handleConversationPress = (conversation) => {
+    navigation.navigate('ChatDetail', {
+      conversationId: conversation.id,
+      otherUserId: conversation.other_user_id,
+      otherUserName: conversation.other_user_name,
+      otherUserImage: conversation.other_user_image,
+    });
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.heading}>Messages</Text>
+        </View>
+        <View style={[styles.chatListContainer, styles.loadingContainer]}>
+          <ActivityIndicator size="large" color="#4B164C" />
+        </View>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.heading}>Messages</Text>
+        </View>
+        <View style={[styles.chatListContainer, styles.errorContainer]}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={() => fetchConversations()}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        {/* Back Icon */}
-        <TouchableOpacity style={[styles.iconContainer, styles.backIconPosition]}>
-          <SvgXml xml={backIcon} style={styles.icon} />
-        </TouchableOpacity>
-
         {/* Heading */}
         <Text style={styles.heading}>Messages</Text>
       </View>
 
       {/* Scrollable Chat List */}
       <View style={styles.chatListContainer}>
-        <ScrollView contentContainerStyle={styles.chatList} showsVerticalScrollIndicator={false}>
-          {users.slice(0, users.length - 3).map(user => (
-            <View key={user.id} style={styles.chatItem}>
-              <Image source={{ uri: user.profileImage }} style={styles.profileImage} />
-              <View style={styles.chatInfo}>
-                <Text style={styles.name}>{user.name}</Text>
-                <Text style={styles.lastMessage}>{user.lastMessage}</Text>
-              </View>
-              <View style={styles.chatMeta}>
-                <Text style={styles.time}>{user.time}</Text>
-                {user.unread && <View style={styles.unreadDot} />}
-              </View>
-            </View>
-          ))}
-        </ScrollView>
+        {conversations.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No conversations yet</Text>
+            <Text style={styles.emptySubtext}>Start swiping to find matches!</Text>
+          </View>
+        ) : (
+          <ScrollView 
+            contentContainerStyle={styles.chatList} 
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={['#4B164C']}
+                tintColor="#4B164C"
+              />
+            }
+          >
+            {conversations.map(conversation => (
+              <TouchableOpacity
+                key={conversation.id}
+                style={styles.chatItem}
+                onPress={() => handleConversationPress(conversation)}
+                activeOpacity={0.7}
+              >
+                <ExpoImage
+                  source={conversation.other_user_image 
+                    ? { uri: conversation.other_user_image } 
+                    : require('../assets/profileava.jpg')
+                  }
+                  style={styles.profileImage}
+                  contentFit="cover"
+                  transition={200}
+                  cachePolicy="memory-disk"
+                  placeholder={require('../assets/profileava.jpg')}
+                />
+                <View style={styles.chatInfo}>
+                  <Text style={styles.name}>
+                    {conversation.other_user_name 
+                      ? conversation.other_user_name.charAt(0).toUpperCase() + conversation.other_user_name.slice(1).toLowerCase()
+                      : 'Unknown'
+                    }
+                  </Text>
+                  <Text style={styles.lastMessage} numberOfLines={1}>
+                    {conversation.last_message || 'No messages yet'}
+                  </Text>
+                </View>
+                <View style={styles.chatMeta}>
+                  <Text style={styles.time}>
+                    {formatTime(conversation.last_message_at)}
+                  </Text>
+                  {conversation.unread_count > 0 && (
+                    <View style={styles.unreadBadge}>
+                      <Text style={styles.unreadCount}>
+                        {conversation.unread_count > 9 ? '9+' : conversation.unread_count}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
       </View>
-
-      </View>
+    </View>
   );
 };
 
@@ -155,6 +302,66 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: '#DD88CF',
     marginTop: 4,
+  },
+  unreadBadge: {
+    backgroundColor: '#DD88CF',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    marginTop: 4,
+  },
+  unreadCount: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    color: '#FF0000',
+    fontSize: 16,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: '#4B164C',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 20,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#4B164C',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
   },
 });
 

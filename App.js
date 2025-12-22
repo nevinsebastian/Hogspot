@@ -27,6 +27,7 @@ const Match = lazy(() => import('./components/Match'));
 const Chat = lazy(() => import('./components/Chat'));
 const UploadPhotoScreen = lazy(() => import('./components/UploadPhotoScreen'));
 const OnboardingScreen = lazy(() => import('./components/OnboardingScreen'));
+const ChatDetail = lazy(() => import('./components/ChatDetail'));
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -203,6 +204,14 @@ const App = () => {
               options={{
                 presentation: 'modal',
                 animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen 
+              name="ChatDetail" 
+              component={ChatDetail}
+              options={{
+                presentation: 'card',
+                animation: 'slide_from_right',
               }}
             />
           </Stack.Navigator>
