@@ -23,6 +23,7 @@ const backIcon = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xm
 const Chat = () => {
   const navigation = useNavigation();
   const [conversations, setConversations] = useState([]);
+  const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
@@ -41,22 +42,39 @@ const Chat = () => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch('http://18.207.241.126/chat/conversations', {
-        method: 'GET',
-        headers: {
-          'accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      // Fetch both conversations and matches in parallel
+      const [conversationsResponse, matchesResponse] = await Promise.all([
+        fetch('http://18.207.241.126/chat/conversations', {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        }),
+        fetch('http://18.207.241.126/matches/', {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        }),
+      ]);
 
-      if (!response.ok) {
+      if (!conversationsResponse.ok) {
         throw new Error('Failed to fetch conversations');
       }
 
-      const data = await response.json();
-      setConversations(data || []);
+      if (!matchesResponse.ok) {
+        throw new Error('Failed to fetch matches');
+      }
+
+      const conversationsData = await conversationsResponse.json();
+      const matchesData = await matchesResponse.json();
+
+      setConversations(conversationsData || []);
+      setMatches(matchesData || []);
     } catch (error) {
-      console.error('Error fetching conversations:', error);
+      console.error('Error fetching data:', error);
       setError('Failed to load conversations');
     } finally {
       setLoading(false);
@@ -103,6 +121,35 @@ const Chat = () => {
     });
   };
 
+  const handleMatchPress = (match) => {
+    // Get priority 1 image or first image
+    const getImageUrl = () => {
+      if (match.images && match.images.length > 0) {
+        const priorityOneImage = match.images.find(img => img.priority === 1);
+        return priorityOneImage?.image_url || match.images[0]?.image_url;
+      }
+      return null;
+    };
+
+    navigation.navigate('ChatDetail', {
+      conversationId: null, // No conversation yet
+      otherUserId: match.id,
+      otherUserName: match.name,
+      otherUserImage: getImageUrl(),
+    });
+  };
+
+  // Get matched users who don't have conversations yet
+  const getMatchesWithoutConversations = () => {
+    if (!matches || matches.length === 0) return [];
+    
+    const conversationUserIds = new Set(
+      conversations.map(conv => conv.other_user_id)
+    );
+    
+    return matches.filter(match => !conversationUserIds.has(match.id));
+  };
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -141,7 +188,7 @@ const Chat = () => {
 
       {/* Scrollable Chat List */}
       <View style={styles.chatListContainer}>
-        {conversations.length === 0 ? (
+        {conversations.length === 0 && getMatchesWithoutConversations().length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No conversations yet</Text>
             <Text style={styles.emptySubtext}>Start swiping to find matches!</Text>
@@ -159,9 +206,10 @@ const Chat = () => {
               />
             }
           >
+            {/* Conversations */}
             {conversations.map(conversation => (
               <TouchableOpacity
-                key={conversation.id}
+                key={`conv-${conversation.id}`}
                 style={styles.chatItem}
                 onPress={() => handleConversationPress(conversation)}
                 activeOpacity={0.7}
@@ -202,6 +250,55 @@ const Chat = () => {
                 </View>
               </TouchableOpacity>
             ))}
+
+            {/* Matches without conversations */}
+            {getMatchesWithoutConversations().map(match => {
+              // Get priority 1 image or first image
+              const getImageUrl = () => {
+                if (match.images && match.images.length > 0) {
+                  const priorityOneImage = match.images.find(img => img.priority === 1);
+                  return priorityOneImage?.image_url || match.images[0]?.image_url;
+                }
+                return null;
+              };
+
+              return (
+                <TouchableOpacity
+                  key={`match-${match.id}`}
+                  style={styles.chatItem}
+                  onPress={() => handleMatchPress(match)}
+                  activeOpacity={0.7}
+                >
+                  <ExpoImage
+                    source={getImageUrl() 
+                      ? { uri: getImageUrl() } 
+                      : require('../assets/profileava.jpg')
+                    }
+                    style={styles.profileImage}
+                    contentFit="cover"
+                    transition={200}
+                    cachePolicy="memory-disk"
+                    placeholder={require('../assets/profileava.jpg')}
+                  />
+                  <View style={styles.chatInfo}>
+                    <Text style={styles.name}>
+                      {match.name 
+                        ? match.name.charAt(0).toUpperCase() + match.name.slice(1).toLowerCase()
+                        : 'Unknown'
+                      }
+                    </Text>
+                    <Text style={[styles.lastMessage, styles.newMatchText]} numberOfLines={1}>
+                      Start chatting
+                    </Text>
+                  </View>
+                  <View style={styles.chatMeta}>
+                    <View style={styles.newMatchBadge}>
+                      <Text style={styles.newMatchBadgeText}>New</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
           </ScrollView>
         )}
       </View>
@@ -362,6 +459,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
+  },
+  newMatchText: {
+    color: '#DD88CF',
+    fontStyle: 'italic',
+  },
+  newMatchBadge: {
+    backgroundColor: '#DD88CF',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  newMatchBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
 });
 
