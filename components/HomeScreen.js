@@ -231,11 +231,16 @@ const HomeScreen = () => {
           }}
           activeOpacity={0.8}
         >
-          <View style={styles.caughtUpCardContent}>
-            <Text style={styles.caughtUpEmoji}>✨</Text>
-            <Text style={styles.caughtUpTitle}>You're All Caught Up!</Text>
-            <Text style={styles.caughtUpMessage}>Tap to refresh and see new people</Text>
-          </View>
+          <ExpoImage
+            source={require('../assets/nothinghere.jpeg')}
+            style={styles.cardImage}
+            contentFit="cover"
+            transition={200}
+            cachePolicy="memory-disk"
+            onError={(error) => {
+              console.error('Error loading nothinghere image:', error);
+            }}
+          />
         </TouchableOpacity>
       );
     }
@@ -524,7 +529,7 @@ const HomeScreen = () => {
               cardStyle={{ position: 'absolute' }}
               cardIndex={0}
               verticalSwipe={false}
-              horizontalSwipe={true}
+              horizontalSwipe={!showCaughtUpCard}
               outputRotationRange={['-8deg', '0deg', '8deg']}
               onSwipedAll={() => {
                 if (hasMoreUsers) {
