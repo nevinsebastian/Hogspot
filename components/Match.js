@@ -135,20 +135,31 @@ const Match = () => {
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.storySection}
           showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <View style={styles.storyItem}>
-              <View style={styles.storyRing}>
-                <ImageBackground 
-                  source={{ uri: 'https://i.pinimg.com/736x/d0/ed/47/d0ed476d90044123b73da39291c05549.jpg' }} 
-                  style={styles.storyImage} 
-                  imageStyle={{ borderRadius: 28 }}
-                >
-                  <View style={styles.imageOverlay} />
-                </ImageBackground>
+          renderItem={({ item }) => {
+            // Get priority 1 image or first image, fallback to hardcoded if none
+            const getImageUrl = () => {
+              if (item.images && item.images.length > 0) {
+                const priorityOneImage = item.images.find(img => img.priority === 1);
+                return priorityOneImage?.image_url || item.images[0]?.image_url;
+              }
+              return 'https://i.pinimg.com/736x/d0/ed/47/d0ed476d90044123b73da39291c05549.jpg';
+            };
+
+            return (
+              <View style={styles.storyItem}>
+                <View style={styles.storyRing}>
+                  <ImageBackground 
+                    source={{ uri: getImageUrl() }} 
+                    style={styles.storyImage} 
+                    imageStyle={{ borderRadius: 28 }}
+                  >
+                    <View style={styles.imageOverlay} />
+                  </ImageBackground>
+                </View>
+                <Text style={styles.userName}>{item.name}</Text>
               </View>
-              <Text style={styles.userName}>{item.name}</Text>
-            </View>
-          )}
+            );
+          }}
         />
 
         {/* "Your Matches" Text */}
@@ -158,28 +169,44 @@ const Match = () => {
 
         {/* Boxes Section */}
         <View style={styles.boxesContainer}>
-          {matches.map((match) => (
-            <View key={match.id} style={styles.box}>
-              <LinearGradient
-                colors={['#4B164C', '#4B164C']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 0, y: 1 }}
-                style={styles.gradient}
-              >
-                <ImageBackground 
-                  source={{ uri: 'https://i.pinimg.com/736x/d0/ed/47/d0ed476d90044123b73da39291c05549.jpg' }} 
-                  style={styles.boxImage} 
-                  imageStyle={{ borderRadius: 22 }}
+          {matches.map((match) => {
+            // Get priority 1 image or first image, fallback to hardcoded if none
+            const getImageUrl = () => {
+              if (match.images && match.images.length > 0) {
+                const priorityOneImage = match.images.find(img => img.priority === 1);
+                return priorityOneImage?.image_url || match.images[0]?.image_url;
+              }
+              return 'https://i.pinimg.com/736x/d0/ed/47/d0ed476d90044123b73da39291c05549.jpg';
+            };
+
+            // Get matched hotspot name or default location
+            const getLocationText = () => {
+              return match.matched_hotspot?.name || 'Lulu, Kochi';
+            };
+
+            return (
+              <View key={match.id} style={styles.box}>
+                <LinearGradient
+                  colors={['#4B164C', '#4B164C']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={styles.gradient}
                 >
-                  <View style={styles.boxOverlay} />
-                </ImageBackground>
-              </LinearGradient>
-              <View style={styles.locationTag}>
-                <Text style={styles.locationText}>Lulu, Kochi</Text>
+                  <ImageBackground 
+                    source={{ uri: getImageUrl() }} 
+                    style={styles.boxImage} 
+                    imageStyle={{ borderRadius: 22 }}
+                  >
+                    <View style={styles.boxOverlay} />
+                  </ImageBackground>
+                </LinearGradient>
+                <View style={styles.locationTag}>
+                  <Text style={styles.locationText}>{getLocationText()}</Text>
+                </View>
+                <Text style={styles.boxUserName}>{match.name}</Text>
               </View>
-              <Text style={styles.boxUserName}>{match.name}</Text>
-            </View>
-          ))}
+            );
+          })}
         </View>
       </ScrollView>
 
@@ -236,9 +263,10 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     position: 'absolute',
     bottom: 17,
-    left: '45%',
+    left: '50%',
     transform: [{ translateX: -50 }],
     textAlign: 'center',
+    width: '100%',
   },
   scrollViewContent: {
     paddingBottom: 80,

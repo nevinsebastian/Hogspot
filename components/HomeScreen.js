@@ -43,6 +43,7 @@ const HomeScreen = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [showCaughtUpCard, setShowCaughtUpCard] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -166,6 +167,7 @@ const HomeScreen = () => {
 
         if (page === 1) {
           setOtherUsers(processedUsers);
+          setShowCaughtUpCard(false);
         } else {
           setOtherUsers(prevUsers => [...prevUsers, ...processedUsers]);
         }
@@ -216,6 +218,28 @@ const HomeScreen = () => {
       return null;
     }
 
+    // Render "caught up" card
+    if (card.isCaughtUpCard) {
+      return (
+        <TouchableOpacity 
+          style={styles.card}
+          onPress={() => {
+            if (location) {
+              setShowCaughtUpCard(false);
+              fetchHotspotData(location.coords.latitude, location.coords.longitude, 1);
+            }
+          }}
+          activeOpacity={0.8}
+        >
+          <View style={styles.caughtUpCardContent}>
+            <Text style={styles.caughtUpEmoji}>✨</Text>
+            <Text style={styles.caughtUpTitle}>You're All Caught Up!</Text>
+            <Text style={styles.caughtUpMessage}>Tap to refresh and see new people</Text>
+          </View>
+        </TouchableOpacity>
+      );
+    }
+
     const imageUrl = card.images && card.images.length > 0 ? card.images[0].image_url : null;
 
     return (
@@ -254,7 +278,7 @@ const HomeScreen = () => {
 
   const handleSwipe = async (index, direction) => {
     const swipedUser = otherUsers[index];
-    if (!swipedUser) return;
+    if (!swipedUser || swipedUser.isCaughtUpCard) return;
 
     try {
       const token = await AsyncStorage.getItem('auth_token');
@@ -506,11 +530,9 @@ const HomeScreen = () => {
                 if (hasMoreUsers) {
                   loadMoreUsers();
                 } else {
-                  Alert.alert(
-                    'No more users',
-                    'There are no more users in this hotspot. Try again later!',
-                    [{ text: 'OK' }]
-                  );
+                  // Show caught up card
+                  setShowCaughtUpCard(true);
+                  setOtherUsers([{ id: 'caught-up', isCaughtUpCard: true }]);
                 }
               }}
             />
@@ -881,6 +903,31 @@ const styles = StyleSheet.create({
   interestText: {
     color: '#4B164C',
     fontSize: 12,
+  },
+  caughtUpCardContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+    backgroundColor: '#4B164C',
+  },
+  caughtUpEmoji: {
+    fontSize: 64,
+    marginBottom: 20,
+  },
+  caughtUpTitle: {
+    fontSize: 28,
+    fontFamily: 'Inter-Bold',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  caughtUpMessage: {
+    fontSize: 16,
+    fontFamily: 'Inter-Medium',
+    color: '#DD88CF',
+    textAlign: 'center',
+    lineHeight: 22,
   },
 });
 
