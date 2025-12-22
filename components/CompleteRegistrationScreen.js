@@ -203,13 +203,13 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
           } else {
             navigation.reset({
               index: 0,
-              routes: [{ name: 'Home' }],
+              routes: [{ name: 'MainTabs' }],
             });
           }
         } else {
           navigation.reset({
             index: 0,
-            routes: [{ name: 'Home' }],
+            routes: [{ name: 'MainTabs' }],
           });
         }
       } else {

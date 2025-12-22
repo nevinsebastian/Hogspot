@@ -266,7 +266,7 @@ const OnboardingScreen = () => {
 
         navigation.reset({
           index: 0,
-          routes: [{ name: 'Home' }],
+          routes: [{ name: 'MainTabs' }],
         });
       } catch (error) {
         console.error('Error updating profile:', error);

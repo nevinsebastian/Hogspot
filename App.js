@@ -10,8 +10,9 @@ import * as SplashScreen from 'expo-splash-screen';
 import { jwtDecode } from 'jwt-decode';
 import Toast from 'react-native-toast-message';
 
-// Regular import for ProfileScreen (frequently accessed, lazy loading causes issues)
+// Regular import for ProfileScreen and SettingsScreen (frequently accessed, lazy loading causes issues with worklets dependencies)
 import ProfileScreen from './components/ProfileScreen';
+import SettingsScreen from './components/SettingsScreen';
 import CustomTabBar from './components/CustomTabBar';
 
 // Lazy load screens
@@ -25,7 +26,6 @@ const Discover = lazy(() => import('./components/Discover'));
 const Match = lazy(() => import('./components/Match'));
 const Chat = lazy(() => import('./components/Chat'));
 const UploadPhotoScreen = lazy(() => import('./components/UploadPhotoScreen'));
-const SettingsScreen = lazy(() => import('./components/SettingsScreen'));
 const OnboardingScreen = lazy(() => import('./components/OnboardingScreen'));
 
 const Stack = createStackNavigator();

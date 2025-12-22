@@ -69,7 +69,7 @@ const LoginScreen = ({ navigation }) => {
 
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Home' }],
+        routes: [{ name: 'MainTabs' }],
       });
     } catch (error) {
       const message =
@@ -96,7 +96,7 @@ const LoginScreen = ({ navigation }) => {
       >
         <TouchableOpacity 
           style={styles.backButton} 
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.navigate('Welcome')}
         >
           <Icon name="arrow-left" size={24} color={THEME.primaryDark} />
         </TouchableOpacity>

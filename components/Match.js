@@ -1,7 +1,8 @@
-import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, FlatList, ScrollView, ActivityIndicator } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, FlatList, ScrollView, ActivityIndicator, RefreshControl } from 'react-native'
 import { SvgXml } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MatchFilterTooltip from './MatchFilterTooltip';
 
@@ -27,16 +28,20 @@ const filterIconSvg = `
 const Match = () => {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
 
-  useEffect(() => {
-    fetchMatches();
-  }, []);
-
-  const fetchMatches = async () => {
+  const fetchMatches = async (isRefresh = false) => {
     try {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setError(null);
+
       const token = await AsyncStorage.getItem('auth_token');
       const response = await fetch('http://18.207.241.126/matches/', {
         method: 'GET',
@@ -57,8 +62,26 @@ const Match = () => {
       setError('Failed to load matches');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
+
+  // Fetch matches when component mounts
+  useEffect(() => {
+    fetchMatches();
+  }, []);
+
+  // Refetch matches when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchMatches();
+    }, [])
+  );
+
+  // Handle pull-to-refresh
+  const onRefresh = useCallback(() => {
+    fetchMatches(true);
+  }, []);
 
   if (loading) {
     return (
@@ -93,7 +116,18 @@ const Match = () => {
       </View>
 
       {/* Scrollable Content */}
-      <ScrollView contentContainerStyle={styles.scrollViewContent} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollViewContent} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#4B164C']}
+            tintColor="#4B164C"
+          />
+        }
+      >
         {/* Story Section */}
         <FlatList
           data={matches}
