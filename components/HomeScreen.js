@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { Image as ExpoImage } from 'expo-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const bellSvg = `
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -27,7 +28,25 @@ const bellSvg = `
 
 const HomeScreen = () => {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const { width, height } = Dimensions.get('window');
+  const swiperHeight = height - 250;
+  
+  // Calculate responsive dimensions
+  const screenPadding = 16;
+  const profileButtonWidth = 64.25;
+  const gapBetweenElements = 12;
+  const mainRectangleLeft = 7;
+  const mainRectangleRight = screenPadding;
+  const mainRectangleWidth = width - mainRectangleLeft - profileButtonWidth - gapBetweenElements - mainRectangleRight;
+  
+  // Responsive font sizes
+  const headingFontSize = width < 375 ? 26 : (width < 414 ? 28 : 32);
+  const locationFontSize = width < 375 ? 22 : (width < 414 ? 24 : 28);
+  
+  // Responsive card dimensions
+  const cardWidth = Math.min(width - 28, 360);
+  const cardHeight = Math.min(cardWidth * 1.275, 459);
   const [hotspotData, setHotspotData] = useState(null);
   const [otherUsers, setOtherUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -222,7 +241,7 @@ const HomeScreen = () => {
     if (card.isCaughtUpCard) {
       return (
         <TouchableOpacity 
-          style={styles.card}
+          style={[styles.card, { width: cardWidth, height: cardHeight }]}
           onPress={() => {
             if (location) {
               setShowCaughtUpCard(false);
@@ -249,7 +268,7 @@ const HomeScreen = () => {
 
     return (
       <TouchableOpacity 
-        style={styles.card}
+        style={[styles.card, { width: cardWidth, height: cardHeight }]}
         onPress={() => {
           setSelectedUser(card);
           setIsModalVisible(true);
@@ -441,13 +460,25 @@ const HomeScreen = () => {
     <View style={styles.container}>
       {isInHotspot ? (
         <>
-          <Text style={styles.heading}>Hogspot</Text>
-          <TouchableOpacity style={styles.notificationButton}>
+          <View style={[styles.headingContainer, { 
+            top: Platform.OS === 'ios' ? 72 : Math.max(insets.top + 16, 56)
+          }]}>
+            <Text style={[styles.heading, {
+              fontSize: Platform.OS === 'ios' ? 28 : headingFontSize,
+            }]}>Hogspot</Text>
+          </View>
+          <TouchableOpacity style={[styles.notificationButton, { 
+            top: Platform.OS === 'ios' ? 72 : Math.max(insets.top + 16, 56)
+          }]}>
             <View style={styles.bellContainer}>
               <SvgXml xml={bellSvg} width={24} height={24} />
             </View>
           </TouchableOpacity>
-          <View style={styles.mainRectangle}>
+          <View style={[styles.mainRectangle, { 
+            top: Platform.OS === 'ios' ? 137 : Math.max(insets.top + 73, 113),
+            width: mainRectangleWidth,
+            maxWidth: mainRectangleWidth,
+          }]}>
             <View style={styles.innerRectangle}>
               <ExpoImage
                 source={hotspotData?.image_url ? { uri: hotspotData.image_url } : require('../assets/lulu.jpg')}
@@ -461,9 +492,14 @@ const HomeScreen = () => {
                 }}
               />
             </View>
-            <Text style={styles.locationText}>{hotspotData ? hotspotData.name : 'Loading...'}</Text>
+            <Text style={[styles.locationText, { fontSize: locationFontSize }]} numberOfLines={1} ellipsizeMode="tail">
+              {hotspotData ? hotspotData.name : 'Loading...'}
+            </Text>
           </View>
-          <View style={styles.newRectangle}>
+          <View style={[styles.newRectangle, { 
+            top: Platform.OS === 'ios' ? 137 : Math.max(insets.top + 73, 113),
+            right: screenPadding,
+          }]}>
             <TouchableOpacity onPress={navigateToProfile}>
               <ExpoImage
                 source={getPriorityOneImage(userInfo) ? { uri: getPriorityOneImage(userInfo) } : require('../assets/profileava.jpg')}
@@ -481,8 +517,12 @@ const HomeScreen = () => {
         </>
       ) : (
         <>
-          <View style={styles.notMainReactangle}>
-            <View style={styles.newRectangle}>
+          <View style={[styles.notMainReactangle, { 
+            top: Platform.OS === 'ios' ? 72 : Math.max(insets.top + 8, 48),
+            width: width - mainRectangleLeft - profileButtonWidth - gapBetweenElements - mainRectangleRight,
+            maxWidth: width - mainRectangleLeft - profileButtonWidth - gapBetweenElements - mainRectangleRight,
+          }]}>
+            <View style={styles.newRectangleInContainer}>
               <TouchableOpacity onPress={navigateToProfile}>
                 <ExpoImage
                   source={getPriorityOneImage(userInfo) ? { uri: getPriorityOneImage(userInfo) } : require('../assets/profileava.jpg')}
@@ -497,9 +537,11 @@ const HomeScreen = () => {
                 />
               </TouchableOpacity>
             </View>
-            <Text style={styles.notLocationText}>Hogspot Near You</Text>
+            <Text style={[styles.notLocationText, { fontSize: width < 375 ? 18 : (width < 414 ? 20 : 20) }]} numberOfLines={1} ellipsizeMode="tail">
+              Hogspot Near You
+            </Text>
           </View>
-          <TouchableOpacity style={styles.notNotificationButton}>
+          <TouchableOpacity style={[styles.notNotificationButton, { top: Platform.OS === 'ios' ? 79 : Math.max(insets.top + 15, 55) }]}>
             <View style={styles.bellContainer}>
               <SvgXml xml={bellSvg} width={24} height={24} />
             </View>
@@ -508,7 +550,7 @@ const HomeScreen = () => {
       )}
 
       {isInHotspot ? (
-        <View style={styles.swiperContainer}>
+        <View style={[styles.swiperContainer, { height: swiperHeight }]}>
           {otherUsers.length > 0 ? (
             <Swiper
               cards={otherUsers}
@@ -554,7 +596,7 @@ const HomeScreen = () => {
           )}
         </View>
       ) : (
-        <View style={styles.notInHotspotContainer}>
+        <View style={[styles.notInHotspotContainer, { width: cardWidth, height: cardHeight }]}>
           <Text style={styles.notInHotspotText}>You are not in a Hogspot</Text>
         </View>
       )}
@@ -570,22 +612,42 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#fdf7fd',
   },
+  headingContainer: {
+    position: 'absolute',
+    left: 16,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    zIndex: 10,
+  },
   heading: {
     fontSize: 28,
     fontFamily: 'inter-bold',
     color: '#4B164C',
-    position: 'absolute',
-    left: 16,
-    top: Platform.OS === 'ios' ? 74 : 50,
-    zIndex: 10,
     backgroundColor: 'transparent',
+    ...(Platform.OS === 'android' && {
+      includeFontPadding: false,
+      textAlignVertical: 'center',
+    }),
+  },
+  newRectangle: {
+    position: 'absolute',
+    width: 64.25,
+    height: 64.63,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 5,
+  },
+  newRectangleInContainer: {
+    width: 64.25,
+    height: 64.63,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   newImage: {
     width: 64.25,
     height: 64.63,
     borderRadius: 30,
-    left: 300,
-    top: 125,
     borderWidth: 2,
     borderColor: '#DD88CF',
   },
@@ -598,7 +660,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'absolute',
     right: 16,
-    top: 72,
   },
   notNotificationButton: {
     width: 48,
@@ -609,7 +670,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'absolute',
     right: 16,
-    top: 79,
   },
   bellContainer: {
     width: 48,
@@ -623,8 +683,6 @@ const styles = StyleSheet.create({
   mainRectangle: {
     position: 'absolute',
     left: 7,
-    top: 137,
-    width: 288,
     height: 64,
     borderRadius: 40,
     backgroundColor: '#FFDFDF',
@@ -634,15 +692,15 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
+    elevation: 3,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 8,
+    minWidth: 200,
   },
   notMainReactangle: {
     position: 'absolute',
     left: 7,
-    top: 72,
-    width: 288,
     height: 64,
     borderRadius: 40,
     backgroundColor: '#FFDFDF',
@@ -652,9 +710,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
+    elevation: 3,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 8,
+    paddingRight: 16,
+    minWidth: 200,
   },
   innerRectangle: {
     width: 57,
@@ -677,26 +738,29 @@ const styles = StyleSheet.create({
     color: '#4B164C',
     lineHeight: 31.2,
     marginTop: 5,
+    flex: 1,
+    flexShrink: 1,
   },
   notLocationText: {
     fontSize: 20,
     fontFamily: 'Inter-Bold',
     color: '#4B164C',
     lineHeight: 31.2,
+    flex: 1,
+    flexShrink: 1,
   },
   swiperContainer: {
     position: 'absolute',
     left: 14,
     top: 170,
     width: '100%',
-    height: '0%',
   },
   notInHotspotContainer: {
     position: 'absolute',
     left: 14,
     top: 200,
-    width: 360,
-    height: 459,
+    maxWidth: 360,
+    maxHeight: 459,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
@@ -707,6 +771,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
+    elevation: 4,
   },
   notInHotspotText: {
     fontSize: 18,
@@ -722,9 +787,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
+    elevation: 4,
     overflow: 'hidden',
-    width: 360,
-    height: 459,
+    maxWidth: 360,
+    maxHeight: 459,
   },
   cardImage: {
     width: '100%',
@@ -786,7 +852,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 4,
+    elevation: 8,
   },
   noUsersContainer: {
     flex: 1,
