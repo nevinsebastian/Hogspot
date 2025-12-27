@@ -10,17 +10,40 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  Dimensions,
 } from 'react-native';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image as ExpoImage } from 'expo-image';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { jwtDecode } from 'jwt-decode';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ChatDetail = () => {
   const navigation = useNavigation();
   const route = useRoute();
+  const insets = useSafeAreaInsets();
+  const { width, height } = Dimensions.get('window');
   const { conversationId, otherUserId, otherUserName, otherUserImage } = route.params || {};
+  
+  // Calculate responsive dimensions
+  const headerPaddingTop = Platform.OS === 'ios' ? 50 : Math.max(insets.top + 8, 20);
+  
+  // Responsive font sizes
+  const headerNameFontSize = width < 375 ? 16 : (width < 414 ? 18 : 18);
+  const headerPhoneFontSize = width < 375 ? 11 : (width < 414 ? 12 : 12);
+  const messageTextFontSize = width < 375 ? 14 : (width < 414 ? 15 : 15);
+  const messageTimeFontSize = width < 375 ? 10 : (width < 414 ? 11 : 11);
+  const inputFontSize = width < 375 ? 14 : (width < 414 ? 15 : 15);
+  
+  // Responsive line heights (proportional to font size)
+  const messageTextLineHeight = messageTextFontSize * 1.33;
+  
+  // Responsive message bubble and profile image sizes
+  const messageProfileImageSize = width < 375 ? 32 : (width < 414 ? 36 : 36);
+  const messageBubbleMaxWidth = width < 375 ? '75%' : '70%';
+  const messageBubblePadding = width < 375 ? 10 : (width < 414 ? 12 : 12);
+  const messageWrapperMargin = width < 375 ? 8 : (width < 414 ? 10 : 12);
   
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
@@ -32,8 +55,10 @@ const ChatDetail = () => {
   const [currentUserImage, setCurrentUserImage] = useState(null);
   const [otherUserPhone, setOtherUserPhone] = useState(null);
   const scrollViewRef = useRef(null);
+  const pollingIntervalRef = useRef(null);
+  const lastMessageIdRef = useRef(null);
 
-  const fetchMessages = async (reset = false) => {
+  const fetchMessages = async (reset = false, checkForNewOnly = false) => {
     try {
       if (reset) {
         setLoading(true);
@@ -62,15 +87,46 @@ const ChatDetail = () => {
       }
 
       const data = await response.json();
+      const newMessages = data.messages || [];
       
-      if (reset) {
-        setMessages(data.messages || []);
+      if (checkForNewOnly) {
+        // Only add messages that we don't already have
+        setMessages(prev => {
+          const existingIds = new Set(prev.map(msg => msg.id));
+          const newMessagesOnly = newMessages.filter(msg => !existingIds.has(msg.id));
+          
+          if (newMessagesOnly.length > 0) {
+            // Auto-scroll to bottom when new message arrives
+            setTimeout(() => {
+              scrollViewRef.current?.scrollToEnd({ animated: true });
+            }, 100);
+            // Update last message ID reference
+            const lastNewMessage = newMessagesOnly[newMessagesOnly.length - 1];
+            if (lastNewMessage && lastNewMessage.id) {
+              lastMessageIdRef.current = lastNewMessage.id;
+            }
+            return [...prev, ...newMessagesOnly];
+          }
+          return prev;
+        });
       } else {
-        setMessages(prev => [...(data.messages || []), ...prev]);
+        if (reset) {
+          setMessages(newMessages);
+          // Update last message ID reference
+          if (newMessages.length > 0) {
+            lastMessageIdRef.current = newMessages[newMessages.length - 1].id;
+          }
+        } else {
+          setMessages(prev => [...(newMessages), ...prev]);
+          // Update last message ID reference for pagination
+          if (newMessages.length > 0) {
+            lastMessageIdRef.current = newMessages[newMessages.length - 1].id;
+          }
+        }
       }
       
       setHasMore(data.has_more || false);
-      setOffset(currentOffset + (data.messages?.length || 0));
+      setOffset(currentOffset + (newMessages.length || 0));
       
       // Mark conversation as read
       if (conversationId) {
@@ -78,7 +134,9 @@ const ChatDetail = () => {
       }
     } catch (error) {
       console.error('Error fetching messages:', error);
-      Alert.alert('Error', 'Failed to load messages. Please try again.');
+      if (!checkForNewOnly) {
+        Alert.alert('Error', 'Failed to load messages. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -128,7 +186,12 @@ const ChatDetail = () => {
       }
 
       const sentMessage = await response.json();
-      setMessages(prev => [...prev, sentMessage]);
+      setMessages(prev => {
+        const updated = [...prev, sentMessage];
+        // Update last message ID reference
+        lastMessageIdRef.current = sentMessage.id;
+        return updated;
+      });
       setNewMessage('');
       
       // Scroll to bottom after sending
@@ -154,8 +217,33 @@ const ChatDetail = () => {
       if (otherUserId && !loading) {
         fetchMessages(true);
       }
-    }, [otherUserId])
+      
+      // Start polling for new messages when screen is focused
+      if (otherUserId) {
+        pollingIntervalRef.current = setInterval(() => {
+          fetchMessages(false, true); // Check for new messages only
+        }, 2000); // Poll every 2 seconds
+        
+        return () => {
+          // Cleanup: stop polling when screen loses focus
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+          }
+        };
+      }
+    }, [otherUserId, loading])
   );
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, []);
 
   const formatMessageTime = (dateString) => {
     if (!dateString) return '';
@@ -207,12 +295,12 @@ const ChatDetail = () => {
   if (loading && messages.length === 0) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Icon name="arrow-left" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Loading...</Text>
-        </View>
+      <View style={[styles.header, { paddingTop: headerPaddingTop }]}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Icon name="arrow-left" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, { fontSize: headerNameFontSize }]}>Loading...</Text>
+      </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4B164C" />
         </View>
@@ -227,18 +315,18 @@ const ChatDetail = () => {
       keyboardVerticalOffset={0}
     >
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: headerPaddingTop }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Icon name="arrow-left" size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerName}>
+          <Text style={[styles.headerName, { fontSize: headerNameFontSize }]}>
             {otherUserName
               ? otherUserName.charAt(0).toUpperCase() + otherUserName.slice(1).toLowerCase()
               : 'Chat'}
           </Text>
           {otherUserPhone && (
-            <Text style={styles.headerPhone}>{otherUserPhone}</Text>
+            <Text style={[styles.headerPhone, { fontSize: headerPhoneFontSize }]}>{otherUserPhone}</Text>
           )}
         </View>
         <View style={styles.headerRight}>
@@ -263,7 +351,7 @@ const ChatDetail = () => {
           const isMyMessage = currentUserId && message.sender_id === currentUserId;
           
           return (
-            <View key={message.id} style={styles.messageWrapper}>
+            <View key={message.id} style={[styles.messageWrapper, { marginBottom: messageWrapperMargin }]}>
               <View
                 style={[
                   styles.messageContainer,
@@ -273,7 +361,11 @@ const ChatDetail = () => {
                 {!isMyMessage && (
                   <ExpoImage
                     source={otherUserImage ? { uri: otherUserImage } : require('../assets/profileava.jpg')}
-                    style={styles.messageProfileImage}
+                    style={[styles.messageProfileImage, { 
+                      width: messageProfileImageSize, 
+                      height: messageProfileImageSize,
+                      borderRadius: messageProfileImageSize / 2,
+                    }]}
                     contentFit="cover"
                   />
                 )}
@@ -281,12 +373,20 @@ const ChatDetail = () => {
                   style={[
                     styles.messageBubble,
                     isMyMessage ? styles.myBubble : styles.otherBubble,
+                    { 
+                      maxWidth: messageBubbleMaxWidth,
+                      padding: messageBubblePadding,
+                    }
                   ]}
                 >
                   <Text
                     style={[
                       styles.messageText,
                       isMyMessage ? styles.myMessageText : styles.otherMessageText,
+                      { 
+                        fontSize: messageTextFontSize,
+                        lineHeight: messageTextLineHeight,
+                      }
                     ]}
                   >
                     {message.content}
@@ -295,7 +395,11 @@ const ChatDetail = () => {
                 {isMyMessage && (
                   <ExpoImage
                     source={currentUserImage ? { uri: currentUserImage } : require('../assets/profileava.jpg')}
-                    style={styles.messageProfileImage}
+                    style={[styles.messageProfileImage, { 
+                      width: messageProfileImageSize, 
+                      height: messageProfileImageSize,
+                      borderRadius: messageProfileImageSize / 2,
+                    }]}
                     contentFit="cover"
                   />
                 )}
@@ -304,7 +408,7 @@ const ChatDetail = () => {
                 styles.messageTimeContainer,
                 isMyMessage ? styles.myMessageTimeContainer : styles.otherMessageTimeContainer
               ]}>
-                <Text style={styles.messageTimeText}>
+                <Text style={[styles.messageTimeText, { fontSize: messageTimeFontSize }]}>
                   {formatMessageTime(message.created_at)}
                 </Text>
               </View>
@@ -319,7 +423,7 @@ const ChatDetail = () => {
           <Icon name="emoticon-happy-outline" size={24} color="#666" />
         </TouchableOpacity>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { fontSize: inputFontSize }]}
           value={newMessage}
           onChangeText={setNewMessage}
           placeholder="Type message here..."
@@ -353,7 +457,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    paddingTop: Platform.OS === 'ios' ? 50 : 12,
     backgroundColor: '#4B164C',
     justifyContent: 'space-between',
   },
@@ -368,6 +471,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#FFFFFF',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    flex: 1,
+    textAlign: 'center',
   },
   headerPhone: {
     fontSize: 12,
@@ -408,14 +518,9 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   messageProfileImage: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
     marginHorizontal: 8,
   },
   messageBubble: {
-    maxWidth: '70%',
-    padding: 12,
     borderRadius: 16,
   },
   myBubble: {
@@ -437,11 +542,9 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   messageTimeText: {
-    fontSize: 11,
     color: '#666666',
   },
   messageText: {
-    fontSize: 15,
     lineHeight: 20,
   },
   myMessageText: {
