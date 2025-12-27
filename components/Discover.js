@@ -4,8 +4,7 @@ import { SvgXml } from 'react-native-svg';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import * as Location from 'expo-location';
 import FilterTooltip from './FilterTooltip';
-
-const { width, height } = Dimensions.get('window');
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const openMaps = async (hotspot) => {
   try {
@@ -344,6 +343,8 @@ const hogspots = [
 ];
 
 const Discover = () => {
+  const insets = useSafeAreaInsets();
+  const { width, height } = Dimensions.get('window');
   const [location, setLocation] = useState(null);
   const [city, setCity] = useState('');
   const [hotspots, setHotspots] = useState([]);
@@ -354,6 +355,21 @@ const Discover = () => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [sortBy, setSortBy] = useState('nearest');
   const mapRef = useRef(null);
+  
+  // Calculate responsive dimensions
+  const screenPadding = 16;
+  const mapContainerWidth = width - (screenPadding * 2);
+  const mapContainerHeight = height * 0.45;
+  
+  // Responsive font sizes
+  const mainTextFontSize = width < 375 ? 22 : (width < 414 ? 24 : 28);
+  const aroundMeFontSize = width < 375 ? 18 : (width < 414 ? 20 : 22);
+  const subTextFontSize = width < 375 ? 12 : (width < 414 ? 13 : 14);
+  const nearbySparksFontSize = width < 375 ? 13 : (width < 414 ? 14 : 15);
+  
+  // Responsive hogspot item dimensions
+  const hogspotItemWidth = width < 375 ? 95 : (width < 414 ? 105 : 115);
+  const hogspotItemHeight = hogspotItemWidth * 1.52;
 
   // Function to calculate distance between two points
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -530,13 +546,13 @@ const Discover = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { marginTop: Platform.OS === 'ios' ? 58 : Math.max(insets.top + 20, 50) }]}>
         <SvgXml xml={locationSvg} style={styles.locationIcon} />
-        <Text style={styles.locationText}>{city || 'Loading...'}</Text>
+        <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">{city || 'Loading...'}</Text>
         <SvgXml xml={otherIconSvg} style={styles.otherIcon} />
       </View>
       <View style={styles.mainTextContainer}>
-        <Text style={styles.mainText}>Discover</Text>
+        <Text style={[styles.mainText, { fontSize: mainTextFontSize }]}>Discover</Text>
         <View style={styles.filterContainer}>
           <TouchableOpacity 
             style={styles.filterButton}
@@ -555,7 +571,7 @@ const Discover = () => {
           />
         </View>
       </View>
-      <Text style={styles.subText}>
+      <Text style={[styles.subText, { fontSize: subTextFontSize }]}>
         <Text style={styles.hogspotText}>Hogspot </Text>
         <Text style={styles.nearYouText}>near you</Text>
       </Text>
@@ -568,7 +584,7 @@ const Discover = () => {
         {hotspots.map(hotspot => (
           <TouchableOpacity 
             key={hotspot.id} 
-            style={styles.hogspotItem}
+            style={[styles.hogspotItem, { width: hogspotItemWidth, height: hogspotItemHeight }]}
             onPress={() => zoomToHotspot(hotspot)}
           >
             <ImageBackground source={require('../assets/lulu.jpg')} style={styles.hogspotImage}>
@@ -586,11 +602,11 @@ const Discover = () => {
           </TouchableOpacity>
         ))}
       </ScrollView>
-      <Text style={styles.aroundMeText}>Around me</Text>
-      <Text style={styles.nearbySparksText}>
+      <Text style={[styles.aroundMeText, { fontSize: aroundMeFontSize }]}>Around me</Text>
+      <Text style={[styles.nearbySparksText, { fontSize: nearbySparksFontSize }]}>
         <Text style={styles.hogspotSparksText}>"Hogspot"</Text> Sparks Await Nearby
       </Text>
-      <View style={styles.mapContainer}>
+      <View style={[styles.mapContainer, { width: mapContainerWidth, height: mapContainerHeight }]}>
         <MapView
           ref={mapRef}
           style={styles.map}
@@ -650,7 +666,7 @@ const Discover = () => {
         onRequestClose={() => setShowModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { width: Math.min(width * 0.85, 400), maxWidth: 400 }]}>
             <Text style={styles.modalTitle}>Navigate to {selectedHotspot?.name}?</Text>
             <Text style={styles.modalDescription}>{selectedHotspot?.description}</Text>
             <View style={styles.modalButtons}>
@@ -683,11 +699,9 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   mapContainer: {
-    width: width - 32, // Adjust width based on screen width
-    height: height * 0.45, // Adjust height based on screen height
     borderRadius: 24, // Rounded corners
     overflow: 'hidden', // Clip content to rounded corners
-    marginTop:15,
+    marginTop: 15,
     ...Platform.select({
       android: {
         elevation: 4, // Add shadow for Android
@@ -719,6 +733,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
     color: '#22172A',
     marginRight: 10,
+    flex: 1,
+    flexShrink: 1,
   },
   otherIcon: {
     width: 12,
@@ -734,6 +750,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: 'Inter-Bold',
     color: '#22172A',
+    flex: 1,
+    flexShrink: 1,
   },
   filterContainer: {
     position: 'relative',
@@ -750,6 +768,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     lineHeight: 16.25,
     marginTop: -18,
+    flexWrap: 'wrap',
   },
   hogspotText: {
     color: '#DD88CF',
@@ -766,13 +785,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   hogspotItem: {
-    width: 105,
-    height: 160,
     borderRadius: 12,
     overflow: 'hidden',
     marginRight: 12,
     borderWidth: 1,
     borderColor: '#DD88CF',
+    minWidth: 90,
+    minHeight: 137,
   },
   hogspotImage: {
     width: '100%',
@@ -838,6 +857,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     color: '#22172A',
     marginTop: 0,
+    flexWrap: 'wrap',
   },
   nearbySparksText: {
     fontSize: 14,
@@ -845,6 +865,7 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     color: '#6C727F',
     marginTop: 6,
+    flexWrap: 'wrap',
   },
   hogspotSparksText: {
     fontFamily: 'Inter-Medium',
@@ -886,7 +907,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 20,
-    width: '80%',
     alignItems: 'center',
   },
   modalTitle: {
