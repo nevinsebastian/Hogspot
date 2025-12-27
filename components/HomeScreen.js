@@ -119,8 +119,14 @@ const HomeScreen = () => {
 
       const data = await response.json();
       console.log('User Info:', data);
+      console.log('User Images:', data?.images);
       if (data) {
         setUserInfo(data);
+        // Log the priority one image for debugging
+        if (data.images && Array.isArray(data.images)) {
+          const priorityOne = data.images.find(img => img.priority === 1);
+          console.log('Priority 1 Image URL:', priorityOne?.image_url);
+        }
       }
     } catch (error) {
       console.error('Error fetching user info:', error);
@@ -139,7 +145,20 @@ const HomeScreen = () => {
     }
     const priorityOneImage = user.images.find(img => img.priority === 1);
     console.log('Priority 1 Image:', priorityOneImage);
-    return priorityOneImage?.image_url || null;
+    const imageUrl = priorityOneImage?.image_url || null;
+    // Ensure the URL is valid and properly formatted for Android
+    if (imageUrl) {
+      // Check if URL is valid
+      if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
+        console.warn('Invalid image URL format:', imageUrl);
+        return null;
+      }
+      // Log for debugging on Android
+      if (Platform.OS === 'android') {
+        console.log('Android - Profile image URL:', imageUrl);
+      }
+    }
+    return imageUrl;
   };
 
   const fetchHotspotData = async (latitude, longitude, page = 1) => {
@@ -501,17 +520,30 @@ const HomeScreen = () => {
             right: screenPadding,
           }]}>
             <TouchableOpacity onPress={navigateToProfile}>
-              <ExpoImage
-                source={getPriorityOneImage(userInfo) ? { uri: getPriorityOneImage(userInfo) } : require('../assets/profileava.jpg')}
-                style={styles.newImage}
-                contentFit="cover"
-                transition={200}
-                cachePolicy="memory-disk"
-                placeholder={require('../assets/profileava.jpg')}
-                onError={(error) => {
-                  console.error('Error loading profile image:', error);
-                }}
-              />
+              {(() => {
+                const profileImageUrl = getPriorityOneImage(userInfo);
+                return (
+                  <ExpoImage
+                    source={profileImageUrl ? { uri: profileImageUrl } : require('../assets/profileava.jpg')}
+                    style={styles.newImage}
+                    contentFit="cover"
+                    transition={200}
+                    cachePolicy="memory-disk"
+                    placeholder={require('../assets/profileava.jpg')}
+                    onError={(error) => {
+                      console.error('Error loading profile image:', error);
+                      console.error('Image URL was:', profileImageUrl);
+                    }}
+                    onLoadStart={() => {
+                      console.log('Loading profile image for user:', userInfo?.id);
+                      console.log('Image URL:', profileImageUrl);
+                    }}
+                    onLoad={() => {
+                      console.log('Profile image loaded successfully');
+                    }}
+                  />
+                );
+              })()}
             </TouchableOpacity>
           </View>
         </>
@@ -524,17 +556,30 @@ const HomeScreen = () => {
           }]}>
             <View style={styles.newRectangleInContainer}>
               <TouchableOpacity onPress={navigateToProfile}>
-                <ExpoImage
-                  source={getPriorityOneImage(userInfo) ? { uri: getPriorityOneImage(userInfo) } : require('../assets/profileava.jpg')}
-                  style={styles.newImage}
-                  contentFit="cover"
-                  transition={200}
-                  cachePolicy="memory-disk"
-                  placeholder={require('../assets/profileava.jpg')}
-                  onError={(error) => {
-                    console.error('Error loading profile image:', error);
-                  }}
-                />
+                {(() => {
+                  const profileImageUrl = getPriorityOneImage(userInfo);
+                  return (
+                    <ExpoImage
+                      source={profileImageUrl ? { uri: profileImageUrl } : require('../assets/profileava.jpg')}
+                      style={styles.newImage}
+                      contentFit="cover"
+                      transition={200}
+                      cachePolicy="memory-disk"
+                      placeholder={require('../assets/profileava.jpg')}
+                      onError={(error) => {
+                        console.error('Error loading profile image:', error);
+                        console.error('Image URL was:', profileImageUrl);
+                      }}
+                      onLoadStart={() => {
+                        console.log('Loading profile image for user:', userInfo?.id);
+                        console.log('Image URL:', profileImageUrl);
+                      }}
+                      onLoad={() => {
+                        console.log('Profile image loaded successfully');
+                      }}
+                    />
+                  );
+                })()}
               </TouchableOpacity>
             </View>
             <Text style={[styles.notLocationText, { fontSize: width < 375 ? 18 : (width < 414 ? 20 : 20) }]} numberOfLines={1} ellipsizeMode="tail">
@@ -650,6 +695,10 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     borderWidth: 2,
     borderColor: '#DD88CF',
+    backgroundColor: '#F5F5F5',
+    ...(Platform.OS === 'android' && {
+      resizeMode: 'cover',
+    }),
   },
   notificationButton: {
     width: 48,
