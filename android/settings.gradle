@@ -1,5 +1,6 @@
 pluginManagement {
-  def nodeExecutable = System.getenv("NODE_BINARY") ?: "/usr/bin/node"
+  // EAS Build should set NODE_BINARY, but fallback to finding node in PATH
+  def nodeExecutable = System.getenv("NODE_BINARY") ?: "node"
   def reactNativeGradlePlugin = new File(
     providers.exec {
       workingDir(rootDir)

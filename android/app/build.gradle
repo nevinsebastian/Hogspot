@@ -3,7 +3,8 @@ apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
-def nodeExecutable = System.getenv("NODE_BINARY") ?: "/usr/bin/node"
+// EAS Build should set NODE_BINARY, but fallback to finding node in PATH
+def nodeExecutable = System.getenv("NODE_BINARY") ?: "node"
 
 /**
  * This is the configuration block to customize your React Native Android app.

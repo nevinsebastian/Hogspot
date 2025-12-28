@@ -33,6 +33,12 @@
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "6de1aec6-aa24-4bd1-b877-34413d069a8c"
+      }
+    },
+    "owner": "nevinsebastian"
   }
 }
