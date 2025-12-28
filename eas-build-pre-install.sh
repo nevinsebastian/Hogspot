@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# EAS Build pre-install hook to set NODE_BINARY
+# EAS Build pre-install hook to set NODE_BINARY and NODE_ENV
 # This ensures Node.js is found during the Gradle build
 
 # Find node executable and set NODE_BINARY if not already set
@@ -16,5 +16,11 @@ if [ -z "$NODE_BINARY" ]; then
   fi
 fi
 
+# Set NODE_ENV if not already set (fallback, eas.json should set this)
+if [ -z "$NODE_ENV" ]; then
+  export NODE_ENV="production"
+fi
+
 echo "NODE_BINARY is set to: $NODE_BINARY"
+echo "NODE_ENV is set to: $NODE_ENV"
 

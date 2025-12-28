@@ -1,9 +1,16 @@
 {
+  "cli": {
+    "version": ">= 16.28.0",
+    "appVersionSource": "remote"
+  },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
       "node": "18.18.0",
+      "env": {
+        "NODE_ENV": "development"
+      },
       "android": {
         "buildType": "apk"
       },
@@ -14,6 +21,9 @@
     "preview": {
       "distribution": "internal",
       "node": "18.18.0",
+      "env": {
+        "NODE_ENV": "production"
+      },
       "android": {
         "buildType": "apk"
       },
@@ -23,6 +33,9 @@
     },
     "production": {
       "node": "18.18.0",
+      "env": {
+        "NODE_ENV": "production"
+      },
       "android": {
         "buildType": "app-bundle"
       },
