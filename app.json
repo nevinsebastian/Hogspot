@@ -7,9 +7,11 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "splash": {
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
+  "image": "./assets/splash.png",
+  "resizeMode": "contain",
+  "backgroundColor": "#000000"
+}
+,
     "ios": {
       "supportsTablet": true,
       "config": {
