@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
+import { API_URL } from '../utils/api';
 
 const VerifyOTPScreen = ({ navigation, route }) => {
   const [email, setEmail] = useState(route.params.email);
@@ -8,7 +9,7 @@ const VerifyOTPScreen = ({ navigation, route }) => {
 
   const handleVerifyOTP = async () => {
     try {
-      const response = await axios.post(`http://13.232.70.195/verify/verify-otp?email=${encodeURIComponent(email)}&otp_code=${otp}`);
+      const response = await axios.post(`${API_URL}/verify/verify-otp?email=${encodeURIComponent(email)}&otp_code=${otp}`);
       console.log('OTP Verification response:', response.data);
 
       if (response.status === 200) {

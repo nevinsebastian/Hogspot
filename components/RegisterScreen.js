@@ -3,6 +3,7 @@ import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert, To
 import { TextInput, Button, Text, Checkbox, HelperText } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { isValidEmail } from '../utils/emailValidator';
+import { API_URL } from '../utils/api';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -46,7 +47,7 @@ const RegisterScreen = ({ navigation }) => {
 
     setIsVerifying(true);
     try {
-      const response = await fetch(`http://18.207.241.126/verify/verify-email?email=${encodeURIComponent(email)}`, {
+      const response = await fetch(`${API_URL}/verify/verify-email?email=${encodeURIComponent(email)}`, {
         method: 'POST',
         headers: {
           'accept': 'application/json',

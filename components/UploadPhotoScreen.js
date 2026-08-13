@@ -13,6 +13,8 @@ import { Text, Button } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../utils/api';
+import { appendImageUris, IMAGE_PICKER_MEDIA_TYPES } from '../utils/imageUpload';
 
 const THEME = {
   primary: '#DD88CF',
@@ -35,7 +37,7 @@ const UploadPhotoScreen = ({ navigation }) => {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: IMAGE_PICKER_MEDIA_TYPES,
       allowsMultipleSelection: true,
       quality: 0.8,
       base64: false,
@@ -66,20 +68,17 @@ const UploadPhotoScreen = ({ navigation }) => {
       }
 
       const formData = new FormData();
-      selectedImages.forEach((image, index) => {
-        formData.append('files', {
-          uri: image.uri,
-          type: 'image/jpeg',
-          name: `photo_${index}.jpg`,
-        });
-      });
+      await appendImageUris(
+        formData,
+        'files',
+        selectedImages.map((image) => image.uri)
+      );
 
-      const response = await fetch('http://18.207.241.126/users/upload_images', {
+      const response = await fetch(`${API_URL}/users/upload_images`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-          'accept': 'application/json',
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
         },
         body: formData,
       });

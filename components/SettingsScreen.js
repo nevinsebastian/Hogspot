@@ -19,6 +19,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
 import Slider from '@react-native-community/slider';
 import { Image as ExpoImage } from 'expo-image';
+import { API_URL } from '../utils/api';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -249,7 +250,7 @@ const SettingsScreen = () => {
         throw new Error('Authentication token not found');
       }
 
-      const response = await fetch('http://18.207.241.126/users/profile_images', {
+      const response = await fetch(`${API_URL}/users/profile_images`, {
         method: 'GET',
         headers: {
           'accept': 'application/json',
@@ -280,7 +281,7 @@ const SettingsScreen = () => {
   const updateImagePriority = async (imageId, newPriority) => {
     const token = await AsyncStorage.getItem('auth_token');
     const response = await fetch(
-      `http://18.207.241.126/users/update_image_priority/${imageId}?priority=${newPriority}`,
+      `${API_URL}/users/update_image_priority/${imageId}?priority=${newPriority}`,
       {
         method: 'PUT',
         headers: {
@@ -410,7 +411,7 @@ const SettingsScreen = () => {
 
       console.log('Sending request body:', requestBody);
 
-      const response = await fetch('http://18.207.241.126/users/complete_profile', {
+      const response = await fetch(`${API_URL}/users/complete_profile`, {
         method: 'PUT',
         headers: {
           'accept': 'application/json',

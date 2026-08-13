@@ -9,6 +9,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 import { jwtDecode } from 'jwt-decode';
 import Toast from 'react-native-toast-message';
+import { API_URL } from './utils/api';
 
 // Regular import for ProfileScreen and SettingsScreen (frequently accessed, lazy loading causes issues with worklets dependencies)
 import ProfileScreen from './components/ProfileScreen';
@@ -99,7 +100,7 @@ const App = () => {
               setIsLoggedIn(true);
               
               // Check if user needs onboarding
-              const response = await fetch('http://18.207.241.126/users/user-info', {
+              const response = await fetch(`${API_URL}/users/user-info`, {
                 headers: {
                   'Authorization': `Bearer ${token}`,
                 },

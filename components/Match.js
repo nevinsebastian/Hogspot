@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MatchFilterTooltip from './MatchFilterTooltip';
+import { API_URL } from '../utils/api';
 
 const filterIconSvg = `
 <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -43,7 +44,7 @@ const Match = () => {
       setError(null);
 
       const token = await AsyncStorage.getItem('auth_token');
-      const response = await fetch('http://18.207.241.126/matches/', {
+      const response = await fetch(`${API_URL}/matches/`, {
         method: 'GET',
         headers: {
           'accept': 'application/json',

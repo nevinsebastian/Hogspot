@@ -14,6 +14,7 @@ import {
   Animated,
   TextInput,
   KeyboardAvoidingView,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -21,6 +22,8 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as ImagePicker from 'expo-image-picker';
 import Slider from '@react-native-community/slider';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { API_URL } from '../utils/api';
+import { appendImageUris, IMAGE_PICKER_MEDIA_TYPES } from '../utils/imageUpload';
 
 const { width, height } = Dimensions.get('window');
 
@@ -177,7 +180,7 @@ const OnboardingScreen = () => {
   const pickImage = async (index) => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: IMAGE_PICKER_MEDIA_TYPES,
         allowsEditing: true,
         aspect: [3, 4],
         quality: 1,
@@ -222,7 +225,7 @@ const OnboardingScreen = () => {
         );
 
         // First API call: Complete profile
-        const profileResponse = await fetch('http://18.207.241.126/users/complete_profile', {
+        const profileResponse = await fetch(`${API_URL}/users/complete_profile`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -237,29 +240,22 @@ const OnboardingScreen = () => {
         }
 
         // Second API call: Upload images if any
-        if (photos.some(photo => photo !== null)) {
+        const photoUris = photos.filter(Boolean);
+        if (photoUris.length > 0) {
           const formData = new FormData();
-          photos.forEach((photo, index) => {
-            if (photo) {
-              formData.append('files', {
-                uri: photo,
-                type: 'image/jpeg',
-                name: `photo${index}.jpg`,
-              });
-            }
-          });
+          await appendImageUris(formData, 'files', photoUris);
 
-          const photoResponse = await fetch('http://18.207.241.126/users/upload_images', {
+          const photoResponse = await fetch(`${API_URL}/users/upload_images`, {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'multipart/form-data',
+              Authorization: `Bearer ${token}`,
+              Accept: 'application/json',
             },
             body: formData,
           });
 
           if (!photoResponse.ok) {
-            const errorData = await photoResponse.json();
+            const errorData = await photoResponse.json().catch(() => ({}));
             throw new Error(errorData.detail || 'Failed to upload images');
           }
         }

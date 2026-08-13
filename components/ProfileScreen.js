@@ -19,6 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Image as ExpoImage } from 'expo-image';
+import { API_URL } from '../utils/api';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -82,7 +83,7 @@ const ProfileScreen = () => {
     const fetchUserInfo = async () => {
       try {
         const token = await AsyncStorage.getItem('auth_token');
-        const response = await fetch('http://18.207.241.126/users/user-info', {
+        const response = await fetch(`${API_URL}/users/user-info`, {
           method: 'GET',
           headers: {
             'accept': 'application/json',
@@ -105,7 +106,7 @@ const ProfileScreen = () => {
   const fetchProfileImages = useCallback(async () => {
     try {
       const token = await AsyncStorage.getItem('auth_token');
-      const response = await fetch('http://18.207.241.126/users/profile_images', {
+      const response = await fetch(`${API_URL}/users/profile_images`, {
         method: 'GET',
         headers: {
           'accept': 'application/json',
@@ -144,7 +145,7 @@ const ProfileScreen = () => {
   const updateImagePriority = async (imageId, newPriority) => {
     const token = await AsyncStorage.getItem('auth_token');
     const response = await fetch(
-      `http://18.207.241.126/users/update_image_priority/${imageId}?priority=${newPriority}`,
+      `${API_URL}/users/update_image_priority/${imageId}?priority=${newPriority}`,
       {
         method: 'PUT',
         headers: {

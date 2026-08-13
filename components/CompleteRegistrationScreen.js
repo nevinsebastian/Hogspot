@@ -3,6 +3,7 @@ import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert, To
 import { TextInput, Button, Text, HelperText } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../utils/api';
 
 // Define theme colors (matching RegisterScreen)
 const THEME = {
@@ -169,7 +170,7 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
       formData.append('client_id', '');
       formData.append('client_secret', '');
 
-      const loginResponse = await fetch('http://18.207.241.126/login', {
+      const loginResponse = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: {
           'accept': 'application/json',
@@ -187,7 +188,7 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
         await AsyncStorage.setItem('userEmail', email);
         
         // Check if user needs onboarding
-        const userInfoResponse = await fetch('http://18.207.241.126/users/user-info', {
+        const userInfoResponse = await fetch(`${API_URL}/users/user-info`, {
           headers: {
             'Authorization': `Bearer ${loginData.access_token}`,
           },
@@ -236,7 +237,7 @@ const CompleteRegistrationScreen = ({ route, navigation }) => {
 
     setLoading(true);
     try {
-      const response = await fetch('http://18.207.241.126/users/register', {
+      const response = await fetch(`${API_URL}/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

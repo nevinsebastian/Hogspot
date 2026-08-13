@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
+import { API_URL } from '../utils/api';
 
 const VerifyEmailScreen = ({ navigation, route }) => {
   const [email, setEmail] = useState(route.params.email);
@@ -8,8 +9,8 @@ const VerifyEmailScreen = ({ navigation, route }) => {
   const handleVerifyEmail = async () => {
     try {
       const encodedEmail = encodeURIComponent(email);
-      console.log(`Sending verification request to: http://13.232.70.195/verify/verify-email?email=${encodedEmail}`);
-      const response = await axios.post(`http://13.232.70.195/verify/verify-email?email=${encodedEmail}`);
+      console.log(`Sending verification request to: ${API_URL}/verify/verify-email?email=${encodedEmail}`);
+      const response = await axios.post(`${API_URL}/verify/verify-email?email=${encodedEmail}`);
       console.log('Verification response:', response.data);
 
       if (response.status === 200) {

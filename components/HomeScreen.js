@@ -10,6 +10,7 @@ import * as Location from 'expo-location';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { Image as ExpoImage } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { API_URL } from '../utils/api';
 
 const bellSvg = `
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -105,7 +106,7 @@ const HomeScreen = () => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch('http://18.207.241.126/users/user-info', {
+      const response = await fetch(`${API_URL}/users/user-info`, {
         method: 'GET',
         headers: {
           'accept': 'application/json',
@@ -174,7 +175,7 @@ const HomeScreen = () => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`http://18.207.241.126/hotspot/start_swiping?page=${page}&limit=10`, {
+      const response = await fetch(`${API_URL}/hotspot/start_swiping?page=${page}&limit=10`, {
         method: 'POST',
         headers: {
           'accept': 'application/json',
@@ -325,7 +326,7 @@ const HomeScreen = () => {
 
     try {
       const token = await AsyncStorage.getItem('auth_token');
-      const response = await fetch('http://18.207.241.126/swipe/', {
+      const response = await fetch(`${API_URL}/swipe/`, {
         method: 'POST',
         headers: {
           'accept': 'application/json',

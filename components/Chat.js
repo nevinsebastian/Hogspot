@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image as ExpoImage } from 'expo-image';
+import { API_URL } from '../utils/api';
 
 
 const backIcon = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -44,14 +45,14 @@ const Chat = () => {
 
       // Fetch both conversations and matches in parallel
       const [conversationsResponse, matchesResponse] = await Promise.all([
-        fetch('http://18.207.241.126/chat/conversations', {
+        fetch(`${API_URL}/chat/conversations`, {
           method: 'GET',
           headers: {
             'accept': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
         }),
-        fetch('http://18.207.241.126/matches/', {
+        fetch(`${API_URL}/matches/`, {
           method: 'GET',
           headers: {
             'accept': 'application/json',

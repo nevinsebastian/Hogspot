@@ -18,6 +18,7 @@ import { Image as ExpoImage } from 'expo-image';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { jwtDecode } from 'jwt-decode';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { API_URL } from '../utils/api';
 
 const ChatDetail = () => {
   const navigation = useNavigation();
@@ -72,7 +73,7 @@ const ChatDetail = () => {
 
       const currentOffset = reset ? 0 : offset;
       const response = await fetch(
-        `http://18.207.241.126/chat/messages/${otherUserId}?limit=50&offset=${currentOffset}`,
+        `${API_URL}/chat/messages/${otherUserId}?limit=50&offset=${currentOffset}`,
         {
           method: 'GET',
           headers: {
@@ -145,7 +146,7 @@ const ChatDetail = () => {
   const markConversationAsRead = async (convId) => {
     try {
       const token = await AsyncStorage.getItem('auth_token');
-      await fetch(`http://18.207.241.126/chat/conversations/${convId}/mark-all-read`, {
+      await fetch(`${API_URL}/chat/conversations/${convId}/mark-all-read`, {
         method: 'PUT',
         headers: {
           'accept': 'application/json',
@@ -167,7 +168,7 @@ const ChatDetail = () => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch('http://18.207.241.126/chat/send', {
+      const response = await fetch(`${API_URL}/chat/send`, {
         method: 'POST',
         headers: {
           'accept': 'application/json',
@@ -267,7 +268,7 @@ const ChatDetail = () => {
           
           // Fetch current user info to get profile image
           try {
-            const response = await fetch('http://18.207.241.126/users/user-info', {
+            const response = await fetch(`${API_URL}/users/user-info`, {
               method: 'GET',
               headers: {
                 'accept': 'application/json',
